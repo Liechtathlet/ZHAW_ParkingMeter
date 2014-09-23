@@ -1,0 +1,10 @@
+<customers>
+    <customer>
+        <name>xxx</name>
+        <firstname>yyy</firstname>
+    </customer>
+    <customer>
+        <name>aaaa</name>
+        <firstname>bbbb</firstname>
+    </customer>
+</customers>
