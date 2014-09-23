@@ -9,10 +9,10 @@ import java.io.File;
 import java.util.logging.Logger;
 
 @Component
-public class HelloService {
-	Logger logger = Logger.getLogger("ch.zhaw");
+public class LogAndXmlService {
+	Logger logger = Logger.getLogger("ch.zhaw.swengineering.example.LogAndXmlService");
 
-    public String sayHello() {
+    public String run() {
 	    Log();
 	    XmlConfig();
         return "Hello world!";

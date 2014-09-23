@@ -43,3 +43,4 @@ log/
 target/
 
 local.properties
+*.log

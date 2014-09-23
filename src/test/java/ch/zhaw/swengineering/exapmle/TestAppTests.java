@@ -1,6 +1,6 @@
 package ch.zhaw.swengineering.exapmle;
 
-import ch.zhaw.swengineering.examle.HelloService;
+import ch.zhaw.swengineering.examle.LogAndXmlService;
 import junit.framework.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -10,13 +10,13 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration("classpath:spring-config.xml")
-public class SpringAppTests {
+public class TestAppTests {
 
     @Autowired
-    private HelloService helloService;
+    private LogAndXmlService logAndXmlService;
 
     @Test
-    public void testSayHello() {
-        Assert.assertEquals("Hello world!", helloService.sayHello());
+    public void testLogAndXmlService() {
+        Assert.assertEquals("Hello world!", logAndXmlService.run());
     }
 }
