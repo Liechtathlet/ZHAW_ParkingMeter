@@ -1,28 +1,21 @@
 package ch.zhaw.swengineering;
 
-import ch.zhaw.swengineering.examle.LogAndXmlService;
-import ch.zhaw.swengineering.examle.RestService;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
 
-@Configuration
 @ComponentScan
+@EnableAutoConfiguration
 public class TestApp {
     public static void main(String[] args) {
-	    org.springframework.context.ApplicationContext context = new AnnotationConfigApplicationContext(TestApp.class);
+	    ConfigurableApplicationContext context = SpringApplication.run(TestApp.class, args);
 	    RunLogAndXmlService(context);
-	    //RunRestService(context);
     }
 
-	private static void RunLogAndXmlService(ApplicationContext context) {
+	private static void RunLogAndXmlService(ConfigurableApplicationContext context) {
+		//org.springframework.context.ApplicationContext context = new AnnotationConfigApplicationContext(TestApp.class);
 		LogAndXmlService service = context.getBean(LogAndXmlService.class);
 		System.out.println(service.run());
-	}
-
-	private static void RunRestService(ApplicationContext context) {
-		RestService service = context.getBean(RestService.class);
-		service.run();
 	}
 }

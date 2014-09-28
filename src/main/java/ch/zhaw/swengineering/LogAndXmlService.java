@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.examle;
+package ch.zhaw.swengineering;
 
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 @Component
 public class LogAndXmlService {
-	Logger logger = Logger.getLogger("ch.zhaw.swengineering.example.LogAndXmlService");
+	Logger logger = Logger.getLogger("ch.zhaw.swengineering.LogAndXmlService");
 
     public String run() {
 	    Log();

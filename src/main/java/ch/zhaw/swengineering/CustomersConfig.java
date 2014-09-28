@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.examle;
+package ch.zhaw.swengineering;
 
 import javax.xml.bind.annotation.*;
 import java.util.List;
