@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 @Component
 public class LogAndXmlService {
-	Logger logger = Logger.getLogger("ch.zhaw.swengineering.LogAndXmlService");
+	Logger logger = Logger.getLogger(LogAndXmlService.class.toString());
 
     public String run() {
 	    Log();

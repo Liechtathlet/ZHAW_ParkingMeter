@@ -1,9 +1,17 @@
 package ch.zhaw.swengineering;
 
+import javax.xml.bind.annotation.XmlRootElement;
+
+@XmlRootElement
 public class Greeting {
 
-	private final long id;
-	private final String content;
+	public long id;
+	public String content;
+
+	public Greeting() {
+		id = 0;
+		content = null;
+	}
 
 	public Greeting(long id, String content) {
 		this.id = id;
