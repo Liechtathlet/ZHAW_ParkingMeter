@@ -27,6 +27,7 @@ gen/
 .classpath
 .project
 .settings/
+.metadata
 
 # Intellij
 .idea/
