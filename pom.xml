@@ -21,7 +21,7 @@
 		<junit.version>4.11</junit.version>
 		<grizzly.version>2.3.16</grizzly.version>
 		<mockito.version>1.9.5</mockito.version>
-		<start-class>ch.zhaw.swengineering.TestApp</start-class>
+		<start-class>ch.zhaw.swengineering.setup.ParkingMeterRunner</start-class>
 	</properties>
 
 	<!-- Dependencies -->

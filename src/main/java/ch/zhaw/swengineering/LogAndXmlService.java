@@ -2,10 +2,15 @@ package ch.zhaw.swengineering;
 
 import org.springframework.stereotype.Component;
 
+import ch.zhaw.swengineering.model.Customer;
+import ch.zhaw.swengineering.model.CustomersConfig;
+
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 @Component
@@ -15,6 +20,7 @@ public class LogAndXmlService {
     public String run() {
 	    Log();
 	    XmlConfig();
+	    
         return "Hello world!";
     }
 
