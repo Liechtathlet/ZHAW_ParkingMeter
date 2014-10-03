@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.controller;
+package ch.zhaw.swengineering.model;
 
 import javax.xml.bind.annotation.XmlRootElement;
 
