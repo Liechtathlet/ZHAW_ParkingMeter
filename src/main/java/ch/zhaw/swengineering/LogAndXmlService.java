@@ -1,17 +1,13 @@
 package ch.zhaw.swengineering;
 
-import org.springframework.stereotype.Component;
-
-import ch.zhaw.swengineering.model.Customer;
-import ch.zhaw.swengineering.model.CustomersConfig;
+import java.io.File;
+import java.util.logging.Logger;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.logging.Logger;
+import org.springframework.stereotype.Component;
 
 @Component
 public class LogAndXmlService {
@@ -35,7 +31,7 @@ public class LogAndXmlService {
 			Unmarshaller m = context.createUnmarshaller();
 			config = (CustomersConfig)m.unmarshal(f);
 		} catch (JAXBException e) {
-			logger.info(String.format("Something went wrong during unmarshaling the example config. Error: %s", e.getMessage()));
+			logger.info(String.format("Something went wrong during unmarshalling the example config. Error: %s", e.getMessage()));
 		}
 
 		logger.info("customers.xml data:");
