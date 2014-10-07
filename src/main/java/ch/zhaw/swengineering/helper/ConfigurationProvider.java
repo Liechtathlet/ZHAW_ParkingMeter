@@ -13,16 +13,23 @@ public class ConfigurationProvider {
 
 	private Logger logger = Logger.getLogger(ConfigurationProvider.class.toString());
 
-	private final String className;
-	private final String xml;
+	protected final Object content;
+	protected final String className;
+	protected final String xml;
 
 	@Autowired
 	protected ConfigurationProvider(String xml, String className) {
 		this.xml = xml;
 		this.className = className;
+
+		content = load();
 	}
 
-	public Object Get() {
+	public Object get() {
+		return content;
+	}
+
+	private Object load() {
 		File f = new File(xml);
 
 		// create JAXB context and instantiate marshaller

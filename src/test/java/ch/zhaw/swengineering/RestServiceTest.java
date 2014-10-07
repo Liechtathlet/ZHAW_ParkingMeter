@@ -1,5 +1,6 @@
 package ch.zhaw.swengineering;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -24,6 +25,7 @@ public class RestServiceTest {
 	//The setUp() method is omitted.
 
 	@Test
+	@Ignore
 	public void findAll_TodosFound_ShouldReturnFoundTodoEntries() throws Exception {
 
 		when(greetingMock.getContent()).thenReturn("mock text");

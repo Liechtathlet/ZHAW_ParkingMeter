@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.helper;
 
 import ch.zhaw.swengineering.model.CoinBoxes;
+import ch.zhaw.swengineering.model.Messages;
 import ch.zhaw.swengineering.model.ParkingTimes;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import org.junit.Test;
@@ -25,15 +26,25 @@ public class ConfigurationProviderTest {
 	@Qualifier("coinBoxes")
 	private ConfigurationProvider coinBoxesConfigurationProvider;
 
+	@Autowired
+	@Qualifier("messages-de")
+	private ConfigurationProvider messagesConfigurationProvider;
+
 	@Test
 	public void canDeserializeParkingTimeDefXml() throws Exception {
-		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.Get();
+		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.get();
 		assertNotNull(parkingTimes);
 	}
 
 	@Test
 	public void canDeserializeCoinBoxesXml() throws Exception {
-		CoinBoxes coinBoxes = (CoinBoxes) coinBoxesConfigurationProvider.Get();
+		CoinBoxes coinBoxes = (CoinBoxes) coinBoxesConfigurationProvider.get();
 		assertNotNull(coinBoxes);
+	}
+
+	@Test
+	public void canDeserializeMessagesXml() throws Exception {
+		Messages messages = (Messages) messagesConfigurationProvider.get();
+		assertNotNull(messages);
 	}
 }
