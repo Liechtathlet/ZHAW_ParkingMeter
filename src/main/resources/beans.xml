@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationProvider">
+        <qualifier value="parkingTimeDef" />
+        <constructor-arg index="0" ref="xml"/>
+        <constructor-arg index="1" ref="className"/>
+    </bean>
+    <bean id="xml" class="java.lang.String">
+        <constructor-arg value="./src/main/resources/parkingTimeDef.xml" />
+    </bean>
+    <bean id="className" class="java.lang.String">
+        <constructor-arg value="ch.zhaw.swengineering.model.ParkingTimes" />
+    </bean>
+
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationProvider">
+        <qualifier value="coinBoxes" />
+        <constructor-arg index="0" ref="coinBoxesXmlPath"/>
+        <constructor-arg index="1" ref="coinBoxesClassName"/>
+    </bean>
+    <bean id="coinBoxesXmlPath" class="java.lang.String">
+        <constructor-arg value="./src/main/resources/coinBoxes.xml" />
+    </bean>
+    <bean id="coinBoxesClassName" class="java.lang.String">
+        <constructor-arg value="ch.zhaw.swengineering.model.CoinBoxes" />
+    </bean>
+</beans>

@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.setup;
 
 import java.util.Arrays;
 
+import ch.zhaw.swengineering.LogAndXmlService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
@@ -9,7 +10,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
-import ch.zhaw.swengineering.LogAndXmlService;
+import org.springframework.context.annotation.ImportResource;
 
 /**
  * @author Daniel Brun
@@ -19,6 +20,7 @@ import ch.zhaw.swengineering.LogAndXmlService;
  */
 @ComponentScan("ch.zhaw.swengineering")
 @EnableAutoConfiguration
+@ImportResource("classpath:beans.xml")
 public class ParkingMeterRunner {
 
 	private static final Logger LOG = LogManager.getLogger(ParkingMeterRunner.class);

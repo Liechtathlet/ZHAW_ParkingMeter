@@ -1,0 +1,22 @@
+<parkingTimes>
+    <parkingTime>
+        <startPrice>0</startPrice>
+        <endPrice>0.5</endPrice>
+        <durationInMinutes>30</durationInMinutes>
+    </parkingTime>
+    <parkingTime>
+        <startPrice>0.5</startPrice>
+        <endPrice>1</endPrice>
+        <durationInMinutes>45</durationInMinutes>
+    </parkingTime>
+    <parkingTime>
+        <startPrice>1</startPrice>
+        <endPrice>1.5</endPrice>
+        <durationInMinutes>55</durationInMinutes>
+    </parkingTime>
+    <parkingTime>
+        <startPrice>1.5</startPrice>
+        <endPrice>2</endPrice>
+        <durationInMinutes>60</durationInMinutes>
+    </parkingTime>
+</parkingTimes>

@@ -1,0 +1,14 @@
+<coinBoxes>
+    <coinBox>
+        <coinValue>0.5</coinValue>
+        <containingCoinCount>5</containingCoinCount>
+    </coinBox>
+    <coinBox>
+        <coinValue>1</coinValue>
+        <containingCoinCount>7</containingCoinCount>
+    </coinBox>
+    <coinBox>
+        <coinValue>2</coinValue>
+        <containingCoinCount>1</containingCoinCount>
+    </coinBox>
+</coinBoxes>
