@@ -38,4 +38,16 @@
     <bean id="messagesClassName" class="java.lang.String">
         <constructor-arg value="ch.zhaw.swengineering.model.Messages" />
     </bean>
+
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationProvider">
+        <qualifier value="secretCodes" />
+        <constructor-arg index="0" ref="secretCodesXmlPath"/>
+        <constructor-arg index="1" ref="secretCodesClassName"/>
+    </bean>
+    <bean id="secretCodesXmlPath" class="java.lang.String">
+        <constructor-arg value="./src/main/resources/secretCodes.xml" />
+    </bean>
+    <bean id="secretCodesClassName" class="java.lang.String">
+        <constructor-arg value="ch.zhaw.swengineering.model.SecretCodes" />
+    </bean>
 </beans>

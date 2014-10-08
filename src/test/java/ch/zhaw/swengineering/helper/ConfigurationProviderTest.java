@@ -3,6 +3,7 @@ package ch.zhaw.swengineering.helper;
 import ch.zhaw.swengineering.model.CoinBoxes;
 import ch.zhaw.swengineering.model.Messages;
 import ch.zhaw.swengineering.model.ParkingTimes;
+import ch.zhaw.swengineering.model.SecretCodes;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,6 +31,10 @@ public class ConfigurationProviderTest {
 	@Qualifier("messages-de")
 	private ConfigurationProvider messagesConfigurationProvider;
 
+	@Autowired
+	@Qualifier("secretCodes")
+	private ConfigurationProvider secretCodesConfigurationProvider;
+
 	@Test
 	public void canDeserializeParkingTimeDefXml() throws Exception {
 		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.get();
@@ -46,5 +51,11 @@ public class ConfigurationProviderTest {
 	public void canDeserializeMessagesXml() throws Exception {
 		Messages messages = (Messages) messagesConfigurationProvider.get();
 		assertNotNull(messages);
+	}
+
+	@Test
+	public void canDeserializeSecretCodesXml() throws Exception {
+		SecretCodes secretCodes = (SecretCodes) secretCodesConfigurationProvider.get();
+		assertNotNull(secretCodes);
 	}
 }
