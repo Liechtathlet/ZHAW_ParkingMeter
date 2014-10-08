@@ -34,6 +34,7 @@ gen/
 *.iml
 *.iws
 *.ipr
+ZHAW_ParkingMeter.iml
 
 # Mac
 .DS_Store
