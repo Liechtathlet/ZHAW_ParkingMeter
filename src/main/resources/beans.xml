@@ -50,4 +50,16 @@
     <bean id="secretCodesClassName" class="java.lang.String">
         <constructor-arg value="ch.zhaw.swengineering.model.SecretCodes" />
     </bean>
+
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationProvider">
+        <qualifier value="parkingMeter" />
+        <constructor-arg index="0" ref="parkingMeterXmlPath"/>
+        <constructor-arg index="1" ref="parkingMeterClassName"/>
+    </bean>
+    <bean id="parkingMeterXmlPath" class="java.lang.String">
+        <constructor-arg value="./src/main/resources/parkingMeter.xml" />
+    </bean>
+    <bean id="parkingMeterClassName" class="java.lang.String">
+        <constructor-arg value="ch.zhaw.swengineering.model.ParkingMeter" />
+    </bean>
 </beans>

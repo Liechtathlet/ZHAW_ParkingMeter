@@ -1,9 +1,6 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.CoinBoxes;
-import ch.zhaw.swengineering.model.Messages;
-import ch.zhaw.swengineering.model.ParkingTimes;
-import ch.zhaw.swengineering.model.SecretCodes;
+import ch.zhaw.swengineering.model.*;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +9,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -35,6 +34,10 @@ public class ConfigurationProviderTest {
 	@Qualifier("secretCodes")
 	private ConfigurationProvider secretCodesConfigurationProvider;
 
+	@Autowired
+	@Qualifier("parkingMeter")
+	private ConfigurationProvider parkingMeterConfigurationProvider;
+
 	@Test
 	public void canDeserializeParkingTimeDefXml() throws Exception {
 		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.get();
@@ -57,5 +60,12 @@ public class ConfigurationProviderTest {
 	public void canDeserializeSecretCodesXml() throws Exception {
 		SecretCodes secretCodes = (SecretCodes) secretCodesConfigurationProvider.get();
 		assertNotNull(secretCodes);
+	}
+
+	@Test
+	public void canDeserializeParkingMeterXml() throws Exception {
+		ParkingMeter parkingMeter = (ParkingMeter) parkingMeterConfigurationProvider.get();
+		assertNotNull(parkingMeter);
+		assertEquals("", new Date().toString());
 	}
 }
