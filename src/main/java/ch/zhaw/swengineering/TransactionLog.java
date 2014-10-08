@@ -1,5 +1,7 @@
 package ch.zhaw.swengineering;
 
+import org.springframework.stereotype.Component;
+
 import java.sql.Time;
 import java.util.Date;
 

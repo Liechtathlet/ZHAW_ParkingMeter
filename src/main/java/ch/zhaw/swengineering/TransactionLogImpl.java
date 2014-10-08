@@ -1,15 +1,24 @@
 package ch.zhaw.swengineering;
 
+import org.springframework.stereotype.Component;
+
 import java.sql.Time;
 import java.util.Date;
 
+@Component
 public class TransactionLogImpl implements TransactionLog {
 	public Date date;
 	public Time time;
 	public String message;
 	private TransactionLogImpl transactionLog;
 	public TransactionLogImpl[] transactionLogEntries;
-	
+
+	public TransactionLogImpl() {}
+
+	/**
+	 * DO NOT CALL ME!!
+	 * I AM A VERY NAUGHTY INFINITE RECURSION FUNCTION!!
+	 */
 	public TransactionLogImpl(Date date, Time time, String message) {
 		transactionLog = new TransactionLogImpl(date, time, message);
 	}
