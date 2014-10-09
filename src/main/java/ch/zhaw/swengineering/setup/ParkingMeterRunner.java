@@ -2,15 +2,16 @@ package ch.zhaw.swengineering.setup;
 
 import java.util.Arrays;
 
-import ch.zhaw.swengineering.LogAndXmlService;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
-
 import org.springframework.context.annotation.ImportResource;
+
+import ch.zhaw.swengineering.LogAndXmlService;
+import ch.zhaw.swengineering.view.SimulationViewActionHandler;
 
 /**
  * @author Daniel Brun
@@ -39,6 +40,8 @@ public class ParkingMeterRunner {
 		ConfigurableApplicationContext context = SpringApplication.run(
 				ParkingMeterRunner.class, args);
 
+		boolean isGuiStarted = false;
+		
 		if (args != null && args.length == 1) {
 			String versionParameter = args[0].trim().toLowerCase();
 
@@ -48,6 +51,10 @@ public class ParkingMeterRunner {
 			}
 		}
 		
+		if(!isGuiStarted){
+			SimulationViewActionHandler service = context.getBean(SimulationViewActionHandler.class);
+			service.startSimulationGui();
+		}
 		// TODO: if not gui: Start Console-Version
 
 		RunLogAndXmlService(context);
