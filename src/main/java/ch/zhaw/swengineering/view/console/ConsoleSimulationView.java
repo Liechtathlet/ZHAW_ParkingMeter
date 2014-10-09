@@ -15,7 +15,7 @@ import ch.zhaw.swengineering.view.SimulationViewActionHandler;
  * Console implementation of the interface {@link SimulationViewActionHandler}
  */
 @Component
-public class ConsoleSimulationViewActionHandler implements SimulationViewActionHandler, Runnable{
+public class ConsoleSimulationView implements SimulationViewActionHandler, Runnable{
 
 	private Thread consoleThread;
 	private boolean run;

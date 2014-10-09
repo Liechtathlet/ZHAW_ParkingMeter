@@ -40,23 +40,23 @@ public class ParkingMeterRunner {
 		ConfigurableApplicationContext context = SpringApplication.run(
 				ParkingMeterRunner.class, args);
 
-		boolean isGuiStarted = false;
+		SimulationViewActionHandler viewHandler = null;
 		
 		if (args != null && args.length == 1) {
 			String versionParameter = args[0].trim().toLowerCase();
 
 			if (versionParameter.equals("gui")) {
 				LOG.info("Detected startup parameter for gui-version. Init gui...");
-				// TODO: Start GUI
+				viewHandler = context.getBean("gui",SimulationViewActionHandler.class);
 			}
 		}
 		
-		if(!isGuiStarted){
-			SimulationViewActionHandler service = context.getBean(SimulationViewActionHandler.class);
-			service.startSimulationGui();
+		if(viewHandler == null){
+			viewHandler = context.getBean("console", SimulationViewActionHandler.class);
 		}
-		// TODO: if not gui: Start Console-Version
-
+		
+		viewHandler.startSimulationGui();
+		
 		RunLogAndXmlService(context);
 	}
 
