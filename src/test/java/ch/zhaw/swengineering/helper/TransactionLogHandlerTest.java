@@ -60,6 +60,39 @@ public class TransactionLogHandlerTest {
 		assertEquals(result.get(2).text, transactionLog.entries.get(2).text);
 	}
 
+	@Test
+	public void askingFor2EntriesReturns2Entries() throws Exception {
+		int numberOfEntries = 2;
+
+		// Mock
+		TransactionLog transactionLog = getMock();
+		MockitoAnnotations.initMocks(this);
+		when(configurationProvider.get()).thenReturn(transactionLog);
+
+		// Run
+		List<TransactionLogEntry> result = transactionLogHandler.get(numberOfEntries);
+
+		// Assert
+		assertEquals(result.size(), numberOfEntries);
+	}
+
+	@Test
+	public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
+		int numberOfEntries = 2;
+
+		// Mock
+		TransactionLog transactionLog = getMock();
+		MockitoAnnotations.initMocks(this);
+		when(configurationProvider.get()).thenReturn(transactionLog);
+
+		// Run
+		List<TransactionLogEntry> result = transactionLogHandler.get(numberOfEntries);
+
+		// Assert
+		assertEquals(result.get(0).text, transactionLog.entries.get(1).text);
+		assertEquals(result.get(1).text, transactionLog.entries.get(2).text);
+	}
+
 	private TransactionLog getMock() throws ParseException {
 		final TransactionLogEntry entry1 = new TransactionLogEntry();
 		entry1.creationTime = new SimpleDateFormat("dd/MM/yyyy").parse("21/12/2012");

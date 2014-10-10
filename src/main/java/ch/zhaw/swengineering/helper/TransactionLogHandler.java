@@ -1,7 +1,5 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.Message;
-import ch.zhaw.swengineering.model.Messages;
 import ch.zhaw.swengineering.model.TransactionLog;
 import ch.zhaw.swengineering.model.TransactionLogEntry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +34,7 @@ public class TransactionLogHandler {
 		// TODO: Casting should be done only once. But it does not work in the
 		// constructor because the poperty will not be injected.
 		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
-		int count = transactionLog.entries.size() - 1;
+		int count = transactionLog.entries.size();
 		return transactionLog.entries.subList(count - numberOfEntries, count);
 	}
 }
