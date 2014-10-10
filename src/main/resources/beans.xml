@@ -68,6 +68,11 @@
         <constructor-arg index="0" ref="transactionLogXmlPath"/>
         <constructor-arg index="1" ref="transactionLogClassName"/>
     </bean>
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationWriter">
+        <qualifier value="transactionLog" />
+        <constructor-arg index="0" ref="transactionLogXmlPath"/>
+        <constructor-arg index="1" ref="transactionLogClassName"/>
+    </bean>
     <bean id="transactionLogXmlPath" class="java.lang.String">
         <constructor-arg value="./src/main/resources/transactionLog.xml" />
     </bean>

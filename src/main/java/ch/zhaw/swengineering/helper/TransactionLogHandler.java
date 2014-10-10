@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -14,6 +15,10 @@ public class TransactionLogHandler {
 	@Autowired
 	@Qualifier("transactionLog")
 	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	@Qualifier("transactionLog")
+	private ConfigurationWriter configurationWriter;
 
 	public List<TransactionLogEntry> getAll() {
 		if (configurationProvider == null || configurationProvider.get() == null) {
@@ -36,5 +41,21 @@ public class TransactionLogHandler {
 		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
 		int count = transactionLog.entries.size();
 		return transactionLog.entries.subList(count - numberOfEntries, count);
+	}
+
+	public void write(String text) {
+		if (configurationProvider == null || configurationProvider.get() == null
+				|| configurationWriter == null) {
+			return;
+		}
+
+		TransactionLogEntry entry = new TransactionLogEntry();
+		entry.text = text;
+		entry.creationTime = new Date();
+
+		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
+		transactionLog.entries.add(entry);
+
+		configurationWriter.write(transactionLog);
 	}
 }

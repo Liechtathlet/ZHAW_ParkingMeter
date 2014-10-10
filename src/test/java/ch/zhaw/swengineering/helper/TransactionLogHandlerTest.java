@@ -8,6 +8,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
@@ -18,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=ParkingMeterRunner.class, loader=AnnotationConfigContextLoader.class)
@@ -29,6 +31,9 @@ public class TransactionLogHandlerTest {
 
 	@Mock
 	private ConfigurationProvider configurationProvider;
+
+	@Mock
+	private ConfigurationWriter configurationWriter;
 
 	@Test
 	public void gettingAllItemsReturnsAllItems() throws Exception {
@@ -91,6 +96,36 @@ public class TransactionLogHandlerTest {
 		// Assert
 		assertEquals(result.get(0).text, transactionLog.entries.get(1).text);
 		assertEquals(result.get(1).text, transactionLog.entries.get(2).text);
+	}
+
+	@Test
+	public void addingAnEntryToTheTransactionLogPassesCorrectObjectToConfigurationWriter() throws Exception {
+		String text = "New Item";
+
+		// Mock
+		TransactionLog transactionLog = getMock();
+		MockitoAnnotations.initMocks(this);
+
+		when(configurationProvider.get()).thenReturn(transactionLog);
+
+		// TODO: Not nicely done. How to check parameter to configurationWriter.write(...)?
+		final Object[] tempTransactionLog = new Object[1];
+		doAnswer(new Answer() {
+			@Override
+			public Object answer(InvocationOnMock invocation) throws Throwable {
+				Object[] args = invocation.getArguments();
+				tempTransactionLog[0] = args[0];
+				return null;
+			}
+		}).when(configurationWriter).write(any(Object.class));
+
+		// Run
+		transactionLogHandler.write(text);
+
+		// Assert
+		TransactionLog newTransactionLog = (TransactionLog)tempTransactionLog[0];
+		assertEquals(newTransactionLog.entries.size(), 4);
+		assertEquals(newTransactionLog.entries.get(3).text, text);
 	}
 
 	private TransactionLog getMock() throws ParseException {
