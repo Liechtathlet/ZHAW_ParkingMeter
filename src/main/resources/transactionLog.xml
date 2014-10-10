@@ -1,0 +1,5 @@
+<transactionLog>
+    <entry creationTime="2014-10-10T21:19:32">First log entry</entry>
+    <entry creationTime="2014-10-10T21:20:32">Second log entry</entry>
+    <entry creationTime="2014-10-10T21:21:32">And so on...</entry>
+</transactionLog>

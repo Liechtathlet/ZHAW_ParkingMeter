@@ -38,6 +38,10 @@ public class ConfigurationProviderTest {
 	@Qualifier("parkingMeter")
 	private ConfigurationProvider parkingMeterConfigurationProvider;
 
+	@Autowired
+	@Qualifier("transactionLog")
+	private ConfigurationProvider transactionLogConfigurationProvider;
+
 	@Test
 	public void canDeserializeParkingTimeDefXml() throws Exception {
 		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.get();
@@ -66,6 +70,11 @@ public class ConfigurationProviderTest {
 	public void canDeserializeParkingMeterXml() throws Exception {
 		ParkingMeter parkingMeter = (ParkingMeter) parkingMeterConfigurationProvider.get();
 		assertNotNull(parkingMeter);
-		assertEquals("", new Date().toString());
+	}
+
+	@Test
+	public void canDeserializeTransactionLogXml() throws Exception {
+		TransactionLog transactionLog = (TransactionLog) transactionLogConfigurationProvider.get();
+		assertNotNull(transactionLog);
 	}
 }

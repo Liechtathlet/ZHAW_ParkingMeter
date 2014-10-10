@@ -41,6 +41,8 @@ public class ConfigurationProvider {
 			logger.warning(String.format("Could not deserialize xml [%s] to class %s. Error: %s", xml, className, e.getMessage()));
 		} catch (ClassNotFoundException e) {
 			logger.warning(String.format("Could not find class %s. Error: %s", className, e.getMessage()));
+		} catch (Exception e) {
+			logger.warning(String.format("Exception caught deserializing xml [%s] to class %s. Error: %s", xml, className, e.getMessage()));
 		}
 
 		return null;

@@ -62,4 +62,16 @@
     <bean id="parkingMeterClassName" class="java.lang.String">
         <constructor-arg value="ch.zhaw.swengineering.model.ParkingMeter" />
     </bean>
+
+    <bean class="ch.zhaw.swengineering.helper.ConfigurationProvider">
+        <qualifier value="transactionLog" />
+        <constructor-arg index="0" ref="transactionLogXmlPath"/>
+        <constructor-arg index="1" ref="transactionLogClassName"/>
+    </bean>
+    <bean id="transactionLogXmlPath" class="java.lang.String">
+        <constructor-arg value="./src/main/resources/transactionLog.xml" />
+    </bean>
+    <bean id="transactionLogClassName" class="java.lang.String">
+        <constructor-arg value="ch.zhaw.swengineering.model.TransactionLog" />
+    </bean>
 </beans>
