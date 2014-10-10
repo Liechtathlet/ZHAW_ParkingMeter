@@ -11,6 +11,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 
 import ch.zhaw.swengineering.LogAndXmlService;
+import ch.zhaw.swengineering.controller.ViewController;
 import ch.zhaw.swengineering.view.SimulationViewActionHandler;
 
 /**
@@ -36,28 +37,31 @@ public class ParkingMeterRunner {
 
 		LOG.info("Init application startup. Arguments: " + Arrays.toString(args));
 		
+		//Java based configuration: http://www.ibm.com/developerworks/library/ws-springjava/, http://spring.io/blog/2009/12/22/configuration-simplifications-in-spring-3-0/
+		
 		// Start Spring
 		ConfigurableApplicationContext context = SpringApplication.run(
 				ParkingMeterRunner.class, args);
 
 		SimulationViewActionHandler viewHandler = null;
+		ViewController viewController = null;
 		
 		if (args != null && args.length == 1) {
 			String versionParameter = args[0].trim().toLowerCase();
 
 			if (versionParameter.equals("gui")) {
 				LOG.info("Detected startup parameter for gui-version. Init gui...");
-				viewHandler = context.getBean("gui",SimulationViewActionHandler.class);
+				
+				//TODO: Find solution for GUI with Spring-Boot
+				//TOOD: switch between gui and console with configuration parameter or factory...
+				//viewHandler = context.getBean("gui",SimulationViewActionHandler.class);
 			}
 		}
 		
-		if(viewHandler == null){
-			viewHandler = context.getBean("console", SimulationViewActionHandler.class);
-		}
+		viewController = context.getBean(ViewController.class);
+		viewController.start();
 		
-		viewHandler.startSimulationGui();
-		
-		RunLogAndXmlService(context);
+		//RunLogAndXmlService(context);
 	}
 
 	/**

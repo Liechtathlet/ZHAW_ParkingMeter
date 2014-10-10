@@ -3,6 +3,8 @@
  */
 package ch.zhaw.swengineering.view;
 
+import ch.zhaw.swengineering.event.ViewEventListener;
+
 /**
  * @author Daniel Brun
  *
@@ -15,5 +17,19 @@ public interface SimulationViewActionHandler {
 	 * 
 	 * TODO: Possibly pass controller.
 	 */
-	void startSimulationGui();
+	void startSimulationView();
+	
+	/**
+	 * Registers a view event listener.
+	 * 
+	 * @param aListener The listener to register.
+	 */
+	void addViewEventListener(ViewEventListener aListener);
+	
+	/**
+	 * Deregisters a view event listener.
+	 * 
+	 * @param aListener The listener to deregister.
+	 */
+	void removeViewEventListener(ViewEventListener aListener);
 }

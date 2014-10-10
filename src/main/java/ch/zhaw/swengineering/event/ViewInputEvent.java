@@ -1,7 +1,7 @@
 /**
  * 
  */
-package ch.zhaw.swengineering.setup;
+package ch.zhaw.swengineering.event;
 
 import java.util.EventObject;
 
