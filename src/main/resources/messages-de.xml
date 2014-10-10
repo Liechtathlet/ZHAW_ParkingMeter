@@ -1,10 +1,3 @@
 <messages>
-    <message key="title">
-        Multipline title text
-        w000t
-    </message>
-    <message key="subtitle">
-        Multipline subtitle text
-        w000t w00t
-    </message>
+    <message key="pakring lot number">Parkplatznummer</message>
 </messages>

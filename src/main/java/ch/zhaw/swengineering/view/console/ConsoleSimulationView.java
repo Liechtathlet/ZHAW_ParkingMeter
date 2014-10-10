@@ -7,8 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
+import ch.zhaw.swengineering.helper.MessageProvider;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import ch.zhaw.swengineering.event.ViewEventListener;
@@ -29,6 +31,9 @@ public class ConsoleSimulationView implements SimulationViewActionHandler, Runna
 	
 	private Thread consoleThread;
 	private boolean run;
+
+	@Autowired
+	private MessageProvider messageProvider;
 	
 	/**
 	 * Creates a new instance of this class.
@@ -58,7 +63,7 @@ public class ConsoleSimulationView implements SimulationViewActionHandler, Runna
 	/**
 	 * Propagates the view input event to all registered listeners.
 	 * 
-	 * @param aViewInputEvent The input to propagate.
+	 * @param anInput The input to propagate.
 	 */
 	private void notifyViewEventListeners(String anInput){
 		LOG.info("Registered view input event: " + anInput);
@@ -76,8 +81,9 @@ public class ConsoleSimulationView implements SimulationViewActionHandler, Runna
 		LOG.debug("Console aquired");
 		//Read console input
 		while(run){
-			//TODO: Replace hard coded string. (Controller: printXyz, then: start application
-			System.out.print("Parkplatznummer: > ");
+			//TODO: Replace hard coded string. (Controller: printXyz, then: start application)
+			//TODO sl: I replaced the hard coded string. But what does the stuff in the brackets mean?
+			System.out.print(messageProvider.get("pakring lot number") + ": > ");
 			String userInputLine = consoleScanner.nextLine();
 			
 			notifyViewEventListeners(userInputLine);
