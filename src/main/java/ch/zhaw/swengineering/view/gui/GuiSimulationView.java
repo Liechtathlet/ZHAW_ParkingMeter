@@ -15,7 +15,7 @@ import java.awt.*;
  *
  * Gui implementation of the interface {@link SimulationViewActionHandler}
  * 
- * TODO: Find soluation for console / gui switch.
+ * TODO: Find solution for console / gui switch.
  */
 //@Component("gui")
 public class GuiSimulationView extends SimulationViewActionHandler {

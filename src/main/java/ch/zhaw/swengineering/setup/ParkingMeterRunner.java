@@ -53,7 +53,7 @@ public class ParkingMeterRunner {
 				LOG.info("Detected startup parameter for gui-version. Init gui...");
 				
 				//TODO: Find solution for GUI with Spring-Boot
-				//TOOD: switch between gui and console with configuration parameter or factory...
+				//TODO: switch between gui and console with configuration parameter or factory...
 				//viewHandler = context.getBean("gui",SimulationViewActionHandler.class);
 			}
 		}

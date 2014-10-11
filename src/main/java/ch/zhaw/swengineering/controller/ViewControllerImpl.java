@@ -19,6 +19,7 @@ import ch.zhaw.swengineering.view.SimulationViewActionHandler;
  * 
  * TODO: Het öpert en bessere Name?
  * TODO sl: GuiController? Es wird denn wahrschinli no en RestController geh..
+ * TODO: db: Hani mer au überleit, denn isch console au = gui
  */
 @Controller
 public class ViewControllerImpl implements ViewController, ViewEventListener{

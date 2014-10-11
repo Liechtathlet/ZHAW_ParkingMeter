@@ -54,6 +54,7 @@ public class ConsoleSimulationView extends SimulationViewActionHandler {
 		while(run){
 			//TODO: Replace hard coded string. (Controller: printXyz, then: start application)
 			//TODO sl: I replaced the hard coded string. But what does the stuff in the brackets mean?
+			//TODO sb: Just some fancy layout :-P
 			System.out.print(messageProvider.get("pakring lot number") + ": > ");
 			String userInputLine = consoleScanner.nextLine();
 			

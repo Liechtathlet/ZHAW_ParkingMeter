@@ -15,6 +15,7 @@ import java.util.List;
  *
  * Interface which defines the actions which the controller can invoke on the simulation view.
  * TODO sl: Ist als abstrake Klasse umgesetzt. Man könnte auch ganz auf Vererbung/Implementierung verzichten und die View's injecten?
+ * TODO: db wenn es kein Interface / abstrakte Klasse ist, dann müsste es zwei verschieden Controller geben, da diese sonst nicht in einem injected werden können.
  */
 public abstract class SimulationViewActionHandler implements Runnable {
 

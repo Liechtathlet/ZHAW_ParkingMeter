@@ -27,6 +27,7 @@ public class TransactionLogHandler {
 
 		// TODO: Casting should be done only once. But it does not work in the
 		// constructor because the poperty will not be injected.
+		// TODO: db: Create init method with @PostContruct ;-)
 		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
 		return transactionLog.entries;
 	}
