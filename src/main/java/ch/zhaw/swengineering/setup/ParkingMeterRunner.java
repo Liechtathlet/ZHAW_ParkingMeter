@@ -10,7 +10,6 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 
-import ch.zhaw.swengineering.LogAndXmlService;
 import ch.zhaw.swengineering.controller.ViewController;
 import ch.zhaw.swengineering.view.SimulationViewActionHandler;
 
@@ -63,18 +62,4 @@ public class ParkingMeterRunner {
 		
 		//RunLogAndXmlService(context);
 	}
-
-	/**
-	 * FIXME: Only for Test, delete after first implementation
-	 * 
-	 * @param context
-	 */
-	private static void RunLogAndXmlService(
-			ConfigurableApplicationContext context) {
-		// org.springframework.context.ApplicationContext context = new
-		// AnnotationConfigApplicationContext(TestApp.class);
-		LogAndXmlService service = context.getBean(LogAndXmlService.class);
-		System.out.println(service.run());
-	}
-
 }
