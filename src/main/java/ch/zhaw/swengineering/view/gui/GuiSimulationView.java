@@ -3,7 +3,7 @@
  */
 package ch.zhaw.swengineering.view.gui;
 
-import ch.zhaw.swengineering.view.SimulationViewActionHandler;
+import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -13,12 +13,12 @@ import java.awt.*;
 /**
  * @author Daniel Brun
  *
- * Gui implementation of the interface {@link SimulationViewActionHandler}
+ * Gui implementation of the interface {@link ch.zhaw.swengineering.view.SimulationView}
  * 
  * TODO: Find solution for console / gui switch.
  */
 //@Component("gui")
-public class GuiSimulationView extends SimulationViewActionHandler {
+public class GuiSimulationView extends SimulationView {
 
 	private static final Logger LOG = LogManager.getLogger(GuiSimulationView.class);
 	
@@ -37,6 +37,16 @@ public class GuiSimulationView extends SimulationViewActionHandler {
 	@Override
 	public void run() {
 		initGui();
+	}
+
+	@Override
+	public int GetParkingLotNumber() {
+		return 0;
+	}
+
+	@Override
+	public void welcome() {
+		System.out.println("GuiSimulationView: Welcome");
 	}
 
 }

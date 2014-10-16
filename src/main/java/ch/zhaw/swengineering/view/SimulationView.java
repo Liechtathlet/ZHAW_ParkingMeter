@@ -17,15 +17,15 @@ import java.util.List;
  * TODO sl: Ist als abstrake Klasse umgesetzt. Man könnte auch ganz auf Vererbung/Implementierung verzichten und die View's injecten?
  * TODO: db wenn es kein Interface / abstrakte Klasse ist, dann müsste es zwei verschieden Controller geben, da diese sonst nicht in einem injected werden können.
  */
-public abstract class SimulationViewActionHandler implements Runnable {
+public abstract class SimulationView implements Runnable {
 
-	private static final Logger LOG = LogManager.getLogger(SimulationViewActionHandler.class);
+	private static final Logger LOG = LogManager.getLogger(SimulationView.class);
 
 	private Thread thread;
 
 	protected List<ViewEventListener> eventListeners;
 
-	public SimulationViewActionHandler() {
+	public SimulationView() {
 		eventListeners = new ArrayList<>();
 	}
 
@@ -49,6 +49,9 @@ public abstract class SimulationViewActionHandler implements Runnable {
 	}
 
 	public abstract void run();
+	public abstract int GetParkingLotNumber();
+
+	public abstract void welcome();
 
 	/**
 	 * Registers a view event listener.

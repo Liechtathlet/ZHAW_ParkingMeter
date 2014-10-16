@@ -6,7 +6,7 @@ package ch.zhaw.swengineering.view.console;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.event.ViewInputEvent;
 import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.view.SimulationViewActionHandler;
+import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +17,10 @@ import java.util.Scanner;
 /**
  * @author Daniel Brun
  *
- * Console implementation of the interface {@link SimulationViewActionHandler}
+ * Console implementation of the interface {@link ch.zhaw.swengineering.view.SimulationView}
  */
-@Component
-public class ConsoleSimulationView extends SimulationViewActionHandler {
+@Component("ConsoleSimulationView")
+public class ConsoleSimulationView extends SimulationView {
 
 	private static final Logger LOG = LogManager.getLogger(ConsoleSimulationView.class);
 	
@@ -64,5 +64,18 @@ public class ConsoleSimulationView extends SimulationViewActionHandler {
 		consoleScanner.close();
 		
 		LOG.info("Console reader stopped...");
+	}
+
+	@Override
+	public int GetParkingLotNumber() {
+		System.out.print(messageProvider.get("parking lot number").trim() + " ");
+
+		Scanner consoleScanner = new Scanner(System.in);
+		return Integer.parseInt(consoleScanner.nextLine());
+	}
+
+	@Override
+	public void welcome() {
+		System.out.println("ConsoleSimulationView: Welcome");
 	}
 }

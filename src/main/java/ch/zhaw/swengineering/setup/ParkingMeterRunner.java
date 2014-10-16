@@ -2,8 +2,11 @@ package ch.zhaw.swengineering.setup;
 
 import java.util.Arrays;
 
+//import ch.zhaw.swengineering.helper.ParkingMeterBeanProcessor;
+import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
@@ -11,7 +14,6 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
 
 import ch.zhaw.swengineering.controller.ViewController;
-import ch.zhaw.swengineering.view.SimulationViewActionHandler;
 
 /**
  * @author Daniel Brun
@@ -25,7 +27,8 @@ import ch.zhaw.swengineering.view.SimulationViewActionHandler;
 public class ParkingMeterRunner {
 
 	private static final Logger LOG = LogManager.getLogger(ParkingMeterRunner.class);
-	
+
+	private static AutowireCapableBeanFactory beanFactory;
 	/**
 	 * Entry-Method for the Java-Application
 	 * 
@@ -35,14 +38,16 @@ public class ParkingMeterRunner {
 	public static void main(String[] args) {
 
 		LOG.info("Init application startup. Arguments: " + Arrays.toString(args));
-		
+
 		//Java based configuration: http://www.ibm.com/developerworks/library/ws-springjava/, http://spring.io/blog/2009/12/22/configuration-simplifications-in-spring-3-0/
 		
 		// Start Spring
 		ConfigurableApplicationContext context = SpringApplication.run(
 				ParkingMeterRunner.class, args);
+//		context.addBeanFactoryPostProcessor(new ParkingMeterBeanProcessor());
+//		context.refresh();
 
-		SimulationViewActionHandler viewHandler = null;
+		SimulationView viewHandler = null;
 		ViewController viewController = null;
 		
 		if (args != null && args.length == 1) {
@@ -56,10 +61,9 @@ public class ParkingMeterRunner {
 				//viewHandler = context.getBean("gui",SimulationViewActionHandler.class);
 			}
 		}
-		
+
 		viewController = context.getBean(ViewController.class);
+
 		viewController.start();
-		
-		//RunLogAndXmlService(context);
 	}
 }
