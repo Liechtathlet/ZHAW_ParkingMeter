@@ -16,7 +16,7 @@ public class ConfigurationWriter {
 	protected final String xml;
 
 	@Autowired
-	protected ConfigurationWriter(String xml, String className) {
+	public ConfigurationWriter(String xml, String className) {
 		this.xml = xml;
 		this.className = className;
 	}

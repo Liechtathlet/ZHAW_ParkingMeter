@@ -18,7 +18,7 @@ public class ConfigurationProvider {
 	protected final String xml;
 
 	@Autowired
-	protected ConfigurationProvider(String xml, String className) {
+	public ConfigurationProvider(String xml, String className) {
 		this.xml = xml;
 		this.className = className;
 
