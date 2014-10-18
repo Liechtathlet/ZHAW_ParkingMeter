@@ -20,7 +20,6 @@ import java.io.IOException;
  *
  * Console implementation of the interface {@link ch.zhaw.swengineering.view.SimulationView}
  */
-@Component
 public class ConsoleSimulationView extends SimulationView {
 
 	private static final Logger LOG = LogManager.getLogger(ConsoleSimulationView.class);

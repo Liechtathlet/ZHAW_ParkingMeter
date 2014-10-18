@@ -17,7 +17,6 @@ import java.awt.*;
  * 
  * TODO: Find solution for console / gui switch.
  */
-//@Component("gui")
 public class GuiSimulationView extends SimulationView {
 
 	private static final Logger LOG = LogManager.getLogger(GuiSimulationView.class);
