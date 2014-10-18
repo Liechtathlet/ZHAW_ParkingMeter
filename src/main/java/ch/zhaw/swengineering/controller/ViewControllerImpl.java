@@ -3,14 +3,15 @@
  */
 package ch.zhaw.swengineering.controller;
 
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.event.ViewInputEvent;
+import java.io.IOException;
 
 /**
  * @author Daniel Brun
@@ -22,7 +23,7 @@ import ch.zhaw.swengineering.event.ViewInputEvent;
  * TODO: db: Hani mer au überleit, denn isch console au = gui
  */
 @Controller
-public class ViewControllerImpl implements ViewController, ViewEventListener{
+public class ViewControllerImpl implements ViewController, ViewEventListener {
 
 	private static final Logger LOG = LogManager.getLogger(ViewControllerImpl.class);
 	
@@ -39,12 +40,15 @@ public class ViewControllerImpl implements ViewController, ViewEventListener{
 		//Start simulation view.
 		view.startSimulationView();
 
+		try {
+			view.showParkingLotMessage();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	@Override
-	public void inputEntered(ViewInputEvent anInputEvent) {
-		System.out.println("Received input event: " + anInputEvent.getInput());
-
-		view.welcome();
+	public void parkingLotEntered(ParkingLotEnteredEvent parkingLotEnteredEvent) {
+		System.out.println("User entered parking lot number: " + parkingLotEnteredEvent.getParkingLotNumber());
 	}
 }

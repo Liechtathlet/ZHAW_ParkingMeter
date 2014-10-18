@@ -2,7 +2,7 @@ package ch.zhaw.swengineering.setup;
 
 import java.util.Arrays;
 
-//import ch.zhaw.swengineering.helper.ParkingMeterBeanProcessor;
+//import ch.zhaw.swengineering.setup.ParkingMeterBeanProcessor;
 import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -28,7 +28,6 @@ public class ParkingMeterRunner {
 
 	private static final Logger LOG = LogManager.getLogger(ParkingMeterRunner.class);
 
-	private static AutowireCapableBeanFactory beanFactory;
 	/**
 	 * Entry-Method for the Java-Application
 	 * 
@@ -47,8 +46,7 @@ public class ParkingMeterRunner {
 //		context.addBeanFactoryPostProcessor(new ParkingMeterBeanProcessor());
 //		context.refresh();
 
-		SimulationView viewHandler = null;
-		ViewController viewController = null;
+		ViewController viewController;
 		
 		if (args != null && args.length == 1) {
 			String versionParameter = args[0].trim().toLowerCase();

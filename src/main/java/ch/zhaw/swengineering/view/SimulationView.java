@@ -7,6 +7,7 @@ import ch.zhaw.swengineering.event.ViewEventListener;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,9 +50,7 @@ public abstract class SimulationView implements Runnable {
 	}
 
 	public abstract void run();
-	public abstract int GetParkingLotNumber();
-
-	public abstract void welcome();
+	public abstract void showParkingLotMessage() throws IOException;
 
 	/**
 	 * Registers a view event listener.

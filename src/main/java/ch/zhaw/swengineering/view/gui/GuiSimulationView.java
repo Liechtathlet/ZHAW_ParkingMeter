@@ -40,13 +40,5 @@ public class GuiSimulationView extends SimulationView {
 	}
 
 	@Override
-	public int GetParkingLotNumber() {
-		return 0;
-	}
-
-	@Override
-	public void welcome() {
-		System.out.println("GuiSimulationView: Welcome");
-	}
-
+	public void showParkingLotMessage() {}
 }
