@@ -37,6 +37,8 @@ public class ConsoleSimulationViewTest {
 	public void setUp() {
 		// Set replacement "command line".
 		System.setOut(new PrintStream(outContent));
+
+		MockitoAnnotations.initMocks(this);
 	}
 
 	@After
@@ -59,7 +61,6 @@ public class ConsoleSimulationViewTest {
 		int expectedParkingLotNumber = 44;
 
 		// Mock
-		MockitoAnnotations.initMocks(this);
 		when(messageProvider.get("parking lot number")).thenReturn("");
 		when(bufferedReader.readLine()).thenReturn(Integer.toString(expectedParkingLotNumber));
 
@@ -80,7 +81,6 @@ public class ConsoleSimulationViewTest {
 		String invalidParkingLotNumber = "invalid parkinglot number";
 
 		// Mock
-		MockitoAnnotations.initMocks(this);
 		when(messageProvider.get("parking lot number")).thenReturn("");
 		when(bufferedReader.readLine()).thenReturn(invalidParkingLotNumber);
 
@@ -96,7 +96,6 @@ public class ConsoleSimulationViewTest {
 		String expectedQuestion = parkingLotText + " ";
 
 		// Mock
-		MockitoAnnotations.initMocks(this);
 		when(messageProvider.get("parking lot number")).thenReturn(parkingLotText);
 		when(bufferedReader.readLine()).thenReturn("0");
 
@@ -113,7 +112,6 @@ public class ConsoleSimulationViewTest {
 		String expectedQuestion = parkingLotText.trim() + " ";
 
 		// Mock
-		MockitoAnnotations.initMocks(this);
 		when(messageProvider.get("parking lot number")).thenReturn(parkingLotText);
 		when(bufferedReader.readLine()).thenReturn("0");
 

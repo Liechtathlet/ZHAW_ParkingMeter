@@ -40,7 +40,8 @@ public class ConsoleSimulationView extends SimulationView {
 	
 	@Override
 	public void run() {
-		// TODO sl: Not needed anymore?
+		// Nothing to do here for command line.
+		// Maybe some info text should be printed out.
 	}
 
 	@Override
