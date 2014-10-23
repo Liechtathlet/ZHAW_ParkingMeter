@@ -35,17 +35,18 @@ public class ParkingMeterRunner {
 	 *            The arguments.
 	 */
 	public static void main(String[] args) {
-
+		System.setProperty("java.awt.headless", "false");
+		
 		ParkingMeterRunner.args = args;
 
 		LOG.info("Init application startup. Arguments: " + Arrays.toString(args));
 
 		//Java based configuration: http://www.ibm.com/developerworks/library/ws-springjava/, http://spring.io/blog/2009/12/22/configuration-simplifications-in-spring-3-0/
-
 		// Start Spring
-		ConfigurableApplicationContext context = SpringApplication.run(
-				ParkingMeterRunner.class, args);
-
+		SpringApplication app = new SpringApplication(ParkingMeterRunner.class);
+		
+		ConfigurableApplicationContext context = app.run(args);
+		
 		context.getBean(ViewController.class).start();
 	}
 
