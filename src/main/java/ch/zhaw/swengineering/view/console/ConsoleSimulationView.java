@@ -3,17 +3,17 @@
  */
 package ch.zhaw.swengineering.view.console;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.view.SimulationView;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import java.io.BufferedReader;
-import java.io.IOException;
 
 /**
  * @author Daniel Brun
