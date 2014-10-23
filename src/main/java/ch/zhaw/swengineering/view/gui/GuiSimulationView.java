@@ -26,12 +26,14 @@ public class GuiSimulationView extends SimulationView {
 	 * Creates the GUI.
 	 */
 	private void initGui() {
+		LOG.debug("Initialize frame");
 		JFrame frame = new JFrame("ParkingMeter");
 		
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.getContentPane().add(new ParkingMeterPanel(), BorderLayout.CENTER);
 		frame.pack();
 		frame.setVisible(true);
+		LOG.debug("Frame initialized...");
 	}
 	
 	@Override
