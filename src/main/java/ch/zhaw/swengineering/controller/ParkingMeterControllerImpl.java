@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.zhaw.swengineering.controller;
 
 import javax.annotation.PostConstruct;
@@ -23,36 +20,49 @@ import ch.zhaw.swengineering.model.ParkingMeter;
 @Controller
 public class ParkingMeterControllerImpl implements ParkingMeterController {
 
-	private static final Logger LOG = LogManager
-			.getLogger(ParkingMeterControllerImpl.class);
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ParkingMeterControllerImpl.class);
 
-	@Autowired
-	@Qualifier("parkingMeter")
-	private ConfigurationProvider parkingMeterProvider;
-	private ParkingMeter parkingMeter;
+    /**
+     * ConfigurationProvider for the 'ParkingMeter'.
+     */
+    @Autowired
+    @Qualifier("parkingMeter")
+    private ConfigurationProvider parkingMeterProvider;
+    
+    /**
+     * The ParkingMeter.
+     */
+    private ParkingMeter parkingMeter;
 
-	@PostConstruct
-	public void init() {
-		LOG.info("Initialize ParkingMeter Controller");
+    /**
+     * Initializes the class after the properties have been injected.
+     */
+    @PostConstruct
+    public final void init() {
+        LOG.info("Initialize ParkingMeter Controller");
 
-		LOG.info("Load ParkingLots");
-		if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
-			parkingMeter = (ParkingMeter) parkingMeterProvider.get();
-		}
-	}
+        LOG.info("Load ParkingLots");
+        if (parkingMeterProvider != null 
+                && parkingMeterProvider.get() != null) {
+            parkingMeter = (ParkingMeter) parkingMeterProvider.get();
+        }
+    }
 
-	@Override
-	public boolean isParkingLot(int aNumber) {
-		boolean result = false;
+    @Override
+    public final boolean isParkingLot(final int aNumber) {
+        boolean result = false;
 
-		for (ParkingLot parkingLot : parkingMeter.parkingLots) {
-			if (parkingLot.number == aNumber) {
-				result = true;
-				break;
-			}
-		}
+        for (ParkingLot parkingLot : parkingMeter.parkingLots) {
+            if (parkingLot.number == aNumber) {
+                result = true;
+                break;
+            }
+        }
 
-		return result;
-	}
-
+        return result;
+    }
 }
