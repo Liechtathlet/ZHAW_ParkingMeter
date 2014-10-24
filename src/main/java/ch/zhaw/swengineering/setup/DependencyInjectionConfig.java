@@ -1,18 +1,19 @@
 package ch.zhaw.swengineering.setup;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.ConfigurationWriter;
-import ch.zhaw.swengineering.view.SimulationView;
-import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
-import ch.zhaw.swengineering.view.gui.GuiSimulationView;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
+import ch.zhaw.swengineering.view.SimulationView;
+import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
+import ch.zhaw.swengineering.view.gui.GuiSimulationView;
 
 @Configuration
 public class DependencyInjectionConfig {
@@ -26,7 +27,7 @@ public class DependencyInjectionConfig {
 
 	@Bean
 	public SimulationView simulationView() {
-		String[] args = ParkingMeterRunner.getArgs();
+		String[] args = ParkingMeterRunner.getArguments();
 
 		if (args != null && args.length == 1) {
 			String versionParameter = args[0].trim().toLowerCase();

@@ -24,33 +24,45 @@ import ch.zhaw.swengineering.controller.ViewController;
 @ImportResource("classpath:beans.xml")
 public class ParkingMeterRunner {
 
-	private static final Logger LOG = LogManager.getLogger(ParkingMeterRunner.class);
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ParkingMeterRunner.class);
 
-	private static String[] args;
+    /**
+     * The arguments.
+     */
+    private static String[] arguments;
 
-	/**
-	 * Entry-Method for the Java-Application
-	 *
-	 * @param args
-	 *            The arguments.
-	 */
-	public static void main(String[] args) {
-		System.setProperty("java.awt.headless", "false");
-		
-		ParkingMeterRunner.args = args;
+    /**
+     * Entry-Method for the Java-Application.
+     * 
+     * @param args
+     *            The arguments.
+     */
+    public static void main(final String[] args) {
+        System.setProperty("java.awt.headless", "false");
 
-		LOG.info("Init application startup. Arguments: " + Arrays.toString(args));
+        ParkingMeterRunner.arguments = args;
 
-		//Java based configuration: http://www.ibm.com/developerworks/library/ws-springjava/, http://spring.io/blog/2009/12/22/configuration-simplifications-in-spring-3-0/
-		// Start Spring
-		SpringApplication app = new SpringApplication(ParkingMeterRunner.class);
-		
-		ConfigurableApplicationContext context = app.run(args);
-		
-		context.getBean(ViewController.class).start();
-	}
+        LOG.info("Init application startup. Arguments: "
+                + Arrays.toString(args));
 
-	public static String[] getArgs() {
-		return args;
-	}
+        // Start Spring
+        SpringApplication app = new SpringApplication(ParkingMeterRunner.class);
+
+        ConfigurableApplicationContext context = app.run(args);
+
+        context.getBean(ViewController.class).start();
+    }
+
+    /**
+     * Gets the arguments which were set during application startup.
+     * 
+     * @return the arguments.
+     */
+    public static String[] getArguments() {
+        return arguments;
+    }
 }
