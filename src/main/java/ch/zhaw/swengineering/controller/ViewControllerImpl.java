@@ -55,9 +55,27 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         // Start simulation view.
         view.startSimulationView();
 
+        // Start process
         view.promptForParkingLotNumber();
     }
 
+    /**
+     * Loads the data from the configuration providers.
+     */
+    private void loadData() {
+        LOG.info("Loading data...");
+
+        LOG.info("Loading CoinBoxes...");
+        if (coinBoxesProvider != null && coinBoxesProvider.get() != null) {
+            coinBoxes = (CoinBoxes) coinBoxesProvider.get();
+        }
+
+        LOG.info("Loading SecretCodes...");
+        if (secretCodesProvider != null && secretCodesProvider.get() != null) {
+            secretCodes = (SecretCodes) secretCodesProvider.get();
+        }
+    }
+    
     @Override
     public final void parkingLotEntered(
             final ParkingLotEnteredEvent parkingLotEnteredEvent) {
@@ -78,31 +96,13 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Step Two: Check if it is a secret number
 
-        // Step Tree: Print error if nothing matched
+        // Step Three: Print error if nothing matched
         if (!processed) {
             view.displayParkingLotNumberInvalid();
             view.promptForParkingLotNumber();
         }
     }
 
-    /**
-     * Loads the data from the configuration providers.
-     */
-    private void loadData() {
-        LOG.info("Loading data...");
-
-        LOG.info("Loading CoinBoxes...");
-        if (coinBoxesProvider != null && coinBoxesProvider.get() != null) {
-            coinBoxes = (CoinBoxes) coinBoxesProvider.get();
-        }
-
-        LOG.info("Loading SecretCodes...");
-        if (secretCodesProvider != null && secretCodesProvider.get() != null) {
-            secretCodes = (SecretCodes) secretCodesProvider.get();
-        }
-    }
-
-    @Override
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
         // TODO Action aborted
         view.promptForParkingLotNumber();

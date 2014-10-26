@@ -28,6 +28,9 @@ public final class DateHelper {
      */
     public static String calculateFormattedTimeDifference(final Date date1,
             final Date date2) {
+        AssertHelper.isNotNull(date1, "date1");
+        AssertHelper.isNotNull(date2, "date2");
+        
         String result = null;
         boolean negative = false;
         long diff = 0;
