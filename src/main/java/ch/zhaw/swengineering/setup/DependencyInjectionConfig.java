@@ -33,12 +33,12 @@ public class DependencyInjectionConfig {
 			String versionParameter = args[0].trim().toLowerCase();
 
 			if (versionParameter.equals("gui")) {
-				LOG.info("Detected startup parameter for gui-version. Loading GUI view");
+				LOG.info("Detected startup parameter for gui version. Loading GUI view.");
 				return new GuiSimulationView();
 			}
 		}
 
-		LOG.info("Detected startup parameter for gui-version. Loading console view");
+		LOG.info("Detected startup parameter for console version. Loading console view.");
 		return new ConsoleSimulationView();
 	}
 
