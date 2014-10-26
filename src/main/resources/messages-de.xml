@@ -1,6 +1,6 @@
 <messages>
     <message key="view.enter.parkinglotnumber">Parkplatznummer eingeben</message>
-    <message key="view.enter.invalid">Unügltige Eingabe</message>
-    <message key="view.enter.coins">Münzen einwerfen für Parkplatz {0}</message>
-    <message key="view.info.parkingTime">Parkzeit für Parkplatz {0}: {1}</message>
+    <message key="view.enter.coins">Münzen einwerfen für Parkplatz [{0}]</message>
+    <message key="view.info.parkingTime">Bezahlte Parkzeit für Parkplatz [{0}]: {1}</message>
+    <message key="view.enter.parkinglotnumber.invalid">Die Eingabe war nicht korrekt. Bitte geben Sie eine gültige Parkplatznummer ein.</message>
 </messages>

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
@@ -15,8 +16,7 @@ import ch.zhaw.swengineering.model.SecretCodes;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
- * @author Daniel Brun
- *         Controller for the view.
+ * @author Daniel Brun Controller for the view.
  */
 @Controller
 public class ViewControllerImpl implements ViewController, ViewEventListener {
@@ -64,17 +64,25 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.debug("User entered parking lot number: "
                 + parkingLotEnteredEvent.getParkingLotNumber());
 
+        boolean processed = false;
         ParkingLot parkingLot = parkingMeterController
                 .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
         // Step One: Check if it is a parking lot number
         if (parkingLot != null) {
+            processed = true;
             view.displayParkingLotNumberAndParkingTime(parkingLot.number,
                     parkingLot.paidUntil);
-            view.promptForMoney();
+            view.promptForMoney(parkingLot.number);
         }
 
         // Step Two: Check if it is a secret number
+
+        // Step Tree: Print error if nothing matched
+        if (!processed) {
+            view.displayParkingLotNumberInvalid();
+            view.promptForParkingLotNumber();
+        }
     }
 
     /**
@@ -92,5 +100,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         if (secretCodesProvider != null && secretCodesProvider.get() != null) {
             secretCodes = (SecretCodes) secretCodesProvider.get();
         }
+    }
+
+    @Override
+    public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
+        // TODO Action aborted
+        view.promptForParkingLotNumber();
     }
 }

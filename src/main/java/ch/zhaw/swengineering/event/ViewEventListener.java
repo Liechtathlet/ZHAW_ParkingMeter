@@ -1,6 +1,3 @@
-/**
- * 
- */
 package ch.zhaw.swengineering.event;
 
 import java.util.EventListener;
@@ -17,4 +14,11 @@ public interface ViewEventListener extends EventListener {
 	 * @param parkingLotEnteredEvent Event data
 	 */
 	void parkingLotEntered(ParkingLotEnteredEvent parkingLotEnteredEvent);
+	
+	/**
+     * Called when the user aborted the current action..
+     *
+     * @param actionAbortedEvent Event data
+     */
+    void actionAborted(ActionAbortedEvent actionAbortedEvent);
 }

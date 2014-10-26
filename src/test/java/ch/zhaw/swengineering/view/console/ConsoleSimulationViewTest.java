@@ -113,7 +113,7 @@ public class ConsoleSimulationViewTest {
         // Mock
         when(messageProvider.get("view.enter.parkinglotnumber")).thenReturn(
                 "Enter");
-        when(messageProvider.get("view.enter.invalid")).thenReturn("Invalid");
+        when(messageProvider.get("view.enter.parkinglotnumber.invalid")).thenReturn("Invalid");
         when(bufferedReader.readLine()).thenReturn(invalidParkingLotNumber);
 
         // Setup

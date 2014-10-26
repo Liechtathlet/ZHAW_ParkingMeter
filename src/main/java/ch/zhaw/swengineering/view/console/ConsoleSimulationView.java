@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.datetime.DateFormatter;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
@@ -26,6 +27,11 @@ public class ConsoleSimulationView extends SimulationView {
      * Date-Format.
      */
     private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
+
+    /**
+     * The 'command' / string which is used to abort the current action.
+     */
+    private static final String ABORT_COMMAND = "x";
 
     /**
      * Thread-Sleep-Time.
@@ -50,6 +56,8 @@ public class ConsoleSimulationView extends SimulationView {
 
     private DateFormatter dateFormatter;
 
+    private int storeParkingLotNumber;
+
     /**
      * Creates a new instance of this class and sets the initial state.
      */
@@ -58,6 +66,8 @@ public class ConsoleSimulationView extends SimulationView {
         viewState = ConsoleViewStateEnum.INIT;
 
         dateFormatter = new DateFormatter(DATE_FORMAT);
+
+        storeParkingLotNumber = -1;
     }
 
     @Override
@@ -73,7 +83,7 @@ public class ConsoleSimulationView extends SimulationView {
                     executeActionsForStateEnteringParkingLotNumber();
                     break;
                 case DROPPING_IN_MONEY:
-                    // TODO:Implement
+                    executeActionsForDroppingInMoney();
                     break;
                 case INIT:
                 default:
@@ -90,12 +100,16 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public final void promptForParkingLotNumber() {
-        viewState = ConsoleViewStateEnum.ENTERING_PARKING_LOT;
+        setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
     }
 
     @Override
-    public final void promptForMoney() {
-        viewState = ConsoleViewStateEnum.DROPPING_IN_MONEY;
+    public final void promptForMoney(final int aParkingLotNumber) {
+        setViewState(ConsoleViewStateEnum.DROPPING_IN_MONEY);
+
+        // TODO: Any better ideas? Perhaps a Hash-Map as an "Object-Store" with
+        // Keys?
+        storeParkingLotNumber = aParkingLotNumber;
     }
 
     @Override
@@ -106,6 +120,11 @@ public class ConsoleSimulationView extends SimulationView {
 
         printToConsole("view.info.parkingTime", false, aParkingLotNumber,
                 formattedDate);
+    }
+
+    @Override
+    public final void displayParkingLotNumberInvalid() {
+        printToConsole("view.enter.parkinglotnumber.invalid", false);
     }
 
     /**
@@ -121,15 +140,28 @@ public class ConsoleSimulationView extends SimulationView {
         try {
             parkingLotNumber = new Integer(input);
         } catch (NumberFormatException e) {
-            // TODO: Fehlermeldung aus UseCase kann nicht angezeigt werden:
-            // Parkplatznummern sind frei wählbar -> UC und Story anpassen
-            printToConsole("view.enter.invalid", false);
+            printToConsole("view.enter.parkinglotnumber.invalid", false);
         }
 
         if (parkingLotNumber != null) {
+            setViewState(ConsoleViewStateEnum.INIT);
             notifyForParkingLotNumberEntered(parkingLotNumber);
-            viewState = ConsoleViewStateEnum.INIT;
         }
+    }
+
+    /**
+     * Executes all necessary actions, which are required in the state
+     * 'DroppingInMoney'.
+     */
+    public final void executeActionsForDroppingInMoney() {
+        printToConsole("view.enter.coins", true, storeParkingLotNumber);
+        String input = readFromConsole();
+
+        // TODO: Implement Story
+        /*
+         * Check, Notify listeners / Throw Event viewState =
+         * ConsoleViewStateEnum.INIT; }
+         */
     }
 
     /**
@@ -144,6 +176,17 @@ public class ConsoleSimulationView extends SimulationView {
 
         for (ViewEventListener listener : eventListeners) {
             listener.parkingLotEntered(event);
+        }
+    }
+
+    /**
+     * Notifies all attached listeners about the aborted action.
+     */
+    private void notifyForActionAborted() {
+        ActionAbortedEvent event = new ActionAbortedEvent(this);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.actionAborted(event);
         }
     }
 
@@ -184,7 +227,15 @@ public class ConsoleSimulationView extends SimulationView {
             LOG.error("Failed to read from console!", e);
         }
 
-        // TODO: Process / Parse / Checke here for Shutdown and abort.
+        if (line != null) {
+            line = line.trim();
+
+            if (line.toLowerCase().equals(ABORT_COMMAND)) {
+                viewState = ConsoleViewStateEnum.INIT;
+                notifyForActionAborted();
+            }
+            // TODO: Check for Shutdown
+        }
 
         return line;
     }
@@ -194,5 +245,17 @@ public class ConsoleSimulationView extends SimulationView {
      */
     public final ConsoleViewStateEnum getViewState() {
         return viewState;
+    }
+
+    /**
+     * Sets the view state. This method is synchronized to ensure integrity
+     * trough the different threads.
+     * 
+     * @param aState
+     *            the view state to set.
+     */
+    private synchronized void setViewState(
+            final ConsoleViewStateEnum aState) {
+        viewState = aState;
     }
 }

@@ -10,9 +10,8 @@ import org.apache.log4j.Logger;
 import ch.zhaw.swengineering.event.ViewEventListener;
 
 /**
- * @author Daniel Brun
- * Interface which defines the actions which the controller can invoke
- * on the simulation view.
+ * @author Daniel Brun Interface which defines the actions which the controller
+ *         can invoke on the simulation view.
  */
 public abstract class SimulationView implements Runnable {
 
@@ -59,11 +58,15 @@ public abstract class SimulationView implements Runnable {
 
     /**
      * Prompts the user to drop in some money.
+     * 
+     * @param aParkingLotNumber
+     *            The number of the parking lot.
      */
-    public abstract void promptForMoney();
+    public abstract void promptForMoney(int aParkingLotNumber);
 
     /**
      * Displays the information about the current parking lot.
+     * 
      * @param aParkingLotNumber
      *            The number of the parking lot.
      * @param aPaidParkingtime
@@ -73,7 +76,13 @@ public abstract class SimulationView implements Runnable {
             int aParkingLotNumber, Date aPaidParkingtime);
 
     /**
+     * Displays a message, that the entered parking lot number was invalid.
+     */
+    public abstract void displayParkingLotNumberInvalid();
+    
+    /**
      * Registers a view event listener.
+     * 
      * @param aListener
      *            The listener to register.
      */
@@ -90,6 +99,7 @@ public abstract class SimulationView implements Runnable {
 
     /**
      * Deregisters a view event listener.
+     * 
      * @param aListener
      *            The listener to deregister.
      */
