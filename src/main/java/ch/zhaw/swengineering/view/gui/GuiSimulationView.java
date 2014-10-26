@@ -4,6 +4,7 @@
 package ch.zhaw.swengineering.view.gui;
 
 import java.awt.BorderLayout;
+import java.util.Date;
 
 import javax.swing.JFrame;
 
@@ -42,5 +43,18 @@ public class GuiSimulationView extends SimulationView {
 	}
 
 	@Override
-	public void showParkingLotMessage() {}
+	public void promptForParkingLotNumber() {}
+
+    @Override
+    public void promptForMoney() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void displayParkingLotNumberAndParkingTime(int aParkingLotNumber,
+            Date aPaidParkingtime) {
+        // TODO Auto-generated method stub
+        
+    }
 }

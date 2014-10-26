@@ -1,9 +1,4 @@
-/**
- * 
- */
 package ch.zhaw.swengineering.controller;
-
-import java.io.IOException;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -21,74 +16,81 @@ import ch.zhaw.swengineering.view.SimulationView;
 
 /**
  * @author Daniel Brun
- * 
  *         Controller for the view.
- * 
  */
 @Controller
 public class ViewControllerImpl implements ViewController, ViewEventListener {
 
-	private static final Logger LOG = LogManager
-			.getLogger(ViewControllerImpl.class);
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ViewControllerImpl.class);
 
-	@Autowired
-	private SimulationView view;
+    @Autowired
+    private SimulationView view;
 
-	@Autowired
-	private ParkingMeterController parkingMeterController;
+    @Autowired
+    private ParkingMeterController parkingMeterController;
 
-	@Autowired
-	@Qualifier("coinBoxes")
-	private ConfigurationProvider coinBoxesProvider;
-	private CoinBoxes coinBoxes;
+    @Autowired
+    @Qualifier("coinBoxes")
+    private ConfigurationProvider coinBoxesProvider;
+    private CoinBoxes coinBoxes;
 
-	@Autowired
-	@Qualifier("secretCodes")
-	private ConfigurationProvider secretCodesProvider;
-	private SecretCodes secretCodes;
+    @Autowired
+    @Qualifier("secretCodes")
+    private ConfigurationProvider secretCodesProvider;
+    private SecretCodes secretCodes;
 
-	@Override
-	public void start() {
-		LOG.info("Starting controller...");
+    @Override
+    public final void start() {
+        LOG.info("Starting controller...");
 
-		// Register event listener.
-		view.addViewEventListener(this);
+        // Register event listener.
+        view.addViewEventListener(this);
 
-		loadData();
+        loadData();
 
-		// Start simulation view.
-		view.startSimulationView();
+        // Start simulation view.
+        view.startSimulationView();
 
-		try {
-			view.showParkingLotMessage();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+        view.promptForParkingLotNumber();
+    }
 
-	@Override
-	public void parkingLotEntered(ParkingLotEnteredEvent parkingLotEnteredEvent) {
-		LOG.debug("User entered parking lot number: "
-				+ parkingLotEnteredEvent.getParkingLotNumber());
+    @Override
+    public final void parkingLotEntered(
+            final ParkingLotEnteredEvent parkingLotEnteredEvent) {
+        LOG.debug("User entered parking lot number: "
+                + parkingLotEnteredEvent.getParkingLotNumber());
 
-		// Step One: Check if it is a parking lot number
-		if (parkingMeterController.isParkingLot(parkingLotEnteredEvent
-				.getParkingLotNumber())) {
+        ParkingLot parkingLot = parkingMeterController
+                .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
-		}
-	}
+        // Step One: Check if it is a parking lot number
+        if (parkingLot != null) {
+            view.displayParkingLotNumberAndParkingTime(parkingLot.number,
+                    parkingLot.paidUntil);
+            view.promptForMoney();
+        }
 
-	private void loadData() {
-		LOG.info("Loading data...");
+        // Step Two: Check if it is a secret number
+    }
 
-		LOG.info("Loading CoinBoxes...");
-		if (coinBoxesProvider != null && coinBoxesProvider.get() != null) {
-			coinBoxes = (CoinBoxes) coinBoxesProvider.get();
-		}
+    /**
+     * Loads the data from the configuration providers.
+     */
+    private void loadData() {
+        LOG.info("Loading data...");
 
-		LOG.info("Loading SecretCodes...");
-		if (secretCodesProvider != null && secretCodesProvider.get() != null) {
-			secretCodes = (SecretCodes) secretCodesProvider.get();
-		}
-	}
+        LOG.info("Loading CoinBoxes...");
+        if (coinBoxesProvider != null && coinBoxesProvider.get() != null) {
+            coinBoxes = (CoinBoxes) coinBoxesProvider.get();
+        }
+
+        LOG.info("Loading SecretCodes...");
+        if (secretCodesProvider != null && secretCodesProvider.get() != null) {
+            secretCodes = (SecretCodes) secretCodesProvider.get();
+        }
+    }
 }

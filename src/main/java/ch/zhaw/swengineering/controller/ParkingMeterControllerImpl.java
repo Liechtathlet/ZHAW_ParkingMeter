@@ -14,7 +14,6 @@ import ch.zhaw.swengineering.model.ParkingMeter;
 
 /**
  * @author Daniel Brun
- * 
  *         Implementation of the {@link ParkingMeterController}
  */
 @Controller
@@ -32,7 +31,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     @Autowired
     @Qualifier("parkingMeter")
     private ConfigurationProvider parkingMeterProvider;
-    
+
     /**
      * The ParkingMeter.
      */
@@ -46,23 +45,23 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         LOG.info("Initialize ParkingMeter Controller");
 
         LOG.info("Load ParkingLots");
-        if (parkingMeterProvider != null 
+        if (parkingMeterProvider != null
                 && parkingMeterProvider.get() != null) {
             parkingMeter = (ParkingMeter) parkingMeterProvider.get();
         }
     }
 
     @Override
-    public final boolean isParkingLot(final int aNumber) {
-        boolean result = false;
+    public final ParkingLot getParkingLot(final int aNumber) {
+        ParkingLot parkingLot = null;
 
-        for (ParkingLot parkingLot : parkingMeter.parkingLots) {
-            if (parkingLot.number == aNumber) {
-                result = true;
+        for (ParkingLot pl : parkingMeter.parkingLots) {
+            if (pl.number == aNumber) {
+                parkingLot = pl;
                 break;
             }
         }
 
-        return result;
+        return parkingLot;
     }
 }

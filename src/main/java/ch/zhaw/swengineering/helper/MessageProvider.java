@@ -1,29 +1,70 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.Message;
-import ch.zhaw.swengineering.model.Messages;
+import java.util.HashMap;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
+import ch.zhaw.swengineering.model.Message;
+import ch.zhaw.swengineering.model.Messages;
+
 @Component
 public class MessageProvider {
 
-	@Autowired
-	@Qualifier("messages-de")
-	private ConfigurationProvider configurationProvider;
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(MessageProvider.class);
 
-	public String get(String key) {
-		if (configurationProvider != null && configurationProvider.get() != null) {
-			// TODO: Casting should be done only once. But it does not work in the
-			// constructor because the poperty will not be injected.
-			Messages messages = (Messages) configurationProvider.get();
-			for (Message message : messages.messages) {
-				if (message.key.equals(key)) {
-					return message.value;
-				}
-			}
-		}
-		return String.format("Key %s not found", key);
-	}
+    @Autowired
+    @Qualifier("messages-de")
+    private ConfigurationProvider configurationProvider;
+
+    private HashMap<String, String> messageMap;
+
+    /**
+     * Loads the necessary data.
+     */
+    @PostConstruct
+    public final void init() {
+        // TODO: Consider different implementation of messages!! e.g. Using
+        // hashMap or something else
+        // Perhaps the standard for message bundles in java and spring could be
+        // used!!
+
+        messageMap = new HashMap<String, String>();
+
+        if (configurationProvider != null
+                && configurationProvider.get() != null) {
+            Messages messages = (Messages) configurationProvider.get();
+
+            for (Message message : messages.messages) {
+                messageMap.put(message.key, message.value);
+            }
+        } else {
+            LOG.error("Could not load messages via ConfigurationProvider!");
+        }
+    }
+
+    /**
+     * Gets the message to the given key.
+     * 
+     * @param key
+     *            the key of the message.
+     * @return the value of the message or the key, if no translation could be found.
+     */
+    public String get(final String key) {
+        if (messageMap.containsKey(key)) {
+            return messageMap.get(key);
+        } else {
+            LOG.warn("Translation for key '" + key + "' not found!");
+            return key;
+        }
+    }
 }

@@ -43,6 +43,8 @@ public class MessageProviderTest {
 		MockitoAnnotations.initMocks(this);
 		when(configurationProvider.get()).thenReturn(messages);
 
+		messageProvider.init();
+		
 		// Run
 		String result = messageProvider.get(key);
 
@@ -59,11 +61,12 @@ public class MessageProviderTest {
 		MockitoAnnotations.initMocks(this);
 		when(configurationProvider.get()).thenReturn(messages);
 
+		messageProvider.init();
 		// Run
 		String result = messageProvider.get(key);
 
 		// Assert
-		assertEquals(result, String.format("Key %s not found", key));
+		assertEquals(key, result);
 	}
 
 	@Test
@@ -73,10 +76,12 @@ public class MessageProviderTest {
 		MockitoAnnotations.initMocks(this);
 		when(configurationProvider.get()).thenReturn(null);
 
+		messageProvider.init();
+		
 		// Run
 		String result = messageProvider.get(key);
 
 		// Assert
-		assertEquals(result, String.format("Key %s not found", key));
+		assertEquals(key,result);
 	}
 }
