@@ -52,7 +52,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     }
 
     @Override
-    public final ParkingLot getParkingLot(final int aNumber) {
+    public ParkingLot getParkingLot(final int aNumber) {
         ParkingLot parkingLot = null;
 
         for (ParkingLot pl : parkingMeter.parkingLots) {

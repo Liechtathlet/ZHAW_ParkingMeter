@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -32,7 +34,7 @@ public abstract class SimulationView implements Runnable {
     /**
      * Starts the simulation gui.
      */
-    public final void startSimulationView() {
+    public void startSimulationView() {
         LOG.info("Trying to start simulation view");
 
         if (thread == null) {
@@ -79,14 +81,14 @@ public abstract class SimulationView implements Runnable {
      * Displays a message, that the entered parking lot number was invalid.
      */
     public abstract void displayParkingLotNumberInvalid();
-    
+
     /**
      * Registers a view event listener.
      * 
      * @param aListener
      *            The listener to register.
      */
-    public final void addViewEventListener(final ViewEventListener aListener) {
+    public void addViewEventListener(final ViewEventListener aListener) {
         if (aListener == null) {
             throw new IllegalArgumentException(
                     "The parameter 'aListener' must not be null!");
@@ -103,8 +105,7 @@ public abstract class SimulationView implements Runnable {
      * @param aListener
      *            The listener to deregister.
      */
-    public final void removeViewEventListener(
-            final ViewEventListener aListener) {
+    public void removeViewEventListener(final ViewEventListener aListener) {
         if (aListener == null) {
             throw new IllegalArgumentException(
                     "The parameter 'aListener' must not be null!");

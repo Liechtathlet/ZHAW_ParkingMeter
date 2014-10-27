@@ -99,12 +99,12 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public final void promptForParkingLotNumber() {
+    public void promptForParkingLotNumber() {
         setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
     }
 
     @Override
-    public final void promptForMoney(final int aParkingLotNumber) {
+    public void promptForMoney(final int aParkingLotNumber) {
         setViewState(ConsoleViewStateEnum.DROPPING_IN_MONEY);
 
         // TODO: Any better ideas? Perhaps a Hash-Map as an "Object-Store" with
@@ -113,7 +113,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public final void displayParkingLotNumberAndParkingTime(
+    public void displayParkingLotNumberAndParkingTime(
             final int aParkingLotNumber, final Date aPaidParkingTime) {
         String formattedDate = dateFormatter.print(aPaidParkingTime,
                 LocaleContextHolder.getLocale());
@@ -123,7 +123,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public final void displayParkingLotNumberInvalid() {
+    public void displayParkingLotNumberInvalid() {
         printToConsole("view.enter.parkinglotnumber.invalid", false);
     }
 
@@ -131,7 +131,7 @@ public class ConsoleSimulationView extends SimulationView {
      * Executes all necessary actions, which are required in the state
      * 'EnteringParkingLotNumber'.
      */
-    public final void executeActionsForStateEnteringParkingLotNumber() {
+    public void executeActionsForStateEnteringParkingLotNumber() {
         printToConsole("view.enter.parkinglotnumber", true);
         String input = readFromConsole();
 
@@ -153,7 +153,7 @@ public class ConsoleSimulationView extends SimulationView {
      * Executes all necessary actions, which are required in the state
      * 'DroppingInMoney'.
      */
-    public final void executeActionsForDroppingInMoney() {
+    public void executeActionsForDroppingInMoney() {
         printToConsole("view.enter.coins", true, storeParkingLotNumber);
         String input = readFromConsole();
 
