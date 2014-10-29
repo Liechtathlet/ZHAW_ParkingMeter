@@ -18,6 +18,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.model.ParkingLot;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
@@ -45,7 +46,7 @@ public class ViewControllerImplTest {
      * Set up a test case.
      */
     @Before
-    public void setUp() {
+    public final void setUp() {
         MockitoAnnotations.initMocks(this);
     }
 
@@ -55,7 +56,7 @@ public class ViewControllerImplTest {
      * Expectation: All methods are invoked correctly.
      */
     @Test
-    public void testStartOnCorrectMethodInvocation() {
+    public final void testStartOnCorrectMethodInvocation() {
 
         // Start
         controller.start();
@@ -67,11 +68,14 @@ public class ViewControllerImplTest {
     }
 
     /**
-     * Method-Under-Test: parkingLotEntered(...). Scenario: A valid parking lot
-     * number is entered. Expectation: All methods are invoked correctly.
+     * Method-Under-Test: parkingLotEntered(...). 
+     * 
+     * Scenario: A valid parking lot number is entered. 
+     * 
+     * Expectation: All methods are invoked correctly.
      */
     @Test
-    public void testParkingLotEnteredEventWithValidParkingLotNumber() {
+    public final void testParkingLotEnteredEventWithValidParkingLotNumber() {
         int parkingLotNumber = 5;
         Date paidUntil = new Date();
 
@@ -101,11 +105,14 @@ public class ViewControllerImplTest {
     }
 
     /**
-     * Method-Under-Test: parkingLotEntered(...). Scenario: An invalid parking
-     * lot number is entered. Expectation: All methods are invoked correctly.
+     * Method-Under-Test: parkingLotEntered(...). 
+     * 
+     * Scenario: An invalid parking lot number is entered. 
+     * 
+     * Expectation: All methods are invoked correctly.
      */
     @Test
-    public void testParkingLotEnteredEventWithInvalidParkingLotNumber() {
+    public final void testParkingLotEnteredEventWithInvalidParkingLotNumber() {
         int parkingLotNumber = 5;
 
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
@@ -121,7 +128,7 @@ public class ViewControllerImplTest {
         // Execute Test
         controller.parkingLotEntered(plEnteredEvent);
 
-        // Assert prositive
+        // Assert positive
         verify(parkingMeterController).getParkingLot(parkingLotNumber);
         verify(view).displayParkingLotNumberInvalid();
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
@@ -130,5 +137,38 @@ public class ViewControllerImplTest {
         verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(
                 eq(parkingLotNumber), any(Date.class));
         verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
+    }
+    
+    /**
+     * Method-Under-Test: moneyInserted(...). 
+     * 
+     * Scenario: An invalid parking lot number is entered. 
+     * 
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testMoneyEnsertedEvent() {
+        int parkingLotNumber = 5;
+
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+        // Mock
+        when(parkingMeterController.getParkingLot(parkingLotNumber))
+                .thenReturn(null);
+
+        // Setup
+        controller.start();
+        controller.parkingLotEntered(plEnteredEvent);
+        
+        // Execute Test
+        controller.moneyInserted(mInsertedEvent);
+
+        // Assert positive
+        //TODO: Implement
+
+        // Assert negative
+        //TODO: Implement
     }
 }

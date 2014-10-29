@@ -12,9 +12,11 @@ import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.datetime.DateFormatter;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -50,6 +52,9 @@ public class ConsoleSimulationView extends SimulationView {
     @Autowired
     private BufferedReader reader;
 
+    @Autowired
+    private IntelligentSlotMachineUserInteractionInterface slotMachine;
+    
     private ConsoleViewStateEnum viewState;
 
     private boolean run;
@@ -162,6 +167,14 @@ public class ConsoleSimulationView extends SimulationView {
          * Check, Notify listeners / Throw Event viewState =
          * ConsoleViewStateEnum.INIT; }
          */
+        //TODO:Parse string and insert coins
+        //slotMachine.insertCoin(0.5);
+        
+        //inseration has finished -> notify controller
+       
+        //Reset view state if operation was successful.
+        setViewState(ConsoleViewStateEnum.INIT);
+        notifyForMoneyInserted();
     }
 
     /**
@@ -190,6 +203,20 @@ public class ConsoleSimulationView extends SimulationView {
         }
     }
 
+    /**
+     * Notifies all attached listeners about the entered money.
+     * 
+     * @param parkingLotNumber
+     *            The parking lot number.
+     */
+    private void notifyForMoneyInserted() {
+        MoneyInsertedEvent event = new MoneyInsertedEvent(this);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.moneyInserted(event);
+        }
+    }
+    
     /**
      * Prints a text with the given key to the console.
      * 

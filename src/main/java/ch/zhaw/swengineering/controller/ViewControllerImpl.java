@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
@@ -106,5 +107,10 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
         // TODO Action aborted
         view.promptForParkingLotNumber();
+    }
+
+    @Override
+    public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
+        // TODO Auto-generated method stub
     }
 }

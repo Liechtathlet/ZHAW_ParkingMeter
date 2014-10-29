@@ -29,6 +29,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
@@ -249,6 +250,9 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecute() throws IOException {
         String exptectedMessage = MessageFormat.format(
                 MSG_VAL_ENTER_COINS + ": ", 5);
+        
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+        
         // Mock
         when(bufferedReader.readLine()).thenReturn("0");
 
@@ -258,5 +262,9 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
+        
+        //verify(listener).moneyInserted(mInsertedEvent);
+        
+        //TODO: Implement test (e.g. verify if intelligent slot machine was called...)
     }
 }

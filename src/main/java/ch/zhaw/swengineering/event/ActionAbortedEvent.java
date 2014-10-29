@@ -5,7 +5,7 @@ import java.util.EventObject;
 /**
  * @author Daniel Brun
  * 
- *         Event which is trown if the action was aborted by the user.
+ *         Event which is thrown if the action was aborted by the user.
  */
 public class ActionAbortedEvent extends EventObject {
 

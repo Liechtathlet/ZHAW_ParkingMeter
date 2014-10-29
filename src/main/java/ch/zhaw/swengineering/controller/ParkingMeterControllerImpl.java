@@ -11,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.model.ParkingLot;
 import ch.zhaw.swengineering.model.ParkingMeter;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 
 /**
  * @author Daniel Brun
@@ -32,6 +33,8 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     @Qualifier("parkingMeter")
     private ConfigurationProvider parkingMeterProvider;
 
+    @Autowired
+    private IntelligentSlotMachineBackendInteractionInterface slotMachine;
     /**
      * The ParkingMeter.
      */
