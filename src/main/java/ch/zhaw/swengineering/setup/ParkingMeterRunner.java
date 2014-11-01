@@ -49,11 +49,13 @@ public class ParkingMeterRunner {
         LOG.info("Init application startup. Arguments: "
                 + Arrays.toString(args));
 
+        SpringApplication app = null;
+        ConfigurableApplicationContext context = null;
+
         // Start Spring
-        SpringApplication app = new SpringApplication(ParkingMeterRunner.class);
+        app = new SpringApplication(ParkingMeterRunner.class);
 
-        ConfigurableApplicationContext context = app.run(args);
-
+        context = app.run(args);
         context.getBean(ViewController.class).start();
     }
 

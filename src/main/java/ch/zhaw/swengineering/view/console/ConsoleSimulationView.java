@@ -36,6 +36,11 @@ public class ConsoleSimulationView extends SimulationView {
     private static final String ABORT_COMMAND = "x";
 
     /**
+     * The 'command' / string which is used to exit the ParkingMeter.
+     */
+    private static final String EXIT_COMMAND = "exit";
+
+    /**
      * Thread-Sleep-Time.
      */
     private static final int SLEEP_TIME = 100;
@@ -54,7 +59,7 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
-    
+
     private ConsoleViewStateEnum viewState;
 
     private boolean run;
@@ -89,6 +94,9 @@ public class ConsoleSimulationView extends SimulationView {
                     break;
                 case DROPPING_IN_MONEY:
                     executeActionsForDroppingInMoney();
+                    break;
+                case EXIT:
+                    run = false;
                     break;
                 case INIT:
                 default:
@@ -132,6 +140,11 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("view.enter.parkinglotnumber.invalid", false);
     }
 
+    @Override
+    public void displayShutdownMessage() {
+        printToConsole("application.bye", false);
+    }
+
     /**
      * Executes all necessary actions, which are required in the state
      * 'EnteringParkingLotNumber'.
@@ -140,17 +153,19 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("view.enter.parkinglotnumber", true);
         String input = readFromConsole();
 
-        Integer parkingLotNumber = null;
+        if (input != null) {
+            Integer parkingLotNumber = null;
 
-        try {
-            parkingLotNumber = new Integer(input);
-        } catch (NumberFormatException e) {
-            printToConsole("view.enter.parkinglotnumber.invalid", false);
-        }
+            try {
+                parkingLotNumber = new Integer(input);
+            } catch (NumberFormatException e) {
+                printToConsole("view.enter.parkinglotnumber.invalid", false);
+            }
 
-        if (parkingLotNumber != null) {
-            setViewState(ConsoleViewStateEnum.INIT);
-            notifyForParkingLotNumberEntered(parkingLotNumber);
+            if (parkingLotNumber != null) {
+                setViewState(ConsoleViewStateEnum.INIT);
+                notifyForParkingLotNumberEntered(parkingLotNumber);
+            }
         }
     }
 
@@ -167,12 +182,12 @@ public class ConsoleSimulationView extends SimulationView {
          * Check, Notify listeners / Throw Event viewState =
          * ConsoleViewStateEnum.INIT; }
          */
-        //TODO:Parse string and insert coins
-        //slotMachine.insertCoin(0.5);
-        
-        //inseration has finished -> notify controller
-       
-        //Reset view state if operation was successful.
+        // TODO:Parse string and insert coins
+        // slotMachine.insertCoin(0.5);
+
+        // inseration has finished -> notify controller
+
+        // Reset view state if operation was successful.
         setViewState(ConsoleViewStateEnum.INIT);
         notifyForMoneyInserted();
     }
@@ -205,9 +220,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     /**
      * Notifies all attached listeners about the entered money.
-     * 
-     * @param parkingLotNumber
-     *            The parking lot number.
      */
     private void notifyForMoneyInserted() {
         MoneyInsertedEvent event = new MoneyInsertedEvent(this);
@@ -216,7 +228,7 @@ public class ConsoleSimulationView extends SimulationView {
             listener.moneyInserted(event);
         }
     }
-    
+
     /**
      * Prints a text with the given key to the console.
      * 
@@ -243,10 +255,11 @@ public class ConsoleSimulationView extends SimulationView {
      * Default actions are shutdown of the ParkingMeter and abort of the current
      * action / flow.
      * 
-     * @return the string.
+     * @return the string. Null if an event was thrown, an empty string if no
+     *         input could be red.
      */
     private String readFromConsole() {
-        String line = null;
+        String line = "";
 
         try {
             line = reader.readLine();
@@ -258,8 +271,13 @@ public class ConsoleSimulationView extends SimulationView {
             line = line.trim();
 
             if (line.toLowerCase().equals(ABORT_COMMAND)) {
+                line = null;
                 viewState = ConsoleViewStateEnum.INIT;
                 notifyForActionAborted();
+            } else if (line.toLowerCase().equals(EXIT_COMMAND)) {
+                line = null;
+                viewState = ConsoleViewStateEnum.INIT;
+                notifyForShutdownRequested();
             }
             // TODO: Check for Shutdown
         }
@@ -281,8 +299,14 @@ public class ConsoleSimulationView extends SimulationView {
      * @param aState
      *            the view state to set.
      */
-    private synchronized void setViewState(
-            final ConsoleViewStateEnum aState) {
+    private synchronized void setViewState(final ConsoleViewStateEnum aState) {
         viewState = aState;
+    }
+
+    @Override
+    public void shutdown() {
+        LOG.info("Shutting down the view...");
+        run = false;
+        setViewState(ConsoleViewStateEnum.EXIT);
     }
 }

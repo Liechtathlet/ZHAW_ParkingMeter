@@ -18,5 +18,9 @@ public enum ConsoleViewStateEnum {
     /**
      * State if the user must drop in some money.
      */
-    DROPPING_IN_MONEY;
+    DROPPING_IN_MONEY, 
+    /**
+     * State if the view is stopped / shut down.
+     */
+    EXIT;
 }

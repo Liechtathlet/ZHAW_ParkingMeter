@@ -32,4 +32,11 @@ public interface ViewEventListener extends EventListener {
      *            the event data.
      */
     void moneyInserted(MoneyInsertedEvent moneyInsertedEvent);
+    
+    /**
+     * Request to shut down the parking meter.
+     * 
+     * @param shutdownEvent the event data.
+     */
+    void shutdownRequested(ShutdownEvent shutdownEvent);
 }

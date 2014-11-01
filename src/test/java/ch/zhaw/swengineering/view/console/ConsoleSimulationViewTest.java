@@ -31,6 +31,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
@@ -52,6 +53,9 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
     private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
+
+    private static final String MSG_KEY_SHUTDOWN = "application.bye";
+    private static final String MSG_VAL_SHUTDOWN = "bye";
 
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -96,6 +100,9 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_ENTER_COINS)).thenReturn(
                 MSG_VAL_ENTER_COINS);
+
+        when(messageProvider.get(MSG_KEY_SHUTDOWN))
+                .thenReturn(MSG_VAL_SHUTDOWN);
 
         when(messageProvider.get("view.info.parkingTime"))
                 .thenReturn("{0}:{1}");
@@ -248,11 +255,11 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testStateForDroppingInMoneyExecute() throws IOException {
-        String exptectedMessage = MessageFormat.format(
-                MSG_VAL_ENTER_COINS + ": ", 5);
-        
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5);
+
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
-        
+
         // Mock
         when(bufferedReader.readLine()).thenReturn("0");
 
@@ -262,9 +269,49 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
+
+        // verify(listener).moneyInserted(mInsertedEvent);
+
+        // TODO: Implement test (e.g. verify if intelligent slot machine was
+        // called...)
+    }
+
+    // ************** Tests for Shuting down **************
+
+    @Test
+    public void testDisplayShutdownMessage() throws IOException {
+        // Run
+        view.displayShutdownMessage();
+
+        // Assert
+        assertEquals(MSG_VAL_SHUTDOWN + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public final void whenEnteredExitAndEventShouldBeGenerated()
+            throws IOException {
+        String shutdownCode = "exit";
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn(shutdownCode);
+
+        // Run
+        view.executeActionsForStateEnteringParkingLotNumber();
+
+        //Read and forget
+        outContent.toString();
         
-        //verify(listener).moneyInserted(mInsertedEvent);
-        
-        //TODO: Implement test (e.g. verify if intelligent slot machine was called...)
+        // Verify that no notification was sent about the entered data.
+        verify(listener).shutdownRequested(any(ShutdownEvent.class));
+    }
+
+    @Test
+    public void testViewShutdown() throws IOException {
+        // Run
+        view.shutdown();
+
+        // Assert
+        assertEquals(ConsoleViewStateEnum.EXIT, view.getViewState());
     }
 }

@@ -1,14 +1,19 @@
 package ch.zhaw.swengineering.controller;
 
+import java.io.Closeable;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.model.CoinBoxes;
@@ -44,6 +49,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     private ConfigurationProvider secretCodesProvider;
     private SecretCodes secretCodes;
 
+    @Autowired
+    private ConfigurableApplicationContext appContext;
+
     @Override
     public final void start() {
         LOG.info("Starting controller...");
@@ -76,7 +84,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             secretCodes = (SecretCodes) secretCodesProvider.get();
         }
     }
-    
+
     @Override
     public final void parkingLotEntered(
             final ParkingLotEnteredEvent parkingLotEnteredEvent) {
@@ -112,5 +120,19 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void shutdownRequested(final ShutdownEvent shutdownEvent) {
+        LOG.info("Received request for shutdown...");
+        // TODO: Persist current coin level
+        // TODO: Persist parking lot allocation
+
+        // TODO: If all ok
+        LOG.info("Proceeding with shutdown...");
+        view.displayShutdownMessage();
+        view.shutdown();
+        LOG.info("Shutdown complete...exit");
+        appContext.close();
     }
 }

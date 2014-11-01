@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 
 /**
@@ -54,6 +53,11 @@ public abstract class SimulationView implements Runnable {
     public abstract void run();
 
     /**
+     * Shuts down the view.
+     */
+    public abstract void shutdown();
+    
+    /**
      * Prompts the user to choose / enter a parking lot number.
      */
     public abstract void promptForParkingLotNumber();
@@ -82,6 +86,11 @@ public abstract class SimulationView implements Runnable {
      */
     public abstract void displayParkingLotNumberInvalid();
 
+    /**
+     * Displays a message, that the system is shutting down.
+     */
+    public abstract void displayShutdownMessage();
+    
     /**
      * Registers a view event listener.
      * 
@@ -113,6 +122,17 @@ public abstract class SimulationView implements Runnable {
 
         if (eventListeners.contains(aListener)) {
             eventListeners.remove(aListener);
+        }
+    }
+    
+    /**
+     * Notifies all attached listeners about the shutdown request.
+     */
+    protected final void notifyForShutdownRequested() {
+        ShutdownEvent event = new ShutdownEvent(this);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.shutdownRequested(event);
         }
     }
 }

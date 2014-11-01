@@ -1,9 +1,9 @@
 package ch.zhaw.swengineering.controller;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
-import static org.mockito.Matchers.eq;
 
 import java.util.Date;
 
@@ -14,12 +14,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.model.ParkingLot;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
@@ -35,6 +37,9 @@ public class ViewControllerImplTest {
 
     @Mock
     private ConsoleSimulationView view;
+
+    @Mock
+    private ConfigurableApplicationContext appContext;
 
     @InjectMocks
     private ViewControllerImpl controller;
@@ -68,9 +73,9 @@ public class ViewControllerImplTest {
     }
 
     /**
-     * Method-Under-Test: parkingLotEntered(...). 
+     * Method-Under-Test: parkingLotEntered(...).
      * 
-     * Scenario: A valid parking lot number is entered. 
+     * Scenario: A valid parking lot number is entered.
      * 
      * Expectation: All methods are invoked correctly.
      */
@@ -99,15 +104,15 @@ public class ViewControllerImplTest {
                 paidUntil);
         verify(view).promptForMoney(parkingLotNumber);
         verify(view).promptForParkingLotNumber();
-        
-        //Assert negative
+
+        // Assert negative
         verify(view, Mockito.times(0)).displayParkingLotNumberInvalid();
     }
 
     /**
-     * Method-Under-Test: parkingLotEntered(...). 
+     * Method-Under-Test: parkingLotEntered(...).
      * 
-     * Scenario: An invalid parking lot number is entered. 
+     * Scenario: An invalid parking lot number is entered.
      * 
      * Expectation: All methods are invoked correctly.
      */
@@ -138,11 +143,11 @@ public class ViewControllerImplTest {
                 eq(parkingLotNumber), any(Date.class));
         verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
     }
-    
+
     /**
-     * Method-Under-Test: moneyInserted(...). 
+     * Method-Under-Test: moneyInserted(...).
      * 
-     * Scenario: An invalid parking lot number is entered. 
+     * Scenario: An invalid parking lot number is entered.
      * 
      * Expectation: All methods are invoked correctly.
      */
@@ -161,14 +166,42 @@ public class ViewControllerImplTest {
         // Setup
         controller.start();
         controller.parkingLotEntered(plEnteredEvent);
-        
+
         // Execute Test
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
-        //TODO: Implement
+        // TODO: Implement
 
         // Assert negative
-        //TODO: Implement
+        // TODO: Implement
+    }
+
+    /**
+     * Method-Under-Test: shutdownRequested(...).
+     * 
+     * Scenario: A shutdown request is being sent and the data correctly
+     * persisted.
+     * 
+     * Expectation: All methods are invoked correctly and a shutdown exception
+     * is thrown.
+     */
+    @Test
+    public final void testShutdownEventPositive() {
+        ShutdownEvent shutdownEvent = new ShutdownEvent(view);
+
+        // Setup
+        controller.start();
+
+        // Execute Test
+        controller.shutdownRequested(shutdownEvent);
+
+        // Assert positive
+        verify(view).displayShutdownMessage();
+        verify(view).shutdown();
+        verify(appContext).close();
+
+        // Assert negative
+        // TODO: Implement
     }
 }
