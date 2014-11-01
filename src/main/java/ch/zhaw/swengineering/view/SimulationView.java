@@ -40,7 +40,7 @@ public abstract class SimulationView implements Runnable {
             // Create and start thread
             thread = new Thread(this);
             thread.start();
-
+            
             LOG.info("Simulation started");
         } else {
             // TODO: Throw exception.

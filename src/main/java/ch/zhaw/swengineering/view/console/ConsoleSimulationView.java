@@ -177,19 +177,22 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("view.enter.coins", true, storeParkingLotNumber);
         String input = readFromConsole();
 
-        // TODO: Implement Story
-        /*
-         * Check, Notify listeners / Throw Event viewState =
-         * ConsoleViewStateEnum.INIT; }
-         */
-        // TODO:Parse string and insert coins
-        // slotMachine.insertCoin(0.5);
+        //if input == null: no input was provided or another event occurred.
+        if (input != null) {
+            // TODO: Implement Story
+            /*
+             * Check, Notify listeners / Throw Event viewState =
+             * ConsoleViewStateEnum.INIT; }
+             */
+            // TODO:Parse string and insert coins
+            // slotMachine.insertCoin(0.5);
 
-        // inseration has finished -> notify controller
+            // inseration has finished -> notify controller
 
-        // Reset view state if operation was successful.
-        setViewState(ConsoleViewStateEnum.INIT);
-        notifyForMoneyInserted();
+            // Reset view state if operation was successful.
+            setViewState(ConsoleViewStateEnum.INIT);
+            notifyForMoneyInserted();
+        }
     }
 
     /**
