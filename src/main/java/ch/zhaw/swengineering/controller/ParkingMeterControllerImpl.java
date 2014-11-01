@@ -1,5 +1,8 @@
 package ch.zhaw.swengineering.controller;
 
+import java.util.Collection;
+import java.util.Map;
+
 import javax.annotation.PostConstruct;
 
 import org.apache.log4j.LogManager;
@@ -11,11 +14,12 @@ import org.springframework.stereotype.Controller;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.model.ParkingLot;
 import ch.zhaw.swengineering.model.ParkingMeter;
+import ch.zhaw.swengineering.model.SecretActionEnum;
+import ch.zhaw.swengineering.model.SecretCodes;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 
 /**
- * @author Daniel Brun
- *         Implementation of the {@link ParkingMeterController}
+ * @author Daniel Brun Implementation of the {@link ParkingMeterController}
  */
 @Controller
 public class ParkingMeterControllerImpl implements ParkingMeterController {
@@ -34,12 +38,19 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     private ConfigurationProvider parkingMeterProvider;
 
     @Autowired
+    @Qualifier("secretCodes")
+    private ConfigurationProvider secretCodesProvider;
+    
+    @Autowired
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
+    
     /**
      * The ParkingMeter.
      */
     private ParkingMeter parkingMeter;
 
+    private SecretCodes secretCodes;
+    
     /**
      * Initializes the class after the properties have been injected.
      */
@@ -48,9 +59,13 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         LOG.info("Initialize ParkingMeter Controller");
 
         LOG.info("Load ParkingLots");
-        if (parkingMeterProvider != null
-                && parkingMeterProvider.get() != null) {
+        if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
             parkingMeter = (ParkingMeter) parkingMeterProvider.get();
+        }
+        LOG.info("Loading SecretCodes...");
+        if (secretCodesProvider != null && secretCodesProvider.get() != null) {
+            secretCodes = (SecretCodes) secretCodesProvider.get();
+            validateSecretCodes();
         }
     }
 
@@ -66,5 +81,29 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         }
 
         return parkingLot;
+    }
+
+    /**
+     * Validates if multiple codes are stored for an action.
+     */
+    public final void validateSecretCodes() {
+        Map<Integer, SecretActionEnum> mapping = secretCodes.getCodeMapping();
+
+        Collection<SecretActionEnum> values = mapping.values();
+        for (SecretActionEnum actionEnum : SecretActionEnum.values()) {
+            int count = 0;
+            for (SecretActionEnum actionEnumToCompare : values) {
+                if (actionEnumToCompare.equals(actionEnum)) {
+                    count++;
+                }
+            }
+
+            if (count > 1) {
+                throw new IllegalArgumentException(
+                        "A secret action can only be mapped "
+                        + "once to a secret code!");
+            }
+        }
+
     }
 }
