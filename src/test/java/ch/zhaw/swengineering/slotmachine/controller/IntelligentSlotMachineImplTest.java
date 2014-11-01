@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
 import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -27,4 +28,8 @@ public class IntelligentSlotMachineImplTest {
         //TODO: Implement tests.
     }
 
+    @Test
+    public final void testNothing(){
+        //Empty test
+    }
 }
