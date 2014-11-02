@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.SecretCodeEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.ParkingLot;
@@ -100,4 +101,10 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Shutdown complete...exit");
         appContext.close();
     }
+
+	@Override
+	public void secretCodeEntered(SecretCodeEnteredEvent SecretCodeEnteredEvent) {
+		// TODO Auto-generated method stub
+		
+	}
 }

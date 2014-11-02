@@ -50,7 +50,8 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_ENTER_PARKING_LOT_INVALID = "view.enter.parkinglotnumber.invalid";
     private static final String MSG_VAL_ENTER_PARKING_LOT_INVALID = "EnterParkingLotNumberInvalid";
-
+    private static final String MSG_VAL_ENTER_SECRET_CODE_INVALID = "EnterSecretCodeInvalid";
+    
     private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
     private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
 
@@ -276,7 +277,22 @@ public class ConsoleSimulationViewTest {
         // called...)
     }
 
-    // ************** Tests for Shuting down **************
+    // ************** Tests for Entering Secret Codes **************
+
+/*    
+    @Test
+    public void testDisplaySecretCodeInvalid() throws IOException {
+        // Run
+        view.displaySecretCodeInvalid();
+
+        // Assert
+        assertEquals(
+        		MSG_VAL_ENTER_SECRET_CODE_INVALID + System.lineSeparator(),
+                outContent.toString());
+    }
+*/    
+    
+    // ************** Tests for Shutting down **************
 
     @Test
     public void testDisplayShutdownMessage() throws IOException {

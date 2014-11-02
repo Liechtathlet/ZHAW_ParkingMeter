@@ -38,7 +38,7 @@ public class SecretCodes {
     }
 
     /**
-     * @return the secret coes.
+     * @return the secret codes.
      */
     public final Map<Integer, SecretActionEnum> getCodeMapping() {
         return new Hashtable<Integer, SecretActionEnum>(codeMapping);

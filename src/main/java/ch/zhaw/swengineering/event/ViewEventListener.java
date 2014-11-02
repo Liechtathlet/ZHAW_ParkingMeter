@@ -17,6 +17,14 @@ public interface ViewEventListener extends EventListener {
     void parkingLotEntered(ParkingLotEnteredEvent parkingLotEnteredEvent);
 
     /**
+     * Called when the user entered a secret code.
+     * 
+     * @param SecretCodeEnteredEvent
+     *            Event data
+     */
+	void secretCodeEntered(SecretCodeEnteredEvent SecretCodeEnteredEvent);
+
+    /**
      * Called when the user aborted the current action.
      * 
      * @param actionAbortedEvent
@@ -39,4 +47,5 @@ public interface ViewEventListener extends EventListener {
      * @param shutdownEvent the event data.
      */
     void shutdownRequested(ShutdownEvent shutdownEvent);
+
 }

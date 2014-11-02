@@ -63,6 +63,11 @@ public abstract class SimulationView implements Runnable {
     public abstract void promptForParkingLotNumber();
 
     /**
+     * Prompts the user to choose / enter a secret code.
+     */
+    public abstract void promptForSecretCode();
+
+    /**
      * Prompts the user to drop in some money.
      * 
      * @param aParkingLotNumber
@@ -86,6 +91,11 @@ public abstract class SimulationView implements Runnable {
      */
     public abstract void displayParkingLotNumberInvalid();
 
+    /**
+     * Displays a message, that the entered secret code was invalid.
+     */
+    public abstract void displaySecretCodeInvalid();
+    
     /**
      * Displays a message, that the system is shutting down.
      */
@@ -135,4 +145,5 @@ public abstract class SimulationView implements Runnable {
             listener.shutdownRequested(event);
         }
     }
+
 }
