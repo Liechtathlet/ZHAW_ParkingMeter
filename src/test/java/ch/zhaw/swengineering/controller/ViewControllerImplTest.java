@@ -169,6 +169,10 @@ public class ViewControllerImplTest {
         verify(parkingMeterController).getParkingLot(secretCodeNumber);
         verify(view).displayAllInformation();
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
+
+        // Assert negative
+        verify(view, Mockito.times(0))
+                .displayParkingLotNumberAndParkingTime(any(Integer.class), any(Date.class));
     }
 
     /**
