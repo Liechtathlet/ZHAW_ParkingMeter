@@ -41,9 +41,6 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     @Qualifier("secretCodes")
     private ConfigurationProvider secretCodesProvider;
     
-    @Autowired
-    private IntelligentSlotMachineBackendInteractionInterface slotMachine;
-    
     /**
      * The ParkingMeter.
      */

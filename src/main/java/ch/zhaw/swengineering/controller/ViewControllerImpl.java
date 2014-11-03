@@ -1,5 +1,7 @@
 package ch.zhaw.swengineering.controller;
 
+import java.math.BigDecimal;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import ch.zhaw.swengineering.event.SecretCodeEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -35,6 +38,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Autowired
     private ConfigurableApplicationContext appContext;
+    
+    @Autowired
+    private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
     @Override
     public final void start() {
@@ -63,6 +69,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         // Step One: Check if it is a parking lot number
         if (parkingLot != null) {
             processed = true;
+            slotMachine.startTransaction();
             view.displayParkingLotNumberAndParkingTime(parkingLot.number,
                     parkingLot.paidUntil);
             view.promptForMoney(parkingLot.number);
@@ -79,13 +86,20 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Override
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
-        // TODO Action aborted
+        slotMachine.finishTransaction(BigDecimal.ZERO);
         view.promptForParkingLotNumber();
     }
 
     @Override
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
+        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: " + slotMachine.getAmountOfCurrentlyInsertedMoney());
         // TODO money insert
+        //TODO: Calculate parking time...
+        
+        //TODO: Check if valid -> end transaction
+        //TODO: Return money
+        //TODO: Print console
+        //TODO: Finish transaction.
     }
 
     @Override
