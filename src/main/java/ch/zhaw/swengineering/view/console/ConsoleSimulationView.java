@@ -2,8 +2,12 @@ package ch.zhaw.swengineering.view.console;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -18,6 +22,9 @@ import ch.zhaw.swengineering.event.SecretCodeEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -46,6 +53,8 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private static final int SLEEP_TIME = 100;
 
+    private static final String COIN_SPLITTER = " ";
+
     /**
      * The Logger.
      */
@@ -71,7 +80,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     private int storeSecretCode;
 
-    
     /**
      * Creates a new instance of this class and sets the initial state.
      */
@@ -125,7 +133,6 @@ public class ConsoleSimulationView extends SimulationView {
         setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
     }
 
-    
     @Override
     public void promptForMoney(final int aParkingLotNumber) {
         setViewState(ConsoleViewStateEnum.DROPPING_IN_MONEY);
@@ -192,21 +199,109 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("view.enter.coins", true, storeParkingLotNumber);
         String input = readFromConsole();
 
-        //if input == null: no input was provided or another event occurred.
+        // if input == null: no input was provided or another event occurred.
         if (input != null) {
-            // TODO: Implement Story
-            /*
-             * Check, Notify listeners / Throw Event viewState =
-             * ConsoleViewStateEnum.INIT; }
-             */
-            // TODO:Parse string and insert coins
-            // slotMachine.insertCoin(0.5);
+            boolean error = false;
 
-            // insertion has finished -> notify controller
+            try {
+                parseAndInsertCoins(input);
+            } catch (CoinBoxFullException e) {
+                error = true;
+                
+                LOG.error("Received exception "
+                        + "from slot machine: coin box is full!", e);
+                
+                if (e.isAllCoinBoxesFull()) {
+                    printToConsole("view.slot.machine.coin.box.full", false,
+                            e.getCoinValue());
+                } else {
+                    printToConsole("view.slot.machine.coin.box.single.full",
+                            false, e.getCoinValue());
+                }
+                Map<BigDecimal, Integer> drawbackMap = slotMachine
+                        .rolebackTransaction();
+                displayMessageForDrawback(drawbackMap);
+            } catch (NoTransactionException e) {
+                error = true;
+                
+                // This should not occur!
+                LOG.error("Received exception "
+                        + "from slot machine: no transaction!", e);
+            } catch (InvalidCoinException e) {
+                error = true;
+                
+                StringBuilder coinString = new StringBuilder();
 
-            // Reset view state if operation was successful.
-            setViewState(ConsoleViewStateEnum.INIT);
-            notifyForMoneyInserted();
+                for (BigDecimal validCoin : e.getValidCoins()) {
+                    coinString.append(validCoin);
+                    coinString.append(", ");
+                }
+
+                LOG.error("Received exception "
+                        + "from slot machine: invalid coin!", e);
+                printToConsole("view.slot.machine.coin.invalid", false,
+                        coinString);
+            }
+
+            if (error) {
+                Map<BigDecimal, Integer> drawbackMap = slotMachine
+                        .rolebackTransaction();
+                displayMessageForDrawback(drawbackMap);
+            } else {
+                // Reset view state if operation was successful.
+                setViewState(ConsoleViewStateEnum.INIT);
+                notifyForMoneyInserted();
+            }
+        }
+    }
+
+    /**
+     * Displays a message for the drawback.
+     * 
+     * @param drawbackMap
+     *            the drawback map
+     */
+    private void displayMessageForDrawback(Map<BigDecimal, Integer> drawbackMap) {
+        StringBuilder sb = new StringBuilder();
+
+        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            sb.append(drawbackMap.get(key));
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
+        }
+
+        printToConsole("view.slot.machine.drawback", false, sb.toString());
+
+    }
+
+    /**
+     * Parses the input string and inserts the coins into the slot machine.
+     * 
+     * @param anInput
+     *            the input string.
+     * @throws InvalidCoinException
+     *             thrown if an invalid coin was inserted.
+     * @throws NoTransactionException
+     *             thrown if no transaction was started.
+     * @throws CoinBoxFullException
+     *             thrown if one or alle coin boxes are full.
+     */
+    private void parseAndInsertCoins(String anInput)
+            throws CoinBoxFullException, NoTransactionException,
+            InvalidCoinException {
+        String split[] = anInput.split(COIN_SPLITTER);
+
+        for (String coin : split) {
+            BigDecimal coinDec = new BigDecimal(coin.trim());
+
+            slotMachine.insertCoin(coinDec);
         }
     }
 
@@ -233,14 +328,13 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private void notifyForSecretCodeEntered(final int secretCode) {
         SecretCodeEnteredEvent event = new SecretCodeEnteredEvent(this,
-        		secretCode);
+                secretCode);
 
         for (ViewEventListener listener : eventListeners) {
             listener.secretCodeEntered(event);
         }
     }
 
-    
     /**
      * Notifies all attached listeners about the aborted action.
      */
@@ -275,7 +369,7 @@ public class ConsoleSimulationView extends SimulationView {
             Integer secretCode = null;
 
             try {
-            	secretCode = new Integer(input);
+                secretCode = new Integer(input);
             } catch (NumberFormatException e) {
                 printToConsole("view.enter.secretCode.invalid", false);
             }

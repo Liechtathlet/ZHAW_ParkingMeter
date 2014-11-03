@@ -1,5 +1,9 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
+import java.math.BigDecimal;
+
+import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedException;
+
 /**
  * @author Daniel Brun
  * 
@@ -9,15 +13,28 @@ package ch.zhaw.swengineering.slotmachine.controller;
 public interface IntelligentSlotMachineBackendInteractionInterface {
 
     /**
-     * TODO: finish class and method and overthink
+     * Gets the amount of the currently inserted money.
      * 
-     * @return the amount of money, which was inserted since the last booking.
+     * @return the amount of money, which was inserted in the current
+     *         transaction.
      */
-    double getAmountOfCurrentlyInsertedMoney();
+    BigDecimal getAmountOfCurrentlyInsertedMoney();
 
     /**
-     * TODO: Finish, should: finish the transaction (Reset values of currently
-     * inserted coins and output rest amount).
+     * Finishes the transaction and transfers the coin to the coin box. The
+     * drawback will be subtracted and prepared for returning to the user.
+     * If no transaction is active, this method will have no effect.
+     * 
+     * @param drawback the drawback to issue.
      */
-    void finishTransaction();
+    void finishTransaction(BigDecimal drawback);
+
+    /**
+     * Starts a new transaction.
+     * 
+     * @throws TransactionAlreadyStartedException
+     *             thrown if a transaction was already started.
+     */
+    void startTransaction();
+
 }

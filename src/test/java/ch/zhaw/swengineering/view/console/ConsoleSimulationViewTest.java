@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.view.console;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -10,6 +11,7 @@ import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -35,6 +37,10 @@ import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -51,7 +57,7 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_ENTER_PARKING_LOT_INVALID = "view.enter.parkinglotnumber.invalid";
     private static final String MSG_VAL_ENTER_PARKING_LOT_INVALID = "EnterParkingLotNumberInvalid";
     private static final String MSG_VAL_ENTER_SECRET_CODE_INVALID = "EnterSecretCodeInvalid";
-    
+
     private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
     private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
 
@@ -69,6 +75,9 @@ public class ConsoleSimulationViewTest {
 
     @Mock
     private BufferedReader bufferedReader;
+
+    @Mock
+    private IntelligentSlotMachine slotMachine;
 
     private DateFormatter dateFormatter;
 
@@ -255,14 +264,15 @@ public class ConsoleSimulationViewTest {
     }
 
     @Test
-    public void testStateForDroppingInMoneyExecute() throws IOException {
+    public void testStateForDroppingInMoneyExecuteWithValidCoins()
+            throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5);
 
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
         // Mock
-        when(bufferedReader.readLine()).thenReturn("0");
+        when(bufferedReader.readLine()).thenReturn("0.5 1.0");
 
         // Run
         view.promptForMoney(5);
@@ -272,26 +282,98 @@ public class ConsoleSimulationViewTest {
         assertEquals(exptectedMessage, outContent.toString());
 
         // verify(listener).moneyInserted(mInsertedEvent);
+        try {
+            verify(slotMachine, Mockito.times(2)).insertCoin(
+                    any(BigDecimal.class));
+        } catch (NoTransactionException | InvalidCoinException e) {
+            fail("Reiceved unexpected exception: " + e);
+        }
+    }
 
+    @Test(expected = InvalidCoinException.class)
+    public void testStateForDroppingInMoneyExecuteWithInvalidCoin()
+            throws IOException, NoTransactionException, InvalidCoinException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5);
+
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("0.6");
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        // verify(listener).moneyInserted(mInsertedEvent);
+        verify(slotMachine, Mockito.times(1)).insertCoin(any(BigDecimal.class));
+    }
+
+    @Test(expected = InvalidCoinException.class)
+    public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
+            throws IOException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5);
+
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("abc");
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        try {
+            verify(slotMachine, Mockito.times(1)).insertCoin(
+                    any(BigDecimal.class));
+        } catch (CoinBoxFullException | NoTransactionException
+                | InvalidCoinException e) {
+            fail("Unexptected Exception");
+        }
+    }
+
+    @Test
+    public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
+            throws IOException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5);
+
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("0.5,0.6");
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        // verify(listener).moneyInserted(mInsertedEvent);
+        // verify(slotMachine,
+        // Mockito.times(1)).insertCoin(any(BigDecimal.class));
         // TODO: Implement test (e.g. verify if intelligent slot machine was
         // called...)
     }
 
     // ************** Tests for Entering Secret Codes **************
 
-/*    
-    @Test
-    public void testDisplaySecretCodeInvalid() throws IOException {
-        // Run
-        view.displaySecretCodeInvalid();
+    /*
+     * @Test public void testDisplaySecretCodeInvalid() throws IOException { //
+     * Run view.displaySecretCodeInvalid();
+     * 
+     * // Assert assertEquals( MSG_VAL_ENTER_SECRET_CODE_INVALID +
+     * System.lineSeparator(), outContent.toString()); }
+     */
 
-        // Assert
-        assertEquals(
-        		MSG_VAL_ENTER_SECRET_CODE_INVALID + System.lineSeparator(),
-                outContent.toString());
-    }
-*/    
-    
     // ************** Tests for Shutting down **************
 
     @Test
@@ -315,9 +397,9 @@ public class ConsoleSimulationViewTest {
         // Run
         view.executeActionsForStateEnteringParkingLotNumber();
 
-        //Read and forget
+        // Read and forget
         outContent.toString();
-        
+
         // Verify that no notification was sent about the entered data.
         verify(listener).shutdownRequested(any(ShutdownEvent.class));
     }

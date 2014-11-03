@@ -4,4 +4,10 @@
     <message key="view.info.parkingTime">Bezahlte Parkzeit für Parkplatz [{0}]: {1}</message>
     <message key="view.enter.parkinglotnumber.invalid">Die Eingabe war nicht korrekt. Bitte geben Sie eine gültige Parkplatznummer ein.</message>
     <message key="application.bye">Bye</message>
+    <message key="view.slot.machine.coin.invalid">Die Eingabe war nicht korrekt - gültige Münzen sind [{0}]</message>
+    <message key="view.slot.machine.drawback.toomuch">Rückgabe (zuviel bezahlt): [{0}] </message>
+    <message key="view.slot.machine.drawback">Geldausgabe: [{0}] </message>
+    <message key="view.slot.machine.interrupted">"Bezahlvorgang noch nicht abgeschlossen. Drücke 'Enter' um die Parkzeit zu registrieren oder 'Abbrechen' um die eingeworfenen Münzen zurückzuerhalten."</message>
+    <message key="view.slot.machine.coin.box.single.full">Das Münzfach für [{0}] ist voll!</message>
+    <message key="view.slot.machine.coin.box.full">Die Münzfächer sind voll!</message>
 </messages>

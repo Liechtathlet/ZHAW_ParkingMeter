@@ -114,4 +114,16 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     public void windowOpened(final WindowEvent e) {
         // Not used.
     }
+
+    @Override
+    public void promptForSecretCode() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void displaySecretCodeInvalid() {
+        // TODO Auto-generated method stub
+        
+    }
 }
