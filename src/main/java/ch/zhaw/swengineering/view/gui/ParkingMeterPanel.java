@@ -8,6 +8,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -27,7 +29,7 @@ public class ParkingMeterPanel extends JPanel {
 
 	private static final Color BG = new Color(93, 92, 102);
 	private static final Color BG_INNER = new Color(26, 51, 115);
-	private static final Color BG_DISPLAY = new Color(95, 109, 96);
+	private static final Color BG_DISPLAY = new Color(162, 205, 90);
 	private static final Color BG_CANCEL = new Color(204, 0, 0);
 	private static final Color BG_OK = new Color(0, 153, 0);
 	private static final Color BG_SLUT = new Color(119, 136, 153);
@@ -228,6 +230,87 @@ public class ParkingMeterPanel extends JPanel {
 		ticketfield.setEditable(false);
 		ticketfield.setBackground(BG_TICKETFIELD);
 		ticketfieldPane.add(ticketfield);
+
+		button1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "1");
+			}
+		});
+		button2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "2");
+			}
+		});
+		button3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "3");
+			}
+		});
+		button4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "4");
+			}
+		});
+		button5.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "5");
+			}
+		});
+		button6.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "6");
+			}
+		});
+		button7.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "7");
+			}
+		});
+		button8.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "8");
+			}
+		});
+		button9.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "9");
+			}
+		});
+		button0.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText(display.getText() + "0");
+			}
+		});
+		buttonCancel.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae) {
+				display.setText("");
+			}
+		});
+		buttonOk.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae1) {
+				// TODO generate Event
+			}
+		});
+		coin1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae1) {
+				// TODO action for coin1
+			}
+		});
+		coin2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae1) {
+				// TODO action for coin2
+			}
+		});
+		coin3.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae1) {
+				// TODO action for coin3
+			}
+		});
+		coin4.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent ae1) {
+				// TODO action for coin4
+			}
+		});
 
 	}
 }
