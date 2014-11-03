@@ -1,22 +1,16 @@
 package ch.zhaw.swengineering.controller;
 
-import java.math.BigDecimal;
-
+import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.SecretCodeEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
-import ch.zhaw.swengineering.view.SimulationView;
+import java.math.BigDecimal;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -59,14 +53,14 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public final void parkingLotEntered(
             final ParkingLotEnteredEvent parkingLotEnteredEvent) {
+        int parkingLotNumber = parkingLotEnteredEvent.getParkingLotNumber();
         LOG.debug("User entered parking lot number: "
-                + parkingLotEnteredEvent.getParkingLotNumber());
+                + parkingLotNumber);
 
         boolean processed = false;
-        ParkingLot parkingLot = parkingMeterController
-                .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
         // Step One: Check if it is a parking lot number
+        ParkingLot parkingLot = parkingMeterController.getParkingLot(parkingLotNumber);
         if (parkingLot != null) {
             processed = true;
             slotMachine.startTransaction();
@@ -76,6 +70,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         }
 
         // Step Two: Check if it is a secret number
+        //SecretActionEnum secretAction = parkingMeterController.getSecretAction(parkingLotNumber);
+        //if (parkingMeterController.isValid)
 
         // Step Three: Print error if nothing matched
         if (!processed) {
@@ -115,10 +111,4 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Shutdown complete...exit");
         appContext.close();
     }
-
-	@Override
-	public void secretCodeEntered(SecretCodeEnteredEvent SecretCodeEnteredEvent) {
-		// TODO Auto-generated method stub
-		
-	}
 }

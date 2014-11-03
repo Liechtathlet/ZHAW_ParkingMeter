@@ -1,5 +1,21 @@
 package ch.zhaw.swengineering.view.console;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.SimulationView;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -8,24 +24,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.SecretCodeEnteredEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import ch.zhaw.swengineering.view.SimulationView;
 
 /**
  * @author Daniel Brun Console implementation of the interface
@@ -78,8 +76,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     private int storeParkingLotNumber;
 
-    private int storeSecretCode;
-
     /**
      * Creates a new instance of this class and sets the initial state.
      */
@@ -129,11 +125,6 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public void promptForSecretCode() {
-        setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
-    }
-
-    @Override
     public void promptForMoney(final int aParkingLotNumber) {
         setViewState(ConsoleViewStateEnum.DROPPING_IN_MONEY);
 
@@ -155,11 +146,6 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void displayParkingLotNumberInvalid() {
         printToConsole("view.enter.parkinglotnumber.invalid", false);
-    }
-
-    @Override
-    public void displaySecretCodeInvalid() {
-        printToConsole("view.enter.secretcode.invalid", false);
     }
 
     @Override
@@ -321,21 +307,6 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     /**
-     * Notifies all attached listeners about the entered secret code.
-     * 
-     * @param secretCode
-     *            The secret code.
-     */
-    private void notifyForSecretCodeEntered(final int secretCode) {
-        SecretCodeEnteredEvent event = new SecretCodeEnteredEvent(this,
-                secretCode);
-
-        for (ViewEventListener listener : eventListeners) {
-            listener.secretCodeEntered(event);
-        }
-    }
-
-    /**
      * Notifies all attached listeners about the aborted action.
      */
     private void notifyForActionAborted() {
@@ -354,30 +325,6 @@ public class ConsoleSimulationView extends SimulationView {
 
         for (ViewEventListener listener : eventListeners) {
             listener.moneyInserted(event);
-        }
-    }
-
-    /**
-     * Executes all necessary actions, which are required in the state
-     * 'EnteringSecretCode'.
-     */
-    public void executeActionsForStateEnteringSecretCode() {
-        printToConsole("view.enter.secretCode", true);
-        String input = readFromConsole();
-
-        if (input != null) {
-            Integer secretCode = null;
-
-            try {
-                secretCode = new Integer(input);
-            } catch (NumberFormatException e) {
-                printToConsole("view.enter.secretCode.invalid", false);
-            }
-
-            if (secretCode != null) {
-                setViewState(ConsoleViewStateEnum.INIT);
-                notifyForSecretCodeEntered(secretCode);
-            }
         }
     }
 

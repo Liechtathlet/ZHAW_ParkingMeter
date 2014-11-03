@@ -1,22 +1,20 @@
 package ch.zhaw.swengineering.controller;
 
-import java.util.Collection;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.ParkingMeter;
+import ch.zhaw.swengineering.model.SecretActionEnum;
+import ch.zhaw.swengineering.model.SecretCodes;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.ParkingMeter;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.model.SecretCodes;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import javax.annotation.PostConstruct;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Map;
 
 /**
  * @author Daniel Brun Implementation of the {@link ParkingMeterController}
@@ -59,6 +57,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
             parkingMeter = (ParkingMeter) parkingMeterProvider.get();
         }
+
         LOG.info("Loading SecretCodes...");
         if (secretCodesProvider != null && secretCodesProvider.get() != null) {
             secretCodes = (SecretCodes) secretCodesProvider.get();
@@ -78,6 +77,23 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         }
 
         return parkingLot;
+    }
+
+    @Override
+    public SecretActionEnum getSecretAction(int secretKey) throws Exception {
+
+        if (secretCodes == null) {
+            throw new Exception();
+        }
+
+        for (Object o : secretCodes.getCodeMapping().entrySet()) {
+            Map.Entry secretCodeEntry = (Map.Entry) o;
+            if (secretCodeEntry.getKey().equals(secretKey)) {
+                return (SecretActionEnum) secretCodeEntry.getValue();
+            }
+        }
+
+        throw new IllegalArgumentException();
     }
 
     /**
