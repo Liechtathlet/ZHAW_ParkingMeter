@@ -90,6 +90,11 @@ public abstract class SimulationView implements Runnable {
      * Displays a message, that the system is shutting down.
      */
     public abstract void displayShutdownMessage();
+
+    /**
+     * Displays all information.
+     */
+    public abstract void displayAllInformation();
     
     /**
      * Registers a view event listener.
@@ -135,5 +140,4 @@ public abstract class SimulationView implements Runnable {
             listener.shutdownRequested(event);
         }
     }
-
 }

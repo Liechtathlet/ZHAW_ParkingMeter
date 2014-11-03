@@ -153,6 +153,12 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("application.bye", false);
     }
 
+    @Override
+    public void displayAllInformation() {
+        // TODO sl: Implement...
+        System.out.print("test");
+    }
+
     /**
      * Executes all necessary actions, which are required in the state
      * 'EnteringParkingLotNumber'.

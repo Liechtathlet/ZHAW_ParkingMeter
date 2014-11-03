@@ -4,6 +4,7 @@ import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 import org.junit.Before;
@@ -87,14 +88,13 @@ public class ViewControllerImplTest {
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
 
-        // Mock
+        // Setup
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(parkingLot);
 
-        // Setup
         controller.start();
 
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -122,14 +122,13 @@ public class ViewControllerImplTest {
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
 
-        // Mock
+        // Setup
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
 
-        // Setup
         controller.start();
 
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -141,6 +140,35 @@ public class ViewControllerImplTest {
         verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(
                 eq(parkingLotNumber), any(Date.class));
         verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: An valid secret code number is entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidSecretCode() throws Exception {
+        int secretCodeNumber = 42;
+
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, secretCodeNumber);
+
+        // Setup
+        when(parkingMeterController.getSecretAction(secretCodeNumber))
+                .thenReturn(SecretActionEnum.VIEW_ALL_INFORMATION);
+
+        controller.start();
+
+        // Run
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeterController).getParkingLot(secretCodeNumber);
+        verify(view).displayAllInformation();
+        verify(view, Mockito.times(2)).promptForParkingLotNumber();
     }
 
     /**
@@ -158,7 +186,7 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
-        // Mock
+        // Setup
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
 
@@ -166,7 +194,7 @@ public class ViewControllerImplTest {
         controller.start();
         controller.parkingLotEntered(plEnteredEvent);
 
-        // Execute Test
+        // Run
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
@@ -192,7 +220,7 @@ public class ViewControllerImplTest {
         // Setup
         controller.start();
 
-        // Execute Test
+        // Run
         controller.shutdownRequested(shutdownEvent);
 
         // Assert positive

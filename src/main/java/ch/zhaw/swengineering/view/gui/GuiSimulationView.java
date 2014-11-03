@@ -76,6 +76,11 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
+    public void displayAllInformation() {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
     public void shutdown() {
         frame.dispose();
     }

@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.SecretActionEnum;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 import org.apache.log4j.LogManager;
@@ -70,13 +71,30 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         }
 
         // Step Two: Check if it is a secret number
-        //SecretActionEnum secretAction = parkingMeterController.getSecretAction(parkingLotNumber);
-        //if (parkingMeterController.isValid)
+        SecretActionEnum secretAction = null;
+        try {
+            secretAction = parkingMeterController.getSecretAction(parkingLotNumber);
+        } catch (Exception e) {
+            // TODO sl: what to do when no secret action can be found? I would just ignore the exception, which means no secret codes can be handled.
+        }
+        if (secretAction != null) {
+            handleSecretAction(secretAction);
+        }
 
         // Step Three: Print error if nothing matched
         if (!processed) {
             view.displayParkingLotNumberInvalid();
             view.promptForParkingLotNumber();
+        }
+    }
+
+    private void handleSecretAction(SecretActionEnum secretAction) {
+        switch (secretAction) {
+            case VIEW_ALL_INFORMATION:
+                view.displayAllInformation();
+                break;
+            default:
+                throw new IllegalArgumentException();
         }
     }
 
