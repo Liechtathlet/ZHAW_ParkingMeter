@@ -11,4 +11,5 @@
     <message key="view.slot.machine.interrupted">"Bezahlvorgang noch nicht abgeschlossen. Drücke 'Enter' um die Parkzeit zu registrieren oder 'Abbrechen' um die eingeworfenen Münzen zurückzuerhalten."</message>
     <message key="view.slot.machine.coin.box.single.full">Das Münzfach für [{0}] ist voll!</message>
     <message key="view.slot.machine.coin.box.full">Die Münzfächer sind voll!</message>
+    <message key="view.info.allParkingCharge">ParkingMeter (alle Parking-Gebühren) Info vom:</message>
 </messages>

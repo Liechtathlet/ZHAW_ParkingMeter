@@ -19,6 +19,7 @@ import java.util.Locale;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -46,349 +47,374 @@ import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
 public class ConsoleSimulationViewTest {
 
-    /**
-     * Date-Format.
-     */
-    private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
+	/**
+	 * Date-Format.
+	 */
+	private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
 
-    private static final String MSG_KEY_ENTER_PARKING_LOT = "view.enter.parkinglotnumber";
-    private static final String MSG_VAL_ENTER_PARKING_LOT = "EnterParkingLotNumber";
+	private static final String MSG_KEY_ENTER_PARKING_LOT = "view.enter.parkinglotnumber";
+	private static final String MSG_VAL_ENTER_PARKING_LOT = "EnterParkingLotNumber";
 
-    private static final String MSG_KEY_ENTER_PARKING_LOT_INVALID = "view.enter.parkinglotnumber.invalid";
-    private static final String MSG_VAL_ENTER_PARKING_LOT_INVALID = "EnterParkingLotNumberInvalid";
-    private static final String MSG_VAL_ENTER_SECRET_CODE_INVALID = "EnterSecretCodeInvalid";
+	private static final String MSG_KEY_ENTER_PARKING_LOT_INVALID = "view.enter.parkinglotnumber.invalid";
+	private static final String MSG_VAL_ENTER_PARKING_LOT_INVALID = "EnterParkingLotNumberInvalid";
+	private static final String MSG_VAL_ENTER_SECRET_CODE_INVALID = "EnterSecretCodeInvalid";
 
-    private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
-    private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
+	private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
+	private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
 
-    private static final String MSG_KEY_SHUTDOWN = "application.bye";
-    private static final String MSG_VAL_SHUTDOWN = "bye";
+	private static final String MSG_KEY_ALL_PARKING_CHARGE = "view.info.allParkingCharge";
+	private static final String MSG_VAL_ALL_PARKING_CHARGE = "ParkingMeter (alle Parking-Gebühren) Info vom:";
 
-    private static final String MSG_KEY_INVALID_FORMAT = "view.slot.machine.format.invalid";
-    private static final String MSG_VAL_INVALID_FORMAT = "invalidformat";
+	private static final String MSG_KEY_SHUTDOWN = "application.bye";
+	private static final String MSG_VAL_SHUTDOWN = "bye";
 
-    // Replacement for the command line
-    private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
+	private static final String MSG_KEY_INVALID_FORMAT = "view.slot.machine.format.invalid";
+	private static final String MSG_VAL_INVALID_FORMAT = "invalidformat";
 
-    @InjectMocks
-    private ConsoleSimulationView view;
+	// Replacement for the command line
+	private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
-    @Mock
-    private MessageProvider messageProvider;
+	@InjectMocks
+	private ConsoleSimulationView view;
 
-    @Mock
-    private BufferedReader bufferedReader;
+	@Mock
+	private MessageProvider messageProvider;
 
-    @Mock
-    private IntelligentSlotMachine slotMachine;
+	@Mock
+	private BufferedReader bufferedReader;
 
-    private DateFormatter dateFormatter;
+	@Mock
+	private IntelligentSlotMachine slotMachine;
 
-    private ViewEventListener listener;
+	private DateFormatter dateFormatter;
 
-    /**
-     * Creates a new instance of this class.
-     */
-    public ConsoleSimulationViewTest() {
-        dateFormatter = new DateFormatter(DATE_FORMAT);
-    }
+	private ViewEventListener listener;
 
-    @Before
-    public void setUp() {
-        // Set replacement "command line".
-        System.setOut(new PrintStream(outContent));
+	/**
+	 * Creates a new instance of this class.
+	 */
+	public ConsoleSimulationViewTest() {
+		dateFormatter = new DateFormatter(DATE_FORMAT);
+	}
 
-        // Init mockito
-        MockitoAnnotations.initMocks(this);
+	@Before
+	public void setUp() {
+		// Set replacement "command line".
+		System.setOut(new PrintStream(outContent));
 
-        // Init mocks
-        listener = mock(ViewEventListener.class);
+		// Init mockito
+		MockitoAnnotations.initMocks(this);
 
-        // Mocking message provider
-        when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT)).thenReturn(
-                MSG_VAL_ENTER_PARKING_LOT);
+		// Init mocks
+		listener = mock(ViewEventListener.class);
 
-        when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT_INVALID))
-                .thenReturn(MSG_VAL_ENTER_PARKING_LOT_INVALID);
+		// Mocking message provider
+		when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT)).thenReturn(
+				MSG_VAL_ENTER_PARKING_LOT);
 
-        when(messageProvider.get(MSG_KEY_ENTER_COINS)).thenReturn(
-                MSG_VAL_ENTER_COINS);
+		when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT_INVALID))
+				.thenReturn(MSG_VAL_ENTER_PARKING_LOT_INVALID);
 
-        when(messageProvider.get(MSG_KEY_SHUTDOWN))
-                .thenReturn(MSG_VAL_SHUTDOWN);
+		when(messageProvider.get(MSG_KEY_ENTER_COINS)).thenReturn(
+				MSG_VAL_ENTER_COINS);
 
-        when(messageProvider.get("view.info.parkingTime"))
-                .thenReturn("{0}:{1}");
+		when(messageProvider.get(MSG_KEY_SHUTDOWN))
+				.thenReturn(MSG_VAL_SHUTDOWN);
 
-        when(messageProvider.get(MSG_KEY_INVALID_FORMAT)).thenReturn(
-                MSG_VAL_INVALID_FORMAT);
+		when(messageProvider.get(MSG_KEY_ALL_PARKING_CHARGE)).thenReturn(
+				MSG_VAL_ALL_PARKING_CHARGE);
 
-        // Initialize view
-        view.addViewEventListener(listener);
-    }
+		when(messageProvider.get("view.info.parkingTime"))
+				.thenReturn("{0}:{1}");
 
-    @After
-    public void tearDown() {
-        // Clean up our "command line" for the next test.
-        System.setOut(null);
-    }
+		when(messageProvider.get(MSG_KEY_INVALID_FORMAT)).thenReturn(
+				MSG_VAL_INVALID_FORMAT);
 
-    @Test
-    public void whenEnteredAParkingLotNumberAnEventShouldBeFired()
-            throws IOException {
-        final int expectedParkingLotNumber = 44;
+		// Initialize view
+		view.addViewEventListener(listener);
+	}
 
-        // Mock User Input
-        when(bufferedReader.readLine()).thenReturn(
-                Integer.toString(expectedParkingLotNumber));
+	@After
+	public void tearDown() {
+		// Clean up our "command line" for the next test.
+		System.setOut(null);
+	}
 
-        // Run
-        view.executeActionsForStateEnteringParkingLotNumber();
+	@Test
+	public void whenEnteredAParkingLotNumberAnEventShouldBeFired()
+			throws IOException {
+		final int expectedParkingLotNumber = 44;
 
-        // Assert
-        ArgumentCaptor<ParkingLotEnteredEvent> argument = ArgumentCaptor
-                .forClass(ParkingLotEnteredEvent.class);
-        verify(listener).parkingLotEntered(argument.capture());
-        assertEquals(expectedParkingLotNumber, argument.getValue()
-                .getParkingLotNumber());
-    }
-
-    @Test
-    public final void whenEnteredAStringItShouldNotGenerateAnEvent()
-            throws IOException {
-        String expectedSequence = MSG_VAL_ENTER_PARKING_LOT + ": "
-                + MSG_VAL_ENTER_PARKING_LOT_INVALID + System.lineSeparator();
-
-        String invalidParkingLotNumber = "invalid parkinglot number";
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn(invalidParkingLotNumber);
-
-        // Run
-        view.executeActionsForStateEnteringParkingLotNumber();
-
-        // Assert
-        assertEquals(expectedSequence, outContent.toString());
-
-        // Verify that no notification was sent about the entered data.
-        verify(listener, Mockito.times(0)).parkingLotEntered(
-                any(ParkingLotEnteredEvent.class));
-    }
-
-    @Test
-    public final void testStateOfPromptForParkingLot() {
-        // Check init state.
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
-
-        // Run
-        view.promptForParkingLotNumber();
-
-        // check state after prompt
-        assertEquals(ConsoleViewStateEnum.ENTERING_PARKING_LOT,
-                view.getViewState());
-    }
-
-    @Test
-    public final void WhenAskedForParkingLotNumberItPrintsText()
-            throws IOException {
-        String parkingLotText = "Parkplatznummer eingeben";
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn("0");
-
-        // Run
-        view.executeActionsForStateEnteringParkingLotNumber();
-
-        // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
-    }
-
-    @Test
-    public void WhenASpaceIsAtTheEndOfTheTextTrimTheText() throws IOException {
-        String parkingLotText = "Parkplatznummer eingeben:     ";
-
-        // Mock
-        when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT)).thenReturn(
-                MSG_VAL_ENTER_PARKING_LOT + "     ");
-        when(bufferedReader.readLine()).thenReturn("0");
-
-        // Run
-        view.executeActionsForStateEnteringParkingLotNumber();
-
-        // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
-    }
-
-    @Test
-    public void testDisplayParkingLotAndParkingTime() throws IOException {
-        Calendar cal = Calendar.getInstance();
-
-        final int expectedParkingLotNumber = 44;
-        final Date expectedParkingDate = cal.getTime();
-        String expectedOutput = expectedParkingLotNumber + ":"
-                + dateFormatter.print(expectedParkingDate, Locale.GERMAN)
-                + System.lineSeparator();
-
-        // Mock
-        when(messageProvider.get("view.info.parkingTime"))
-                .thenReturn("{0}:{1}");
-
-        // Run
-        view.displayParkingLotNumberAndParkingTime(expectedParkingLotNumber,
-                expectedParkingDate);
-
-        // Assert
-        assertEquals(expectedOutput, outContent.toString());
-    }
-
-    // ************** Tests for Entering Parking Lot **************
-
-    @Test
-    public void testDisplayParkingLotInvalid() throws IOException {
-        // Run
-        view.displayParkingLotNumberInvalid();
-
-        // Assert
-        assertEquals(
-                MSG_VAL_ENTER_PARKING_LOT_INVALID + System.lineSeparator(),
-                outContent.toString());
-    }
-
-    // ************** Tests for Money-Prompt **************
-
-    @Test
-    public final void testStatetForDroppingInMoneyState() {
-        // Check init state.
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
-
-        // Run
-        view.promptForMoney(5);
-
-        // check state after prompt
-        assertEquals(ConsoleViewStateEnum.DROPPING_IN_MONEY,
-                view.getViewState());
-    }
-
-    @Test
-    public void testStateForDroppingInMoneyExecuteWithValidCoins()
-            throws IOException {
-        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
-
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn("0.5 1.0");
-
-        // Run
-        view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
-
-        // Assert
-        assertEquals(exptectedMessage, outContent.toString());
-
-        // verify(listener).moneyInserted(mInsertedEvent);
-        try {
-            verify(slotMachine, Mockito.times(2)).insertCoin(
-                    any(BigDecimal.class));
-        } catch (NoTransactionException | InvalidCoinException e) {
-            fail("Reiceved unexpected exception: " + e);
-        }
-    }
-
-    @Test
-    public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
-            throws IOException {
-        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5) + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
-
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn("abc");
-
-        // Run
-        view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
-
-        // Assert
-        assertEquals(exptectedMessage, outContent.toString());
-
-        try {
-            verify(slotMachine, Mockito.times(0)).insertCoin(
-                    any(BigDecimal.class));
-        } catch (CoinBoxFullException | NoTransactionException
-                | InvalidCoinException e) {
-            fail("Unexptected Exception");
-        }
-    }
-
-    @Test
-    public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
-            throws IOException {
-        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
-                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
-
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn("0.5,0.6");
-
-        // Run
-        view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
-
-        // Assert
-        assertEquals(exptectedMessage, outContent.toString());
-    }
-
-    // ************** Tests for Entering Secret Codes **************
-
-    /*
-     * @Test public void testDisplaySecretCodeInvalid() throws IOException { //
-     * Run view.displaySecretCodeInvalid();
-     * 
-     * // Assert assertEquals( MSG_VAL_ENTER_SECRET_CODE_INVALID +
-     * System.lineSeparator(), outContent.toString()); }
-     */
-
-    // ************** Tests for Shutting down **************
-
-    @Test
-    public void testDisplayShutdownMessage() throws IOException {
-        // Run
-        view.displayShutdownMessage();
-
-        // Assert
-        assertEquals(MSG_VAL_SHUTDOWN + System.lineSeparator(),
-                outContent.toString());
-    }
-
-    @Test
-    public final void whenEnteredExitAndEventShouldBeGenerated()
-            throws IOException {
-        String shutdownCode = "exit";
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn(shutdownCode);
-
-        // Run
-        view.executeActionsForStateEnteringParkingLotNumber();
-
-        // Read and forget
-        outContent.toString();
-
-        // Verify that no notification was sent about the entered data.
-        verify(listener).shutdownRequested(any(ShutdownEvent.class));
-    }
-
-    @Test
-    public void testViewShutdown() throws IOException {
-        // Run
-        view.shutdown();
-
-        // Assert
-        assertEquals(ConsoleViewStateEnum.EXIT, view.getViewState());
-    }
+		// Mock User Input
+		when(bufferedReader.readLine()).thenReturn(
+				Integer.toString(expectedParkingLotNumber));
+
+		// Run
+		view.executeActionsForStateEnteringParkingLotNumber();
+
+		// Assert
+		ArgumentCaptor<ParkingLotEnteredEvent> argument = ArgumentCaptor
+				.forClass(ParkingLotEnteredEvent.class);
+		verify(listener).parkingLotEntered(argument.capture());
+		assertEquals(expectedParkingLotNumber, argument.getValue()
+				.getParkingLotNumber());
+	}
+
+	@Test
+	public final void whenEnteredAStringItShouldNotGenerateAnEvent()
+			throws IOException {
+		String expectedSequence = MSG_VAL_ENTER_PARKING_LOT + ": "
+				+ MSG_VAL_ENTER_PARKING_LOT_INVALID + System.lineSeparator();
+
+		String invalidParkingLotNumber = "invalid parkinglot number";
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn(invalidParkingLotNumber);
+
+		// Run
+		view.executeActionsForStateEnteringParkingLotNumber();
+
+		// Assert
+		assertEquals(expectedSequence, outContent.toString());
+
+		// Verify that no notification was sent about the entered data.
+		verify(listener, Mockito.times(0)).parkingLotEntered(
+				any(ParkingLotEnteredEvent.class));
+	}
+
+	@Test
+	public final void testStateOfPromptForParkingLot() {
+		// Check init state.
+		assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+
+		// Run
+		view.promptForParkingLotNumber();
+
+		// check state after prompt
+		assertEquals(ConsoleViewStateEnum.ENTERING_PARKING_LOT,
+				view.getViewState());
+	}
+
+	@Test
+	public final void WhenAskedForParkingLotNumberItPrintsText()
+			throws IOException {
+		String parkingLotText = "Parkplatznummer eingeben";
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn("0");
+
+		// Run
+		view.executeActionsForStateEnteringParkingLotNumber();
+
+		// Assert
+		assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
+	}
+
+	@Test
+	public void WhenASpaceIsAtTheEndOfTheTextTrimTheText() throws IOException {
+		String parkingLotText = "Parkplatznummer eingeben:     ";
+
+		// Mock
+		when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT)).thenReturn(
+				MSG_VAL_ENTER_PARKING_LOT + "     ");
+		when(bufferedReader.readLine()).thenReturn("0");
+
+		// Run
+		view.executeActionsForStateEnteringParkingLotNumber();
+
+		// Assert
+		assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
+	}
+
+	@Test
+	public void testDisplayParkingLotAndParkingTime() throws IOException {
+		Calendar cal = Calendar.getInstance();
+
+		final int expectedParkingLotNumber = 44;
+		final Date expectedParkingDate = cal.getTime();
+		String expectedOutput = expectedParkingLotNumber + ":"
+				+ dateFormatter.print(expectedParkingDate, Locale.GERMAN)
+				+ System.lineSeparator();
+
+		// Mock
+		when(messageProvider.get("view.info.parkingTime"))
+				.thenReturn("{0}:{1}");
+
+		// Run
+		view.displayParkingLotNumberAndParkingTime(expectedParkingLotNumber,
+				expectedParkingDate);
+
+		// Assert
+		assertEquals(expectedOutput, outContent.toString());
+	}
+
+	// ************** Tests for Entering Parking Lot **************
+
+	@Test
+	public void testDisplayParkingLotInvalid() throws IOException {
+		// Run
+		view.displayParkingLotNumberInvalid();
+
+		// Assert
+		assertEquals(
+				MSG_VAL_ENTER_PARKING_LOT_INVALID + System.lineSeparator(),
+				outContent.toString());
+	}
+
+	// ************** Tests for Money-Prompt **************
+
+	@Test
+	public final void testStatetForDroppingInMoneyState() {
+		// Check init state.
+		assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+
+		// Run
+		view.promptForMoney(5);
+
+		// check state after prompt
+		assertEquals(ConsoleViewStateEnum.DROPPING_IN_MONEY,
+				view.getViewState());
+	}
+
+	@Test
+	public void testStateForDroppingInMoneyExecuteWithValidCoins()
+			throws IOException {
+		String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+				+ ": ", 5);
+
+		MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn("0.5 1.0");
+
+		// Run
+		view.promptForMoney(5);
+		view.executeActionsForDroppingInMoney();
+
+		// Assert
+		assertEquals(exptectedMessage, outContent.toString());
+
+		// verify(listener).moneyInserted(mInsertedEvent);
+		try {
+			verify(slotMachine, Mockito.times(2)).insertCoin(
+					any(BigDecimal.class));
+		} catch (NoTransactionException | InvalidCoinException e) {
+			fail("Reiceved unexpected exception: " + e);
+		}
+	}
+
+	@Test
+	public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
+			throws IOException {
+		String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+				+ ": ", 5)
+				+ MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+
+		MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn("abc");
+
+		// Run
+		view.promptForMoney(5);
+		view.executeActionsForDroppingInMoney();
+
+		// Assert
+		assertEquals(exptectedMessage, outContent.toString());
+
+		try {
+			verify(slotMachine, Mockito.times(0)).insertCoin(
+					any(BigDecimal.class));
+		} catch (CoinBoxFullException | NoTransactionException
+				| InvalidCoinException e) {
+			fail("Unexptected Exception");
+		}
+	}
+
+	@Test
+	public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
+			throws IOException {
+		String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+				+ ": ", 5)
+				+ MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+
+		MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn("0.5,0.6");
+
+		// Run
+		view.promptForMoney(5);
+		view.executeActionsForDroppingInMoney();
+
+		// Assert
+		assertEquals(exptectedMessage, outContent.toString());
+	}
+
+	// ************** Tests for Entering Secret Codes **************
+
+	/*
+	 * @Test public void testDisplaySecretCodeInvalid() throws IOException { //
+	 * Run view.displaySecretCodeInvalid();
+	 * 
+	 * // Assert assertEquals( MSG_VAL_ENTER_SECRET_CODE_INVALID +
+	 * System.lineSeparator(), outContent.toString()); }
+	 */
+
+	// ************** Tests for show all Parking charge **************
+
+	@Ignore
+	@Test
+	public void testEnterCorrectSecureCodeForViewAllParkingCharge()
+			throws IOException {
+		String parkingLotText = "Parkplatznummer eingeben: 222222";
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn("222222");
+
+		// Run
+
+		// Assert
+		assertEquals(MSG_VAL_ALL_PARKING_CHARGE + System.lineSeparator(),
+				outContent.toString());
+	}
+
+	// ************** Tests for Shutting down **************
+
+	@Test
+	public void testDisplayShutdownMessage() throws IOException {
+		// Run
+		view.displayShutdownMessage();
+
+		// Assert
+		assertEquals(MSG_VAL_SHUTDOWN + System.lineSeparator(),
+				outContent.toString());
+	}
+
+	@Test
+	public final void whenEnteredExitAndEventShouldBeGenerated()
+			throws IOException {
+		String shutdownCode = "exit";
+
+		// Mock
+		when(bufferedReader.readLine()).thenReturn(shutdownCode);
+
+		// Run
+		view.executeActionsForStateEnteringParkingLotNumber();
+
+		// Read and forget
+		outContent.toString();
+
+		// Verify that no notification was sent about the entered data.
+		verify(listener).shutdownRequested(any(ShutdownEvent.class));
+	}
+
+	@Test
+	public void testViewShutdown() throws IOException {
+		// Run
+		view.shutdown();
+
+		// Assert
+		assertEquals(ConsoleViewStateEnum.EXIT, view.getViewState());
+	}
 }
