@@ -47,7 +47,17 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
+    public void displayDroppingInMoneyInvalid() {
+
+    }
+
+    @Override
     public void promptForParkingLotNumber() {
+    }
+
+    @Override
+    public void promptForSecretCode() {
+
     }
 
     @Override
@@ -70,9 +80,19 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
+    public void displaySecretCodeInvalid() {
+
+    }
+
+    @Override
     public void displayShutdownMessage() {
         // TODO Auto-generated method stub
         
+    }
+
+    @Override
+    public void promptForMoneyEntered() {
+
     }
 
     @Override

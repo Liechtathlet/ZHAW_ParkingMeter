@@ -48,6 +48,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Start process
         view.promptForParkingLotNumber();
+        view.promptForMoneyEntered();
     }
 
     @Override
@@ -86,6 +87,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         // TODO money insert
+        view.promptForMoneyEntered();
     }
 
     @Override

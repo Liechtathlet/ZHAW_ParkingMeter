@@ -156,9 +156,13 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public void displayShutdownMessage() {
-        printToConsole("application.bye", false);
-    }
+    public void displayShutdownMessage() { printToConsole("application.bye", false); }
+
+    @Override
+    public void promptForMoneyEntered() { printToConsole("view.enter.moneyEnteredFinished", false); }
+
+    @Override
+    public void displayDroppingInMoneyInvalid() { printToConsole("view.enter.droppingInMoney.invalid", false); }
 
     /**
      * Executes all necessary actions, which are required in the state
@@ -192,21 +196,34 @@ public class ConsoleSimulationView extends SimulationView {
         printToConsole("view.enter.coins", true, storeParkingLotNumber);
         String input = readFromConsole();
 
+
         //if input == null: no input was provided or another event occurred.
-        if (input != null) {
-            // TODO: Implement Story
-            /*
+        /*
              * Check, Notify listeners / Throw Event viewState =
              * ConsoleViewStateEnum.INIT; }
              */
-            // TODO:Parse string and insert coins
-            // slotMachine.insertCoin(0.5);
+        // TODO:Parse string and insert coins
+        // slotMachine.insertCoin(0.5);
 
-            // insertion has finished -> notify controller
+        // insertion has finished -> notify controller
+        // Reset view state if operation was successful.
 
-            // Reset view state if operation was successful.
-            setViewState(ConsoleViewStateEnum.INIT);
-            notifyForMoneyInserted();
+        if (input != null) {
+            Float droppingInMoney = null;
+
+            try {
+                droppingInMoney= new Float(input);
+
+                } catch (NumberFormatException e) {
+                printToConsole("view.enter.droppingInMoney.invalid", false);
+            }
+
+
+            if (droppingInMoney != null) {
+                setViewState(ConsoleViewStateEnum.INIT);
+                notifyForMoneyInserted(droppingInMoney);
+            }
+
         }
     }
 
@@ -255,13 +272,15 @@ public class ConsoleSimulationView extends SimulationView {
     /**
      * Notifies all attached listeners about the entered money.
      */
-    private void notifyForMoneyInserted() {
-        MoneyInsertedEvent event = new MoneyInsertedEvent(this);
+    private void notifyForMoneyInserted(final float droppingInMoney) {
+        MoneyInsertedEvent event = new MoneyInsertedEvent(this, droppingInMoney);
 
         for (ViewEventListener listener : eventListeners) {
             listener.moneyInserted(event);
         }
     }
+
+
 
     /**
      * Executes all necessary actions, which are required in the state

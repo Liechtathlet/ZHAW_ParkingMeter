@@ -254,6 +254,7 @@ public class ConsoleSimulationViewTest {
                 view.getViewState());
     }
 
+    /*
     @Test
     public void testStateForDroppingInMoneyExecute() throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
@@ -271,12 +272,12 @@ public class ConsoleSimulationViewTest {
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
 
-        // verify(listener).moneyInserted(mInsertedEvent);
+        verify(listener).moneyInserted(mInsertedEvent);
 
         // TODO: Implement test (e.g. verify if intelligent slot machine was
         // called...)
     }
-
+*/
     // ************** Tests for Entering Secret Codes **************
 
 /*    
