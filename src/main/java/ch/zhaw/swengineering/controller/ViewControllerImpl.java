@@ -50,6 +50,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         view.promptForParkingLotNumber();
         view.promptForMoneyEntered();
     }
+		// Start simulation view.
+		view.startSimulationView();
 
     @Override
     public final void parkingLotEntered(
@@ -89,6 +91,15 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         // TODO money insert
         view.promptForMoneyEntered();
     }
+	private void handleSecretAction(SecretActionEnum secretAction) {
+		switch (secretAction) {
+		case VIEW_ALL_INFORMATION:
+			view.displayAllInformation();
+			break;
+		default:
+			throw new IllegalArgumentException();
+		}
+	}
 
     @Override
     public void shutdownRequested(final ShutdownEvent shutdownEvent) {

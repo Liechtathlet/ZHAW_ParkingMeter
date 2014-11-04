@@ -1,5 +1,6 @@
 package ch.zhaw.swengineering.controller;
 
+import ch.zhaw.swengineering.model.SecretActionEnum;
 import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.model.ParkingLot;
@@ -19,4 +20,14 @@ public interface ParkingMeterController {
      *         matching parking lot could be found.
      */
     ParkingLot getParkingLot(int aNumber);
+
+    /**
+     * Gets the secret action to secret key.
+     *
+     * @param secretKey Secret key.
+     * @return The secret action to the given secret key.
+     * @throws Exception when no secret actions loaded.
+     * @throws java.lang.IllegalArgumentException when no matching secret action can be found.
+     */
+    SecretActionEnum getSecretAction(int secretKey) throws Exception;
 }

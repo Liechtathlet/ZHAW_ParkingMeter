@@ -18,6 +18,6 @@
 		<constructor-arg value="./src/main/resources/parkingTimeDef.xml" />
 	</bean>
 	<bean id="className" class="java.lang.String">
-		<constructor-arg value="ch.zhaw.swengineering.model.ParkingTimes" />
+		<constructor-arg value="ch.zhaw.swengineering.model.ParkingTimeDefinitions" />
 	</bean>
 </beans>

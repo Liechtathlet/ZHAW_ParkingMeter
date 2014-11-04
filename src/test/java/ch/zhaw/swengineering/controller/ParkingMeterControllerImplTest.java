@@ -1,11 +1,11 @@
 package ch.zhaw.swengineering.controller;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Calendar;
-import java.util.Hashtable;
-
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.ParkingMeter;
+import ch.zhaw.swengineering.model.SecretActionEnum;
+import ch.zhaw.swengineering.model.SecretCodes;
+import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -17,12 +17,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.ParkingMeter;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.model.SecretCodes;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import java.util.Calendar;
+import java.util.Hashtable;
+
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -96,26 +94,31 @@ public class ParkingMeterControllerImplTest {
     // ************** Tests secret code validation ***************
 
     /**
-     * Method-Under-Test: validateSecretCodes(...).
+     * Method-Under-Test: getSecretAction(...).
      * 
      * Scenario: The secret code mapping is valid.
      * 
-     * Expectation: The validation is successfull.
+     * Expectation: The validation is successful.
      */
     @Test
-    public final void validateSecretCodePositive() {
-        Hashtable<Integer, SecretActionEnum> mappingTable 
-        = new Hashtable<Integer, SecretActionEnum>();
+    public final void secretCodesMappingIsValid() throws Exception {
 
-        mappingTable.put(new Integer(12345),
-                SecretActionEnum.VIEW_ALL_INFORMATION);
+        int secretKey = 12345;
+        SecretActionEnum secretAction = SecretActionEnum.VIEW_ALL_INFORMATION;
+
+        // Setup
+        Hashtable<Integer, SecretActionEnum> mappingTable = new Hashtable<>();
+
+        mappingTable.put(secretKey, secretAction);
 
         SecretCodes secretCodes = new SecretCodes(mappingTable);
 
-        // Setup
         when(configProviderSecretCode.get()).thenReturn(secretCodes);
-        initStandard();
 
+        controller.init();
+
+        // Assert
+        Assert.assertEquals(secretAction, controller.getSecretAction(secretKey));
     }
 
     /**
@@ -125,24 +128,41 @@ public class ParkingMeterControllerImplTest {
      * 
      * Expectation: The validation is not successful and an exception is thrown.
      */
-    @Test(expected = IllegalArgumentException.class)
-    public final void validateSecretCodeWithDuplicate() {
-        Hashtable<Integer, SecretActionEnum> mappingTable 
-        = new Hashtable<Integer, SecretActionEnum>();
+    @Test(expected = Exception.class)
+    public final void exceptionShouldBeThrownWhenNoSecretActionsLoaded() throws Exception {
 
-        mappingTable.put(new Integer(12345),
-                SecretActionEnum.VIEW_ALL_INFORMATION);
-        mappingTable.put(new Integer(56789),
-                SecretActionEnum.VIEW_ALL_INFORMATION);
+        int secretKey = 999;
+
+        // Assert
+        controller.getSecretAction(secretKey);
+    }
+
+    /**
+     * Method-Under-Test: validateSecretCodes(...).
+     *
+     * Scenario: The secret code mapping is invalid.
+     *
+     * Expectation: The validation is not successful and an exception is thrown.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public final void illegalArgumentexceptionShouldBeThrownWhenNoSecretActionCanBefound() throws Exception {
+
+        int secretKey = 999;
+        SecretActionEnum secretAction = SecretActionEnum.VIEW_ALL_INFORMATION;
+
+        // Setup
+        Hashtable<Integer, SecretActionEnum> mappingTable = new Hashtable<>();
+
+        mappingTable.put(111, secretAction);
 
         SecretCodes secretCodes = new SecretCodes(mappingTable);
 
-        // Setup
         when(configProviderSecretCode.get()).thenReturn(secretCodes);
-        initStandard();
 
-        verify(controller).validateSecretCodes();
+        controller.init();
 
+        // Assert
+        controller.getSecretAction(secretKey);
     }
 
     /**

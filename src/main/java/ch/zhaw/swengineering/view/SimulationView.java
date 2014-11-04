@@ -52,8 +52,6 @@ public abstract class SimulationView implements Runnable {
      */
     public abstract void run();
 
-    public abstract void displayDroppingInMoneyInvalid();
-
     /**
      * Shuts down the view.
      */

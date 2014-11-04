@@ -44,7 +44,7 @@ public class ConfigurationProviderTest {
 
 	@Test
 	public void canDeserializeParkingTimeDefXml() throws Exception {
-		ParkingTimes parkingTimes = (ParkingTimes) parkingTimeConfigurationProvider.get();
+		ParkingTimeDefinitions parkingTimes = (ParkingTimeDefinitions) parkingTimeConfigurationProvider.get();
 		assertNotNull(parkingTimes);
 	}
 

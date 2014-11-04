@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
 /**
- * @author Daniel Brun
+ * @author Roland Hofer
  * 
  *         Panel which displays a parking meter.
  */
@@ -123,7 +123,6 @@ public class ParkingMeterPanel extends JPanel {
 		ticketPane.setLayout(borderLayoutParkingTicketPane);
 		displayPane.setLayout(flowLayoutParkingDisplayPane);
 		coinsButtonPane.setLayout(flowLayoutParkingCoinsButtonPane);
-		// coinsButtonPane.setLayout(new GridLayout(3, 1, 5, 5));
 		buttonPane.setLayout(new GridLayout(4, 1, 5, 5));
 		slotPane.setLayout(flowLayoutParkingSlotPane);
 		ticketfieldPane.setLayout(flowLayoutParkingTicketfieldPane);

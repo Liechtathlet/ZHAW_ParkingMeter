@@ -254,6 +254,10 @@ public class ConsoleSimulationViewTest {
                 view.getViewState());
     }
 
+	@Test
+	public void testDisplayParkingLotInvalid() throws IOException {
+		// Run
+		view.displayParkingLotNumberInvalid();
     /*
     @Test
     public void testStateForDroppingInMoneyExecute() throws IOException {
@@ -273,12 +277,23 @@ public class ConsoleSimulationViewTest {
         assertEquals(exptectedMessage, outContent.toString());
 
         verify(listener).moneyInserted(mInsertedEvent);
+		// check state after prompt
+		assertEquals(ConsoleViewStateEnum.DROPPING_IN_MONEY,
+				view.getViewState());
+	}
 
         // TODO: Implement test (e.g. verify if intelligent slot machine was
         // called...)
     }
 */
     // ************** Tests for Entering Secret Codes **************
+	@Test
+	public void testStateForDroppingInMoneyExecuteWithValidCoins()
+			throws IOException {
+		String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+				+ ": ", 5);
+
+		MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
 /*    
     @Test

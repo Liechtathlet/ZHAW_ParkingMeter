@@ -157,12 +157,10 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void displayShutdownMessage() { printToConsole("application.bye", false); }
-
-    @Override
-    public void promptForMoneyEntered() { printToConsole("view.enter.moneyEnteredFinished", false); }
-
-    @Override
-    public void displayDroppingInMoneyInvalid() { printToConsole("view.enter.droppingInMoney.invalid", false); }
+    public void displayAllInformation() {
+        // TODO sl: Implement...
+        System.out.print("test");
+    }
 
     /**
      * Executes all necessary actions, which are required in the state
@@ -204,10 +202,69 @@ public class ConsoleSimulationView extends SimulationView {
              */
         // TODO:Parse string and insert coins
         // slotMachine.insertCoin(0.5);
+        // if input == null: no input was provided or another event occurred.
+        if (input != null) {
+            boolean error = false;
+            boolean drawback = false;
 
         // insertion has finished -> notify controller
         // Reset view state if operation was successful.
+            try {
+                parseAndInsertCoins(input);
+            } catch (CoinBoxFullException e) {
+                error = true;
 
+                LOG.error("Received exception "
+                        + "from slot machine: coin box is full!", e);
+
+                if (e.isAllCoinBoxesFull()) {
+                    printToConsole("view.slot.machine.coin.box.full", false,
+                            e.getCoinValue());
+                } else {
+                    printToConsole("view.slot.machine.coin.box.single.full",
+                            false, e.getCoinValue());
+                }
+                Map<BigDecimal, Integer> drawbackMap = slotMachine
+                        .rolebackTransaction();
+                displayMessageForDrawback(drawbackMap);
+            } catch (NoTransactionException e) {
+                error = true;
+                drawback = true;
+
+                // This should not occur!
+                LOG.error("Received exception "
+                        + "from slot machine: no transaction!", e);
+            } catch (InvalidCoinException e) {
+                error = true;
+                drawback = true;
+
+                StringBuilder coinString = new StringBuilder();
+
+                for (BigDecimal validCoin : e.getValidCoins()) {
+                    coinString.append(validCoin);
+                    coinString.append(", ");
+                }
+
+                LOG.error("Received exception "
+                        + "from slot machine: invalid coin!", e);
+                printToConsole("view.slot.machine.coin.invalid", false,
+                        coinString);
+            } catch (NumberFormatException e) {
+                error = true;
+                printToConsole("view.slot.machine.format.invalid", false);
+            }
+
+            if (error) {
+                if (drawback) {
+                    Map<BigDecimal, Integer> drawbackMap = slotMachine
+                            .rolebackTransaction();
+                    displayMessageForDrawback(drawbackMap);
+                }
+            } else {
+                // Reset view state if operation was successful.
+                setViewState(ConsoleViewStateEnum.INIT);
+                notifyForMoneyInserted();
+            }
         if (input != null) {
             Float droppingInMoney = null;
 
@@ -272,15 +329,13 @@ public class ConsoleSimulationView extends SimulationView {
     /**
      * Notifies all attached listeners about the entered money.
      */
-    private void notifyForMoneyInserted(final float droppingInMoney) {
-        MoneyInsertedEvent event = new MoneyInsertedEvent(this, droppingInMoney);
+    private void notifyForMoneyInserted() {
+        MoneyInsertedEvent event = new MoneyInsertedEvent(this);
 
         for (ViewEventListener listener : eventListeners) {
             listener.moneyInserted(event);
         }
     }
-
-
 
     /**
      * Executes all necessary actions, which are required in the state

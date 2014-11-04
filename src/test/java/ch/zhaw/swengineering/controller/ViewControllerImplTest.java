@@ -157,7 +157,7 @@ public class ViewControllerImplTest {
 
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
-        //MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
         // Mock
         when(parkingMeterController.getParkingLot(parkingLotNumber))
@@ -169,6 +169,8 @@ public class ViewControllerImplTest {
 
         // Execute Test
     //    controller.moneyInserted(mInsertedEvent);
+        // Run
+        controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
         // TODO: Implement

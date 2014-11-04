@@ -6,4 +6,12 @@
     <message key="view.enter.droppingInMoney.invalid">Diese Münze wird nicht akzeptiert. Bitte werfen Sie eine andere Münze ein.</message>
     <message key="view.enter.moneyEnteredFinished">Für Beleg drucken, drücken Sie bitte nochmals Enter.</message>
     <message key="application.bye">Bye</message>
+    <message key="view.slot.machine.format.invalid">Das Eingabeformat war ungültig.</message>
+    <message key="view.slot.machine.coin.invalid">Die Eingabe war nicht korrekt - gültige Münzen sind [{0}]</message>
+    <message key="view.slot.machine.drawback.toomuch">Rückgabe (zuviel bezahlt): [{0}] </message>
+    <message key="view.slot.machine.drawback">Geldausgabe: [{0}] </message>
+    <message key="view.slot.machine.interrupted">"Bezahlvorgang noch nicht abgeschlossen. Drücke 'Enter' um die Parkzeit zu registrieren oder 'Abbrechen' um die eingeworfenen Münzen zurückzuerhalten."</message>
+    <message key="view.slot.machine.coin.box.single.full">Das Münzfach für [{0}] ist voll!</message>
+    <message key="view.slot.machine.coin.box.full">Die Münzfächer sind voll!</message>
+    <message key="view.info.allParkingCharge">ParkingMeter (alle Parking-Gebühren) Info vom:</message>
 </messages>
