@@ -6,7 +6,9 @@ import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.model.ParkingLot;
 import ch.zhaw.swengineering.model.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +49,8 @@ public class ViewControllerImplTest {
     @Mock
     private ParkingMeterControllerImpl parkingMeterController;
 
+    @Mock
+    private IntelligentSlotMachine slotMachine;
     /**
      * Set up a test case.
      */

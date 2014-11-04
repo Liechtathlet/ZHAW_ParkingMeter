@@ -1,5 +1,20 @@
 package ch.zhaw.swengineering.view.console;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
@@ -10,20 +25,6 @@ import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.SimulationView;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Daniel Brun Console implementation of the interface
@@ -194,15 +195,16 @@ public class ConsoleSimulationView extends SimulationView {
         // if input == null: no input was provided or another event occurred.
         if (input != null) {
             boolean error = false;
+            boolean drawback = false;
 
             try {
                 parseAndInsertCoins(input);
             } catch (CoinBoxFullException e) {
                 error = true;
-                
+
                 LOG.error("Received exception "
                         + "from slot machine: coin box is full!", e);
-                
+
                 if (e.isAllCoinBoxesFull()) {
                     printToConsole("view.slot.machine.coin.box.full", false,
                             e.getCoinValue());
@@ -215,13 +217,15 @@ public class ConsoleSimulationView extends SimulationView {
                 displayMessageForDrawback(drawbackMap);
             } catch (NoTransactionException e) {
                 error = true;
-                
+                drawback = true;
+
                 // This should not occur!
                 LOG.error("Received exception "
                         + "from slot machine: no transaction!", e);
             } catch (InvalidCoinException e) {
                 error = true;
-                
+                drawback = true;
+
                 StringBuilder coinString = new StringBuilder();
 
                 for (BigDecimal validCoin : e.getValidCoins()) {
@@ -233,12 +237,17 @@ public class ConsoleSimulationView extends SimulationView {
                         + "from slot machine: invalid coin!", e);
                 printToConsole("view.slot.machine.coin.invalid", false,
                         coinString);
+            } catch (NumberFormatException e) {
+                error = true;
+                printToConsole("view.slot.machine.format.invalid", false);
             }
 
             if (error) {
-                Map<BigDecimal, Integer> drawbackMap = slotMachine
-                        .rolebackTransaction();
-                displayMessageForDrawback(drawbackMap);
+                if (drawback) {
+                    Map<BigDecimal, Integer> drawbackMap = slotMachine
+                            .rolebackTransaction();
+                    displayMessageForDrawback(drawbackMap);
+                }
             } else {
                 // Reset view state if operation was successful.
                 setViewState(ConsoleViewStateEnum.INIT);
@@ -384,7 +393,6 @@ public class ConsoleSimulationView extends SimulationView {
                 viewState = ConsoleViewStateEnum.INIT;
                 notifyForShutdownRequested();
             }
-            // TODO: Check for Shutdown
         }
 
         return line;

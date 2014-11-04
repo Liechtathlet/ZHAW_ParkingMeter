@@ -64,6 +64,9 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_SHUTDOWN = "application.bye";
     private static final String MSG_VAL_SHUTDOWN = "bye";
 
+    private static final String MSG_KEY_INVALID_FORMAT = "view.slot.machine.format.invalid";
+    private static final String MSG_VAL_INVALID_FORMAT = "invalidformat";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -116,6 +119,9 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get("view.info.parkingTime"))
                 .thenReturn("{0}:{1}");
+
+        when(messageProvider.get(MSG_KEY_INVALID_FORMAT)).thenReturn(
+                MSG_VAL_INVALID_FORMAT);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -290,33 +296,11 @@ public class ConsoleSimulationViewTest {
         }
     }
 
-    @Test(expected = InvalidCoinException.class)
-    public void testStateForDroppingInMoneyExecuteWithInvalidCoin()
-            throws IOException, NoTransactionException, InvalidCoinException {
-        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
-
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
-
-        // Mock
-        when(bufferedReader.readLine()).thenReturn("0.6");
-
-        // Run
-        view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
-
-        // Assert
-        assertEquals(exptectedMessage, outContent.toString());
-
-        // verify(listener).moneyInserted(mInsertedEvent);
-        verify(slotMachine, Mockito.times(1)).insertCoin(any(BigDecimal.class));
-    }
-
-    @Test(expected = InvalidCoinException.class)
+    @Test
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
+                + ": ", 5) + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
@@ -331,7 +315,7 @@ public class ConsoleSimulationViewTest {
         assertEquals(exptectedMessage, outContent.toString());
 
         try {
-            verify(slotMachine, Mockito.times(1)).insertCoin(
+            verify(slotMachine, Mockito.times(0)).insertCoin(
                     any(BigDecimal.class));
         } catch (CoinBoxFullException | NoTransactionException
                 | InvalidCoinException e) {
@@ -343,7 +327,8 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
+                + ": ", 5)
+                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
@@ -356,12 +341,6 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
-
-        // verify(listener).moneyInserted(mInsertedEvent);
-        // verify(slotMachine,
-        // Mockito.times(1)).insertCoin(any(BigDecimal.class));
-        // TODO: Implement test (e.g. verify if intelligent slot machine was
-        // called...)
     }
 
     // ************** Tests for Entering Secret Codes **************
