@@ -1,17 +1,22 @@
 package ch.zhaw.swengineering.controller;
 
-import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
-import ch.zhaw.swengineering.view.SimulationView;
+import java.math.BigDecimal;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import java.math.BigDecimal;
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShowAllParkingCharge;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.view.SimulationView;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -54,14 +59,14 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public final void parkingLotEntered(
             final ParkingLotEnteredEvent parkingLotEnteredEvent) {
-        int parkingLotNumber = parkingLotEnteredEvent.getParkingLotNumber();
         LOG.debug("User entered parking lot number: "
-                + parkingLotNumber);
+                + parkingLotEnteredEvent.getParkingLotNumber());
 
         boolean processed = false;
+        ParkingLot parkingLot = parkingMeterController
+                .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
         // Step One: Check if it is a parking lot number
-        ParkingLot parkingLot = parkingMeterController.getParkingLot(parkingLotNumber);
         if (parkingLot != null) {
             processed = true;
             slotMachine.startTransaction();
@@ -71,30 +76,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         }
 
         // Step Two: Check if it is a secret number
-        SecretActionEnum secretAction = null;
-        try {
-            secretAction = parkingMeterController.getSecretAction(parkingLotNumber);
-        } catch (Exception e) {
-            // TODO sl: what to do when no secret action can be found? I would just ignore the exception, which means no secret codes can be handled.
-        }
-        if (secretAction != null) {
-            handleSecretAction(secretAction);
-        }
 
         // Step Three: Print error if nothing matched
         if (!processed) {
             view.displayParkingLotNumberInvalid();
             view.promptForParkingLotNumber();
-        }
-    }
-
-    private void handleSecretAction(SecretActionEnum secretAction) {
-        switch (secretAction) {
-            case VIEW_ALL_INFORMATION:
-                view.displayAllInformation();
-                break;
-            default:
-                throw new IllegalArgumentException();
         }
     }
 
@@ -108,12 +94,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         LOG.info("Received: MoneyInsertedEvent, InsertedMoney: " + slotMachine.getAmountOfCurrentlyInsertedMoney());
         // TODO money insert
-        //TODO: Calculate parking time...
         
-        //TODO: Check if valid -> end transaction
-        //TODO: Return money
-        //TODO: Print console
-        //TODO: Finish transaction.
     }
 
     @Override
@@ -128,5 +109,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         view.shutdown();
         LOG.info("Shutdown complete...exit");
         appContext.close();
+    }
+
+    @Override
+    public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
+        // TODO Auto-generated method stub
+        
     }
 }

@@ -1,13 +1,11 @@
 package ch.zhaw.swengineering.controller;
 
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
-import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,12 +19,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import java.util.Date;
-
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 
 /**
  * @author Daniel Brun
@@ -49,8 +47,6 @@ public class ViewControllerImplTest {
     @Mock
     private ParkingMeterControllerImpl parkingMeterController;
 
-    @Mock
-    private IntelligentSlotMachine slotMachine;
     /**
      * Set up a test case.
      */
@@ -92,13 +88,14 @@ public class ViewControllerImplTest {
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
 
-        // Setup
+        // Mock
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(parkingLot);
 
+        // Setup
         controller.start();
 
-        // Run
+        // Execute Test
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -126,13 +123,14 @@ public class ViewControllerImplTest {
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
 
-        // Setup
+        // Mock
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
 
+        // Setup
         controller.start();
 
-        // Run
+        // Execute Test
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -144,39 +142,6 @@ public class ViewControllerImplTest {
         verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(
                 eq(parkingLotNumber), any(Date.class));
         verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
-    }
-
-    /**
-     * Method-Under-Test: parkingLotEntered(...).
-     *
-     * Scenario: An valid secret code number is entered.
-     *
-     * Expectation: All methods are invoked correctly.
-     */
-    @Test
-    public final void testParkingLotEnteredEventWithValidSecretCode() throws Exception {
-        int secretCodeNumber = 42;
-
-        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
-                view, secretCodeNumber);
-
-        // Setup
-        when(parkingMeterController.getSecretAction(secretCodeNumber))
-                .thenReturn(SecretActionEnum.VIEW_ALL_INFORMATION);
-
-        controller.start();
-
-        // Run
-        controller.parkingLotEntered(plEnteredEvent);
-
-        // Assert positive
-        verify(parkingMeterController).getParkingLot(secretCodeNumber);
-        verify(view).displayAllInformation();
-        verify(view, Mockito.times(2)).promptForParkingLotNumber();
-
-        // Assert negative
-        verify(view, Mockito.times(0))
-                .displayParkingLotNumberAndParkingTime(any(Integer.class), any(Date.class));
     }
 
     /**
@@ -194,7 +159,7 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
-        // Setup
+        // Mock
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
 
@@ -202,6 +167,8 @@ public class ViewControllerImplTest {
         controller.start();
         controller.parkingLotEntered(plEnteredEvent);
 
+        // Execute Test
+    //    controller.moneyInserted(mInsertedEvent);
         // Run
         controller.moneyInserted(mInsertedEvent);
 
@@ -228,7 +195,7 @@ public class ViewControllerImplTest {
         // Setup
         controller.start();
 
-        // Run
+        // Execute Test
         controller.shutdownRequested(shutdownEvent);
 
         // Assert positive

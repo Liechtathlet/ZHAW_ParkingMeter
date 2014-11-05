@@ -445,6 +445,8 @@ public class ConsoleSimulationViewTest {
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
+                + MSG_VAL_ONE_CB_FULL
+                + System.lineSeparator()
                 + MSG_VAL_DRAWBACK + System.lineSeparator();
 
         BigDecimal coin = new BigDecimal(2.00);

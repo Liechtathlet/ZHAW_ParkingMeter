@@ -14,6 +14,10 @@ import ch.zhaw.swengineering.event.ViewEventListener;
  * @author Daniel Brun Interface which defines the actions which the controller
  *         can invoke on the simulation view.
  */
+/**
+ * @author Daniel Brun
+ *
+ */
 public abstract class SimulationView implements Runnable {
 
     private static final Logger LOG = LogManager
@@ -85,16 +89,11 @@ public abstract class SimulationView implements Runnable {
      * Displays a message, that the entered parking lot number was invalid.
      */
     public abstract void displayParkingLotNumberInvalid();
-    
+
     /**
      * Displays a message, that the system is shutting down.
      */
     public abstract void displayShutdownMessage();
-
-    /**
-     * Displays all information.
-     */
-    public abstract void displayAllInformation();
     
     /**
      * Registers a view event listener.
@@ -140,4 +139,10 @@ public abstract class SimulationView implements Runnable {
             listener.shutdownRequested(event);
         }
     }
+
+    /**
+     * Displays all available information.
+     * TODO: Anpassen.
+     */
+    public abstract void displayAllInformation();
 }

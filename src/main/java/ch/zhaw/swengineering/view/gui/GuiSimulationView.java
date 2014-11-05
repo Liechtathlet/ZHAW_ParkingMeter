@@ -25,6 +25,7 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
             .getLogger(GuiSimulationView.class);
 
     private JFrame frame;
+
     /**
      * Creates the GUI.
      */
@@ -66,18 +67,13 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void displayParkingLotNumberInvalid() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     public void displayShutdownMessage() {
         // TODO Auto-generated method stub
-        
-    }
 
-    @Override
-    public void displayAllInformation() {
-        // TODO Auto-generated method stub
     }
 
     @Override
@@ -118,5 +114,11 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void windowOpened(final WindowEvent e) {
         // Not used.
+    }
+
+    @Override
+    public void displayAllInformation() {
+        // TODO Auto-generated method stub
+
     }
 }
