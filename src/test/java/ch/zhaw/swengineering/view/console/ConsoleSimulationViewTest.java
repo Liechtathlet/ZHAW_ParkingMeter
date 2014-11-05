@@ -3,6 +3,7 @@ package ch.zhaw.swengineering.view.console;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -13,9 +14,13 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -26,11 +31,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 import org.springframework.format.datetime.DateFormatter;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
@@ -67,6 +74,18 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_INVALID_FORMAT = "view.slot.machine.format.invalid";
     private static final String MSG_VAL_INVALID_FORMAT = "invalidformat";
 
+    private static final String MSG_KEY_CB_FULL = "view.slot.machine.coin.box.full";
+    private static final String MSG_VAL_CB_FULL = "coinBoxFull";
+
+    private static final String MSG_KEY_ONE_CB_FULL = "view.slot.machine.coin.box.single.full";
+    private static final String MSG_VAL_ONE_CB_FULL = "oneCoinBoxFull";
+
+    private static final String MSG_KEY_DRAWBACK = "view.slot.machine.drawback";
+    private static final String MSG_VAL_DRAWBACK = "drawback";
+
+    private static final String MSG_KEY_COIN_INVALID = "view.slot.machine.coin.invalid";
+    private static final String MSG_VAL_COIN_INVALID = "coininvalid";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -78,6 +97,9 @@ public class ConsoleSimulationViewTest {
 
     @Mock
     private BufferedReader bufferedReader;
+
+    @Spy
+    private PrintStream printStreamWriter;
 
     @Mock
     private IntelligentSlotMachine slotMachine;
@@ -96,7 +118,7 @@ public class ConsoleSimulationViewTest {
     @Before
     public void setUp() {
         // Set replacement "command line".
-        System.setOut(new PrintStream(outContent));
+        printStreamWriter = new PrintStream(outContent);
 
         // Init mockito
         MockitoAnnotations.initMocks(this);
@@ -122,6 +144,17 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_INVALID_FORMAT)).thenReturn(
                 MSG_VAL_INVALID_FORMAT);
+
+        when(messageProvider.get(MSG_KEY_CB_FULL)).thenReturn(MSG_VAL_CB_FULL);
+
+        when(messageProvider.get(MSG_KEY_DRAWBACK))
+                .thenReturn(MSG_VAL_DRAWBACK);
+
+        when(messageProvider.get(MSG_KEY_ONE_CB_FULL)).thenReturn(
+                MSG_VAL_ONE_CB_FULL);
+
+        when(messageProvider.get(MSG_KEY_COIN_INVALID)).thenReturn(
+                MSG_VAL_COIN_INVALID);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -300,7 +333,8 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5) + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+                + ": ", 5)
+                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
 
@@ -324,6 +358,35 @@ public class ConsoleSimulationViewTest {
     }
 
     @Test
+    public void testStateForDroppingInMoneyExecuteWithInValidCoin()
+            throws IOException, CoinBoxFullException, NoTransactionException,
+            InvalidCoinException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5)
+                + MSG_VAL_COIN_INVALID
+                + System.lineSeparator()
+                + MSG_VAL_DRAWBACK + System.lineSeparator();
+
+        List<BigDecimal> validCoins = new ArrayList<BigDecimal>();
+        validCoins.add(new BigDecimal("2.00").setScale(2));
+        validCoins.add(new BigDecimal("1.00").setScale(2));
+
+        // Mock
+        doThrow(new InvalidCoinException("invalidcoin", validCoins)).when(
+                slotMachine).insertCoin(any(BigDecimal.class));
+        when(bufferedReader.readLine()).thenReturn("0.6");
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        verify(slotMachine).insertCoin(any(BigDecimal.class));
+    }
+
+    @Test
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
@@ -341,6 +404,98 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
+    }
+
+    @Test
+    public void testStateForDroppingInMoneyExecuteWithCoinBoxFull()
+            throws IOException, CoinBoxFullException, NoTransactionException,
+            InvalidCoinException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5)
+                + MSG_VAL_CB_FULL
+                + System.lineSeparator()
+                + MSG_VAL_DRAWBACK
+                + System.lineSeparator();
+
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+
+        BigDecimal coin = new BigDecimal(2.00);
+        coin = coin.setScale(2);
+
+        drawbackMap.put(coin, new Integer(1));
+
+        // Mock
+        doThrow(new CoinBoxFullException("coinboxfull")).when(slotMachine)
+                .insertCoin(coin);
+        when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
+        when(bufferedReader.readLine()).thenReturn(coin.toPlainString());
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        assertEquals(exptectedMessage, outContent.toString());
+    }
+
+    @Test
+    public void testStateForDroppingInMoneyWithNoTransaction()
+            throws IOException, CoinBoxFullException, NoTransactionException,
+            InvalidCoinException {
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5)
+                + MSG_VAL_DRAWBACK + System.lineSeparator();
+
+        BigDecimal coin = new BigDecimal(2.00);
+        coin = coin.setScale(2);
+
+        drawbackMap.put(coin, new Integer(1));
+
+        // Mock
+        doThrow(new NoTransactionException("noTransaction")).when(slotMachine)
+                .insertCoin(any(BigDecimal.class));
+        when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
+        when(bufferedReader.readLine()).thenReturn(coin.toPlainString());
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        assertEquals(exptectedMessage, outContent.toString());
+
+    }
+
+    @Test
+    public void testStateForDroppingInMoneyExecuteWithOneCoinBoxFull()
+            throws IOException, CoinBoxFullException, NoTransactionException,
+            InvalidCoinException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5)
+                + MSG_VAL_ONE_CB_FULL
+                + System.lineSeparator()
+                + MSG_VAL_DRAWBACK + System.lineSeparator();
+
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+
+        BigDecimal coin = new BigDecimal(2.00);
+        coin = coin.setScale(2);
+
+        drawbackMap.put(coin, new Integer(2));
+
+        // Mock
+        doThrow(new CoinBoxFullException("coinboxfull", coin))
+                .when(slotMachine).insertCoin(coin);
+        when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
+        when(bufferedReader.readLine()).thenReturn(
+                coin.toPlainString() + " " + coin.toPlainString());
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        assertEquals(exptectedMessage, outContent.toString());
+
     }
 
     // ************** Tests for Entering Secret Codes **************
@@ -390,5 +545,23 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(ConsoleViewStateEnum.EXIT, view.getViewState());
+    }
+
+    @Test
+    public void testReadFromConsole() throws IOException {
+        String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
+                + ": ", 5);
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("x");
+
+        // Run
+        view.promptForMoney(5);
+        view.executeActionsForDroppingInMoney();
+
+        // Assert
+        verify(listener).actionAborted(any(ActionAbortedEvent.class));
+        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+        assertEquals(exptectedMessage, outContent.toString());
     }
 }

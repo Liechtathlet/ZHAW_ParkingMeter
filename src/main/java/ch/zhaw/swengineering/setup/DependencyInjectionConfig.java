@@ -2,6 +2,8 @@ package ch.zhaw.swengineering.setup;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -24,6 +26,11 @@ public class DependencyInjectionConfig {
 	public BufferedReader bufferedReader() {
 		return new BufferedReader(new InputStreamReader(System.in));
 	}
+	
+	@Bean
+    public PrintStream printWriter() {
+        return System.out;
+    }
 
 	@Bean
 	public SimulationView simulationView() {

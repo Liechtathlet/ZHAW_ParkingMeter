@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.view.console;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -65,6 +66,9 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Autowired
     private BufferedReader reader;
+    
+    @Autowired
+    private PrintStream writer;
 
     @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
@@ -356,10 +360,10 @@ public class ConsoleSimulationView extends SimulationView {
     private void printToConsole(final String aKey, final boolean prompt,
             final Object... arguments) {
         if (prompt) {
-            System.out.print(MessageFormat.format(messageProvider.get(aKey)
+            writer.print(MessageFormat.format(messageProvider.get(aKey)
                     .trim() + ": ", arguments));
         } else {
-            System.out.println(MessageFormat.format(messageProvider.get(aKey)
+            writer.println(MessageFormat.format(messageProvider.get(aKey)
                     .trim(), arguments));
         }
     }
