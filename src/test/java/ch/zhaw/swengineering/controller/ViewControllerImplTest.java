@@ -199,6 +199,7 @@ public class ViewControllerImplTest {
         verify(slotMachine).finishTransaction(drawback);
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
         verify(view).displayParkingLotNumberAndParkingTime(5, end);
+        verify(view).displayMessageForDrawback();
 
         // Assert negative
         verify(view, Mockito.times(0)).displayNotEnoughMoneyError();

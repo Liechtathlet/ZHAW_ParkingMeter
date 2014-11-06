@@ -37,4 +37,12 @@ public interface IntelligentSlotMachineUserInteractionInterface {
      * @return the map with the coins to output.
      */
     Map<BigDecimal, Integer> rolebackTransaction();
+    
+    /**
+     * Gets the drawback of the current transaction.
+     * The transaction must be finished to deliver the drawback.
+     * 
+     * @return the current drawback.
+     */
+    Map<BigDecimal, Integer>  getDrawback();
 }

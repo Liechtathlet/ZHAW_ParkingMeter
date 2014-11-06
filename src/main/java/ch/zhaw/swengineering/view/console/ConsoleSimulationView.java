@@ -360,10 +360,10 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private void printToConsole(final String aKey, final boolean prompt,
             final Object... arguments) {
-        
+
         if (prompt) {
-            writer.print(MessageFormat.format(messageProvider.get(aKey)
-                    .trim() + ": ", arguments));
+            writer.print(MessageFormat.format(messageProvider.get(aKey).trim()
+                    + ": ", arguments));
         } else {
             writer.println(MessageFormat.format(messageProvider.get(aKey)
                     .trim(), arguments));
@@ -432,6 +432,11 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void displayNotEnoughMoneyError() {
         printToConsole("view.booking.not.enough.money", false);
+    }
+
+    @Override
+    public void displayMessageForDrawback() {
+        displayMessageForDrawback(slotMachine.getDrawback());
     }
 
 }

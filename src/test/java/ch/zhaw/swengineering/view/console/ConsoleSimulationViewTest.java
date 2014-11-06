@@ -527,6 +527,31 @@ public class ConsoleSimulationViewTest {
     }
 
     @Test
+    public void testDisplayDrawbackMessage() throws IOException {
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+
+        BigDecimal coin = new BigDecimal(2.00);
+        coin = coin.setScale(2);
+
+        drawbackMap.put(coin, new Integer(1));
+        
+        coin = new BigDecimal(0.5);
+        coin = coin.setScale(2);
+
+        drawbackMap.put(coin, new Integer(2));
+        
+        when(slotMachine.getDrawback()).thenReturn(drawbackMap);
+        
+        // Run
+        view.displayMessageForDrawback();
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_DRAWBACK, "1 x 0.5, 1 x 2.0")
+                        + System.lineSeparator(), outContent.toString());
+    }
+
+    @Test
     public void testDisplayNotEnoughMoneyError() throws IOException {
         // Run
         view.displayNotEnoughMoneyError();
