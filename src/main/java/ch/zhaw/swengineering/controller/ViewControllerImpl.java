@@ -111,6 +111,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                     moneyInsertedEvent.getParkingLotNumber(),
                     booking.getPaidTill());
             slotMachine.finishTransaction(booking.getDrawbackMoney());
+            view.displayMessageForDrawback();
             view.promptForParkingLotNumber();
         }
     }

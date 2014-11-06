@@ -51,6 +51,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     private Map<BigDecimal, Integer> transactionCoinCache;
     private Map<BigDecimal, Integer> crawBackCoinCache;
     private SortedSet<BigDecimal> availableCoinList;
+    private SortedSet<BigDecimal> reverseAvailableCoinList;
 
     /**
      * Creates a new instance of this class.
@@ -58,6 +59,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     public IntelligentSlotMachineImpl() {
         transactionCoinCache = new Hashtable<>();
         availableCoinList = new TreeSet<>();
+        reverseAvailableCoinList = new TreeSet<>(Collections.reverseOrder());
         crawBackCoinCache = new Hashtable<>();
     }
 
@@ -77,6 +79,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
             resetCoinCache();
 
             availableCoinList.addAll(transactionCoinCache.keySet());
+            reverseAvailableCoinList.addAll(transactionCoinCache.keySet());
         }
     }
 
@@ -100,9 +103,9 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
             // TODO: Request for Review: Is there a case, when this doesn't
             // work?
-            for (BigDecimal coinVal : availableCoinList) {
+            for (BigDecimal coinVal : reverseAvailableCoinList) {
                 CoinBox cb = coinBoxes.getCoinBox(coinVal);
-                int count = drawback.divideToIntegralValue(cb.getCoinValue())
+                int count = currDrawback.divideToIntegralValue(cb.getCoinValue())
                         .toBigInteger().intValue();
 
                 // Check if enough coins are available
@@ -110,17 +113,19 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                     count = cb.getCurrentCoinCount();
                 }
 
-                // Put into drawback cache
-                crawBackCoinCache
-                        .put(cb.getCoinValue(), Integer.valueOf(count));
-                cb.setCurrentCoinCount(cb.getCurrentCoinCount() - count);
+                if (count > 0) {
+                    // Put into drawback cache
+                    crawBackCoinCache.put(cb.getCoinValue(),
+                            Integer.valueOf(count));
+                    cb.setCurrentCoinCount(cb.getCurrentCoinCount() - count);
 
-                // Subtract: count * value
-                currDrawback = currDrawback.subtract(cb.getCoinValue()
-                        .multiply(new BigDecimal(count)));
+                    // Subtract: count * value
+                    currDrawback = currDrawback.subtract(cb.getCoinValue()
+                            .multiply(new BigDecimal(count)));
 
-                if (currDrawback.compareTo(BigDecimal.ZERO) == 0) {
-                    break;
+                    if (currDrawback.compareTo(BigDecimal.ZERO) == 0) {
+                        break;
+                    }
                 }
             }
 
@@ -247,6 +252,15 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
      */
     private synchronized void setTransaction(final boolean aValue) {
         transactionStarted = aValue;
+    }
+
+    @Override
+    public Map<BigDecimal, Integer> getDrawback() {
+        if (!transactionStarted) {
+            return crawBackCoinCache;
+        } else {
+            return null;
+        }
     }
 
 }

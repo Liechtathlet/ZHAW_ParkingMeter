@@ -1,5 +1,6 @@
 package ch.zhaw.swengineering.view;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -149,10 +150,14 @@ public abstract class SimulationView implements Runnable {
      * TODO: Anpassen.
      */
     public abstract void displayAllInformation();
-
     
     /**
      * Displays an error message, that not enough money was inserted.
      */
     public abstract void displayNotEnoughMoneyError();
+
+    /**
+     * Displays a message with the drawback.
+     */
+    public abstract void displayMessageForDrawback();
 }

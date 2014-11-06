@@ -3,6 +3,7 @@ package ch.zhaw.swengineering.view.gui;
 import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.math.BigDecimal;
 import java.util.Date;
 
 import javax.swing.JFrame;
@@ -124,6 +125,12 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     @Override
     public void displayNotEnoughMoneyError() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void displayMessageForDrawback() {
         // TODO Auto-generated method stub
         
     }
