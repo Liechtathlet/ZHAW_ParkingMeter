@@ -1,20 +1,24 @@
 package ch.zhaw.swengineering.controller;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.ParkingMeter;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.model.SecretCodes;
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Map;
+
+import javax.annotation.PostConstruct;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
-import javax.annotation.PostConstruct;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Map;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingMeter;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
+import ch.zhaw.swengineering.model.persistence.SecretCodes;
 
 /**
  * @author Daniel Brun Implementation of the {@link ParkingMeterController}
@@ -38,14 +42,20 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     @Autowired
     @Qualifier("secretCodes")
     private ConfigurationProvider secretCodesProvider;
-    
+
+    @Autowired
+    @Qualifier("parkingTimeDef")
+    private ConfigurationProvider parkingTimeDefinitionProvider;
+
     /**
      * The ParkingMeter.
      */
     private ParkingMeter parkingMeter;
 
     private SecretCodes secretCodes;
-    
+
+    private ParkingTimeDefinitions definitions;
+
     /**
      * Initializes the class after the properties have been injected.
      */
@@ -62,6 +72,14 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         if (secretCodesProvider != null && secretCodesProvider.get() != null) {
             secretCodes = (SecretCodes) secretCodesProvider.get();
             validateSecretCodes();
+        }
+
+        LOG.info("Loading ParkingTimeDefinitions...");
+        if (parkingTimeDefinitionProvider != null
+                && parkingTimeDefinitionProvider.get() != null) {
+            definitions = (ParkingTimeDefinitions) parkingTimeDefinitionProvider
+                    .get();
+            validateParkingTimeDefinitions();
         }
     }
 
@@ -83,6 +101,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     public SecretActionEnum getSecretAction(int secretKey) throws Exception {
 
         if (secretCodes == null) {
+            // /TODO: Please change...no proper error
             throw new Exception();
         }
 
@@ -94,6 +113,21 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         }
 
         throw new IllegalArgumentException();
+    }
+
+    @Override
+    public void persistBooking(ParkingLotBooking aBooking) {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public ParkingLotBooking calculateBookingForParkingLot(int aParkingLot,
+            BigDecimal someInsertedMoney) {
+        ParkingLotBooking booking = new ParkingLotBooking(aParkingLot,
+                someInsertedMoney);
+
+        return booking;
     }
 
     /**
@@ -114,9 +148,20 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
             if (count > 1) {
                 throw new IllegalArgumentException(
                         "A secret action can only be mapped "
-                        + "once to a secret code!");
+                                + "once to a secret code!");
             }
         }
 
+    }
+
+    /**
+     * Validates the loaded parking time definitions.
+     */
+    public final void validateParkingTimeDefinitions() {
+        if (definitions.getParkingTimeDefinitions() == null
+                || definitions.getParkingTimeDefinitions().size() == 0) {
+            throw new IllegalArgumentException(
+                    "At least one parking time definition must be configured.");
+        }
     }
 }

@@ -1,8 +1,9 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.TransactionLog;
-import ch.zhaw.swengineering.model.TransactionLogEntry;
+import ch.zhaw.swengineering.model.persistence.TransactionLog;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;

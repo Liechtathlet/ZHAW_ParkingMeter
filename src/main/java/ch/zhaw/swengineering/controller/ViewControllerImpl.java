@@ -14,7 +14,7 @@ import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShowAllParkingCharge;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 
@@ -94,7 +94,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         LOG.info("Received: MoneyInsertedEvent, InsertedMoney: " + slotMachine.getAmountOfCurrentlyInsertedMoney());
         // TODO money insert
-        
+        // ParkingLotBooking: dateFrom, dateTill, paid
+        //calculate
+        //slotMachine.finishTransaction(null);
     }
 
     @Override

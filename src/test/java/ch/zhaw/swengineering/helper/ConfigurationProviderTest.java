@@ -1,7 +1,8 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.*;
+import ch.zhaw.swengineering.model.persistence.*;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;

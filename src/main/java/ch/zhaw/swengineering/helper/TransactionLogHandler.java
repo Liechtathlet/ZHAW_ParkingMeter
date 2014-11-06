@@ -1,7 +1,8 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.TransactionLog;
-import ch.zhaw.swengineering.model.TransactionLogEntry;
+import ch.zhaw.swengineering.model.persistence.TransactionLog;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.model;
+package ch.zhaw.swengineering.model.persistence;
 
 import javax.xml.bind.annotation.XmlRootElement;
 

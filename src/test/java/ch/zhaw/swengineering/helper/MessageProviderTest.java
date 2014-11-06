@@ -1,8 +1,9 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.Message;
-import ch.zhaw.swengineering.model.Messages;
+import ch.zhaw.swengineering.model.persistence.Message;
+import ch.zhaw.swengineering.model.persistence.Messages;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;

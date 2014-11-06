@@ -1,5 +1,5 @@
 
-package ch.zhaw.swengineering.model;
+package ch.zhaw.swengineering.model.persistence;
 
 /**
  * @author Daniel Brun

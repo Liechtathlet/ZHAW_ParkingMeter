@@ -10,8 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import ch.zhaw.swengineering.model.Message;
-import ch.zhaw.swengineering.model.Messages;
+import ch.zhaw.swengineering.model.persistence.Message;
+import ch.zhaw.swengineering.model.persistence.Messages;
 
 @Component
 public class MessageProvider {

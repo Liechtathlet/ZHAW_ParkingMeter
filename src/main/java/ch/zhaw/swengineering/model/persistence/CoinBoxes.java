@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.model;
+package ch.zhaw.swengineering.model.persistence;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;

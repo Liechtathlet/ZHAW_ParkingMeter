@@ -1,15 +1,16 @@
-package ch.zhaw.swengineering.model;
+package ch.zhaw.swengineering.model.persistence;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlValue;
-import java.util.Date;
 
 @XmlAccessorType(XmlAccessType.FIELD)
-public class TransactionLogEntry {
+public class Message {
+
 	@XmlAttribute
-	public Date creationTime;
+	public String key;
+
 	@XmlValue
-	public String text;
+	public String value;
 }

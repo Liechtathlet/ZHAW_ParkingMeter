@@ -1,9 +1,12 @@
 package ch.zhaw.swengineering.controller;
 
-import ch.zhaw.swengineering.model.SecretActionEnum;
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Controller;
 
-import ch.zhaw.swengineering.model.ParkingLot;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 
 /**
  * @author Daniel Brun Interface for ParkingMeter Controllers Provides methods
@@ -30,4 +33,21 @@ public interface ParkingMeterController {
      * @throws java.lang.IllegalArgumentException when no matching secret action can be found.
      */
     SecretActionEnum getSecretAction(int secretKey) throws Exception;
+    
+    /**
+     * Calculates the booking for the parking lot and the given amount of money.
+     * 
+     * @param aParkingLot The parking lot.
+     * @param someInsertedMoney The amount of money.
+     * @return The calculated parking lot booking.
+     */
+    ParkingLotBooking calculateBookingForParkingLot(int aParkingLot,
+            BigDecimal someInsertedMoney);
+    
+    /**
+     * Persists the given booking.
+     * 
+     * @param aBooking the booking to persist.
+     */
+    void persistBooking(ParkingLotBooking aBooking);
 }

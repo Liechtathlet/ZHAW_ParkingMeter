@@ -1,11 +1,12 @@
 package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.model.ParkingLot;
-import ch.zhaw.swengineering.model.ParkingMeter;
-import ch.zhaw.swengineering.model.SecretActionEnum;
-import ch.zhaw.swengineering.model.SecretCodes;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingMeter;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
+import ch.zhaw.swengineering.model.persistence.SecretCodes;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
