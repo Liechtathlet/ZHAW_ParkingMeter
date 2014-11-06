@@ -5,6 +5,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Before;
@@ -22,8 +24,11 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 
 /**
@@ -46,6 +51,9 @@ public class ViewControllerImplTest {
 
     @Mock
     private ParkingMeterControllerImpl parkingMeterController;
+
+    @Mock
+    private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
     /**
      * Set up a test case.
@@ -147,38 +155,111 @@ public class ViewControllerImplTest {
     /**
      * Method-Under-Test: moneyInserted(...).
      * 
-     * Scenario: An invalid parking lot number is entered.
+     * Scenario: All data is valid and enough money was inserted.
      * 
-     * Expectation: All methods are invoked correctly.
+     * Expectation: All methods are invoked correctly and deliver the correct
+     * result.
      */
     @Test
-    public final void testMoneyEnsertedEvent() {
+    public final void testMoneyEnsertedEventWithEnoughMoney() {
         int parkingLotNumber = 5;
-
-        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
-                view, parkingLotNumber);
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
+        BigDecimal insertedMoney = new BigDecimal(2.0);
+        BigDecimal drawback = new BigDecimal(1.00);
+
+        Calendar cal = Calendar.getInstance();
+        Date start = cal.getTime();
+
+        cal.add(Calendar.MINUTE, 10);
+
+        Date end = cal.getTime();
+
+        ParkingLotBooking booking = new ParkingLotBooking(false, 5, start, end,
+                insertedMoney, new BigDecimal(1.00), drawback);
+
         // Mock
+        when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
+                insertedMoney);
         when(parkingMeterController.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
+        when(
+                parkingMeterController.calculateBookingForParkingLot(5,
+                        insertedMoney)).thenReturn(booking);
 
         // Setup
         controller.start();
-        controller.parkingLotEntered(plEnteredEvent);
 
-        // Execute Test
-    //    controller.moneyInserted(mInsertedEvent);
         // Run
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
-        // TODO: Implement
+        verify(parkingMeterController).calculateBookingForParkingLot(5,
+                insertedMoney);
+        verify(slotMachine).finishTransaction(drawback);
+        verify(view, Mockito.times(2)).promptForParkingLotNumber();
+        verify(view).displayParkingLotNumberAndParkingTime(5, end);
 
         // Assert negative
-        // TODO: Implement
+        verify(view, Mockito.times(0)).displayNotEnoughMoneyError();
+        verify(view, Mockito.times(0)).promptForMoney(5);
     }
 
+    /**
+     * Method-Under-Test: moneyInserted(...).
+     * 
+     * Scenario: All data is valid, but not enough money was inserted.
+     * 
+     * Expectation: All methods are invoked correctly and deliver the correct
+     * result.
+     */
+    @Test
+    public final void testMoneyEnsertedEventWithNotEnoughMoney() {
+        int parkingLotNumber = 5;
+
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
+
+        BigDecimal insertedMoney = new BigDecimal(2.0);
+        BigDecimal drawback = new BigDecimal(1.00);
+
+        Calendar cal = Calendar.getInstance();
+        Date start = cal.getTime();
+
+        cal.add(Calendar.MINUTE, 10);
+
+        Date end = cal.getTime();
+
+        ParkingLotBooking booking = new ParkingLotBooking(true, 5, start, end,
+                insertedMoney, new BigDecimal(1.00), drawback);
+
+        // Mock
+        when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
+                insertedMoney);
+        when(parkingMeterController.getParkingLot(parkingLotNumber))
+                .thenReturn(null);
+        when(
+                parkingMeterController.calculateBookingForParkingLot(5,
+                        insertedMoney)).thenReturn(booking);
+
+        // Setup
+        controller.start();
+
+        // Run
+        controller.moneyInserted(mInsertedEvent);
+
+        // Assert positive
+        verify(view).displayNotEnoughMoneyError();
+        verify(view).promptForMoney(5);
+        verify(parkingMeterController).calculateBookingForParkingLot(5,
+                insertedMoney);
+       
+        verify(view).promptForParkingLotNumber();
+       
+        // Assert negative
+        verify(slotMachine, Mockito.times(0)).finishTransaction(drawback);
+        verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(5, end);
+    }
+    
     /**
      * Method-Under-Test: shutdownRequested(...).
      * 

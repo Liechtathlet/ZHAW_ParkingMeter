@@ -37,6 +37,37 @@ public class ParkingLotBooking {
     }
 
     /**
+     * Creates a new instance of this class.
+     * 
+     * @param notEnoughMoney
+     *            Set to true if not enough money was inserted for the booking.
+     * @param parkingLotNumber
+     *            The parking lot number.
+     * @param paidFrom
+     *            The date from when the parking lot is paid.
+     * @param paidTill
+     *            The date till when the parking lot is paid.
+     * @param insertedMoney
+     *            The inserted money.
+     * @param chargedMoney
+     *            The charged money.
+     * @param drawbackMoney
+     *            The drawback.
+     */
+    public ParkingLotBooking(boolean notEnoughMoney, int parkingLotNumber,
+            Date paidFrom, Date paidTill, BigDecimal insertedMoney,
+            BigDecimal chargedMoney, BigDecimal drawbackMoney) {
+        super();
+        this.notEnoughMoney = notEnoughMoney;
+        this.parkingLotNumber = parkingLotNumber;
+        this.paidFrom = paidFrom;
+        this.paidTill = paidTill;
+        this.insertedMoney = insertedMoney;
+        this.chargedMoney = chargedMoney;
+        this.drawbackMoney = drawbackMoney;
+    }
+
+    /**
      * @return the paidFrom
      */
     public Date getPaidFrom() {
