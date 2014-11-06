@@ -29,8 +29,8 @@ import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedExce
 /**
  * @author Daniel Brun
  * 
- *         Implementation of the {@link IntelligentSlotMachine}.
- * TODO: Refactor & Review
+ *         Implementation of the {@link IntelligentSlotMachine}. TODO: Refactor
+ *         & Review
  */
 @Controller
 public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
@@ -57,7 +57,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
      */
     public IntelligentSlotMachineImpl() {
         transactionCoinCache = new Hashtable<>();
-        availableCoinList = new TreeSet<>(Collections.reverseOrder());
+        availableCoinList = new TreeSet<>();
         crawBackCoinCache = new Hashtable<>();
     }
 

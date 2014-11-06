@@ -54,7 +54,7 @@ public class DependencyInjectionConfig {
 	public ConfigurationProvider coinBoxesConfigurationProvider() {
 		return new ConfigurationProvider(
 				"./src/main/resources/coinBoxes.xml",
-				"ch.zhaw.swengineering.model.CoinBoxes");
+				"ch.zhaw.swengineering.model.persistence.CoinBoxes");
 	}
 
 	@Bean
@@ -62,7 +62,7 @@ public class DependencyInjectionConfig {
 	public ConfigurationProvider messagesDeConfigurationProvider() {
 		return new ConfigurationProvider(
 				"./src/main/resources/messages-de.xml",
-				"ch.zhaw.swengineering.model.Messages");
+				"ch.zhaw.swengineering.model.persistence.Messages");
 	}
 
 	@Bean
@@ -70,7 +70,7 @@ public class DependencyInjectionConfig {
 	public ConfigurationProvider secretCodesConfigurationProvider() {
 		return new ConfigurationProvider(
 				"./src/main/resources/secretCodes.xml",
-				"ch.zhaw.swengineering.model.SecretCodes");
+				"ch.zhaw.swengineering.model.persistence.SecretCodes");
 	}
 
 	@Bean
@@ -78,7 +78,7 @@ public class DependencyInjectionConfig {
 	public ConfigurationProvider parkingMeterConfigurationProvider() {
 		return new ConfigurationProvider(
 				"./src/main/resources/parkingMeter.xml",
-				"ch.zhaw.swengineering.model.ParkingMeter");
+				"ch.zhaw.swengineering.model.persistence.ParkingMeter");
 	}
 
 	@Bean
@@ -86,7 +86,7 @@ public class DependencyInjectionConfig {
 	public ConfigurationProvider transactionLogConfigurationProvider() {
 		return new ConfigurationProvider(
 				"./src/main/resources/transactionLog.xml",
-				"ch.zhaw.swengineering.model.TransactionLog");
+				"ch.zhaw.swengineering.model.persistence.TransactionLog");
 	}
 
 	@Bean
@@ -94,6 +94,6 @@ public class DependencyInjectionConfig {
 	public ConfigurationWriter transactionLogConfigurationWriter() {
 		return new ConfigurationWriter(
 				"./src/main/resources/transactionLog.xml",
-				"ch.zhaw.swengineering.model.TransactionLog");
+				"ch.zhaw.swengineering.model.persistence.TransactionLog");
 	}
 }

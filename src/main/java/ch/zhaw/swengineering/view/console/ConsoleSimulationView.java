@@ -360,6 +360,7 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private void printToConsole(final String aKey, final boolean prompt,
             final Object... arguments) {
+        
         if (prompt) {
             writer.print(MessageFormat.format(messageProvider.get(aKey)
                     .trim() + ": ", arguments));
