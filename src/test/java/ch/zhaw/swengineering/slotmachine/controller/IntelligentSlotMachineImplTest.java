@@ -3,6 +3,8 @@ package ch.zhaw.swengineering.slotmachine.controller;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.any;
 
 import java.math.BigDecimal;
 import java.util.Map;
@@ -18,6 +20,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.persistence.CoinBox;
 import ch.zhaw.swengineering.model.persistence.CoinBoxes;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
@@ -36,6 +39,9 @@ public class IntelligentSlotMachineImplTest {
 
     @Mock(name = "coinBoxesProvider")
     private ConfigurationProvider configProviderCoinBoxes;
+    
+    @Mock(name ="coinBoxesWriter")
+    private ConfigurationWriter configWriterCoinBoxes;
 
     /**
      * Sets up a test case.
@@ -222,6 +228,8 @@ public class IntelligentSlotMachineImplTest {
 
         assertEquals(0, BigDecimal.ZERO.compareTo(slotMachine
                 .getAmountOfCurrentlyInsertedMoney()));
+        
+        verify(configWriterCoinBoxes).write(any(Object.class));
     }
 
     /**
