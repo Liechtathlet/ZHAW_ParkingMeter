@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.persistence.CoinBox;
 import ch.zhaw.swengineering.model.persistence.CoinBoxes;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
@@ -44,8 +45,13 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     @Autowired
     @Qualifier("coinBoxes")
     private ConfigurationProvider coinBoxesProvider;
+    
+    @Autowired
+    @Qualifier("coinBoxes")
+    private ConfigurationWriter coinBoxesWriter;
+    
     private CoinBoxes coinBoxes;
-
+    
     private boolean transactionStarted;
 
     private Map<BigDecimal, Integer> transactionCoinCache;
@@ -136,6 +142,8 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                 throw new SlotMachineException(
                         "Error during drawback calculation...");
             }
+            
+            coinBoxesWriter.write(coinBoxes);
         }
     }
 

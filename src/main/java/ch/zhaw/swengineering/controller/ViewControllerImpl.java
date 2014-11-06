@@ -109,6 +109,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
         slotMachine.finishTransaction(BigDecimal.ZERO);
         view.promptForParkingLotNumber();
+        //TODO: Abort transaction
     }
 
     @Override

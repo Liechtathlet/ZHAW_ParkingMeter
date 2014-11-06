@@ -141,8 +141,12 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void displayParkingLotNumberAndParkingTime(
             final int aParkingLotNumber, final Date aPaidParkingTime) {
-        String formattedDate = dateFormatter.print(aPaidParkingTime,
-                LocaleContextHolder.getLocale());
+
+        String formattedDate = "-";
+        if (aPaidParkingTime != null) {
+            formattedDate = dateFormatter.print(aPaidParkingTime,
+                    LocaleContextHolder.getLocale());
+        }
 
         printToConsole("view.info.parkingTime", false, aParkingLotNumber,
                 formattedDate);

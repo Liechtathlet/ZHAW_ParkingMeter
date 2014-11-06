@@ -1,17 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <coinBoxes>
-    <coinBox>
-        <coinValue>0.5</coinValue>
-        <maxCoinCount>10</maxCoinCount>
-        <currentCoinCount>5</currentCoinCount>
-    </coinBox>
-    <coinBox>
-        <coinValue>1</coinValue>
-        <maxCoinCount>10</maxCoinCount>
-        <currentCoinCount>5</currentCoinCount>
-    </coinBox>
-    <coinBox>
-        <coinValue>2</coinValue>
-        <maxCoinCount>10</maxCoinCount>
-        <currentCoinCount>5</currentCoinCount>
-    </coinBox>
+	<coinBox>
+		<coinValue>0.50</coinValue>
+		<currentCoinCount>5</currentCoinCount>
+		<maxCoinCount>10</maxCoinCount>
+	</coinBox>
+	<coinBox>
+		<coinValue>1.00</coinValue>
+		<currentCoinCount>5</currentCoinCount>
+		<maxCoinCount>10</maxCoinCount>
+	</coinBox>
+	<coinBox>
+		<coinValue>2.00</coinValue>
+		<currentCoinCount>6</currentCoinCount>
+		<maxCoinCount>10</maxCoinCount>
+	</coinBox>
 </coinBoxes>
