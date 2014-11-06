@@ -242,7 +242,6 @@ public class ParkingMeterControllerImplTest {
         Assert.assertNull(booking.getChargedMoney());
         Assert.assertEquals(booking.getDrawbackMoney(), new BigDecimal(0.5));
         Assert.assertEquals(new BigDecimal(0.5), booking.getInsertedMoney());
-
     }
 
     /**
