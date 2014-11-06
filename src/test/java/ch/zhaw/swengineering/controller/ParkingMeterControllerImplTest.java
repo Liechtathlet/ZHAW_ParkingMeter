@@ -206,9 +206,9 @@ public class ParkingMeterControllerImplTest {
 
         // 5.0 ->
         Assert.assertNotNull(booking);
-        Assert.assertEquals(new BigDecimal(4).setScale(1),
+        Assert.assertEquals(new BigDecimal(4),
                 booking.getChargedMoney());
-        Assert.assertEquals(new BigDecimal(2).setScale(1),
+        Assert.assertEquals(new BigDecimal(1),
                 booking.getDrawbackMoney());
         Assert.assertEquals(new BigDecimal(5), booking.getInsertedMoney());
         Assert.assertEquals(booking.isNotEnoughMoney(), false);
@@ -218,7 +218,7 @@ public class ParkingMeterControllerImplTest {
 
         int minutes = diff / 1000 / 60;
 
-        Assert.assertEquals(120, minutes);
+        Assert.assertEquals(90, minutes);
     }
 
     /**
