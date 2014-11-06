@@ -1,7 +1,9 @@
 package ch.zhaw.swengineering.controller;
 
 import java.math.BigDecimal;
+import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -16,6 +18,7 @@ import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingMeter;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.model.persistence.SecretCodes;
@@ -80,6 +83,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
             definitions = (ParkingTimeDefinitions) parkingTimeDefinitionProvider
                     .get();
             validateParkingTimeDefinitions();
+            sortParkingTimeDefinitions();
         }
     }
 
@@ -87,6 +91,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     public ParkingLot getParkingLot(final int aNumber) {
         ParkingLot parkingLot = null;
 
+        // TODO: Not efficient...
         for (ParkingLot pl : parkingMeter.parkingLots) {
             if (pl.number == aNumber) {
                 parkingLot = pl;
@@ -105,6 +110,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
             throw new Exception();
         }
 
+        // TODO: What the hell?
         for (Object o : secretCodes.getCodeMapping().entrySet()) {
             Map.Entry secretCodeEntry = (Map.Entry) o;
             if (secretCodeEntry.getKey().equals(secretKey)) {
@@ -124,8 +130,59 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     @Override
     public ParkingLotBooking calculateBookingForParkingLot(int aParkingLot,
             BigDecimal someInsertedMoney) {
+
         ParkingLotBooking booking = new ParkingLotBooking(aParkingLot,
                 someInsertedMoney);
+
+        BigDecimal leftoverMoney = someInsertedMoney;
+        boolean minimumBooking = false;
+        int bookingInMinutes = 0;
+
+        // Loop over definitions...
+        for (ParkingTimeDefinition def : definitions
+                .getParkingTimeDefinitions()) {
+
+            int periodCount = leftoverMoney
+                    .divideToIntegralValue(def.getPricePerPeriod())
+                    .toBigInteger().intValue();
+
+            if (periodCount == 0) {
+                booking.setDrawbackMoney(leftoverMoney);
+                booking.setNotEnoughMoney(!minimumBooking);
+                break;
+            } else {
+                // At least one period is covered.
+                minimumBooking = true;
+
+                int countOfSuccessivePeriods = def
+                        .getCountOfSuccessivePeriods().intValue();
+
+                // Limit period count
+                if (countOfSuccessivePeriods != 0
+                        && periodCount > countOfSuccessivePeriods) {
+                    periodCount = countOfSuccessivePeriods;
+                }
+
+                // Calculate
+                bookingInMinutes += def.getDurationOfPeriodInMinutes()
+                        .intValue() * periodCount;
+                leftoverMoney = leftoverMoney.subtract(def.getPricePerPeriod()
+                        .multiply(new BigDecimal(periodCount)));
+            }
+        }
+
+        // Do final calculations.
+        if (minimumBooking) {
+            booking.setDrawbackMoney(leftoverMoney);
+            booking.setChargedMoney(someInsertedMoney.subtract(leftoverMoney));
+            
+            Calendar cal = Calendar.getInstance();
+            booking.setPaidFrom(cal.getTime());
+            
+            cal.add(Calendar.MINUTE, bookingInMinutes);
+            
+            booking.setPaidTill(cal.getTime());
+        }
 
         return booking;
     }
@@ -163,5 +220,12 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
             throw new IllegalArgumentException(
                     "At least one parking time definition must be configured.");
         }
+    }
+
+    /**
+     * Executes a sort on the parking time definitions.
+     */
+    private void sortParkingTimeDefinitions() {
+        Collections.sort(definitions.getParkingTimeDefinitions());
     }
 }

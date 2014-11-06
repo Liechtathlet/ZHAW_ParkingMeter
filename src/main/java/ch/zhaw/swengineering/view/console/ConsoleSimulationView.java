@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.view.console;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
+
+    @Autowired
+    private PrintStream writer;
 
     private ConsoleViewStateEnum viewState;
 
@@ -336,7 +340,8 @@ public class ConsoleSimulationView extends SimulationView {
      * Notifies all attached listeners about the entered money.
      */
     private void notifyForMoneyInserted() {
-        MoneyInsertedEvent event = new MoneyInsertedEvent(this);
+        MoneyInsertedEvent event = new MoneyInsertedEvent(this,
+                storeParkingLotNumber);
 
         for (ViewEventListener listener : eventListeners) {
             listener.moneyInserted(event);
@@ -356,10 +361,10 @@ public class ConsoleSimulationView extends SimulationView {
     private void printToConsole(final String aKey, final boolean prompt,
             final Object... arguments) {
         if (prompt) {
-            System.out.print(MessageFormat.format(messageProvider.get(aKey)
+            writer.print(MessageFormat.format(messageProvider.get(aKey)
                     .trim() + ": ", arguments));
         } else {
-            System.out.println(MessageFormat.format(messageProvider.get(aKey)
+            writer.println(MessageFormat.format(messageProvider.get(aKey)
                     .trim(), arguments));
         }
     }
@@ -421,6 +426,11 @@ public class ConsoleSimulationView extends SimulationView {
         LOG.info("Shutting down the view...");
         run = false;
         setViewState(ConsoleViewStateEnum.EXIT);
+    }
+
+    @Override
+    public void displayNotEnoughMoneyError() {
+        printToConsole("view.booking.not.enough.money", false);
     }
 
 }

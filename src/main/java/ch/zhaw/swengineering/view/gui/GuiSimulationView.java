@@ -121,4 +121,10 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
         // TODO Auto-generated method stub
 
     }
+
+    @Override
+    public void displayNotEnoughMoneyError() {
+        // TODO Auto-generated method stub
+        
+    }
 }

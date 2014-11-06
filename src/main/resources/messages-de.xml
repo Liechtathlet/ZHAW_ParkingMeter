@@ -14,4 +14,5 @@
     <message key="view.slot.machine.coin.box.single.full">Das Münzfach für [{0}] ist voll!</message>
     <message key="view.slot.machine.coin.box.full">Die Münzfächer sind voll!</message>
     <message key="view.info.allParkingCharge">ParkingMeter (alle Parking-Gebühren) Info vom:</message>
+    <message key="view.booking.not.enough.money">Es wurden zu wenige Münzen eingeworfen.</message>
 </messages>

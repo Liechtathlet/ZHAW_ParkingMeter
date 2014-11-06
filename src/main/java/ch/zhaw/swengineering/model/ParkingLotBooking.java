@@ -11,6 +11,8 @@ import java.util.Date;
  */
 public class ParkingLotBooking {
 
+    private boolean notEnoughMoney;
+
     private int parkingLotNumber;
 
     private Date paidFrom;
@@ -31,6 +33,7 @@ public class ParkingLotBooking {
     public ParkingLotBooking(int aParkingLotNumber, BigDecimal aInsertedMoney) {
         this.parkingLotNumber = aParkingLotNumber;
         this.insertedMoney = aInsertedMoney;
+        this.notEnoughMoney = false;
     }
 
     /**
@@ -41,7 +44,8 @@ public class ParkingLotBooking {
     }
 
     /**
-     * @param paidFrom the paidFrom to set
+     * @param paidFrom
+     *            the paidFrom to set
      */
     public void setPaidFrom(Date paidFrom) {
         this.paidFrom = paidFrom;
@@ -55,7 +59,8 @@ public class ParkingLotBooking {
     }
 
     /**
-     * @param paidTill the paidTill to set
+     * @param paidTill
+     *            the paidTill to set
      */
     public void setPaidTill(Date paidTill) {
         this.paidTill = paidTill;
@@ -69,7 +74,8 @@ public class ParkingLotBooking {
     }
 
     /**
-     * @param chargedMoney the chargedMoney to set
+     * @param chargedMoney
+     *            the chargedMoney to set
      */
     public void setChargedMoney(BigDecimal chargedMoney) {
         this.chargedMoney = chargedMoney;
@@ -83,7 +89,8 @@ public class ParkingLotBooking {
     }
 
     /**
-     * @param drawbackMoney the drawbackMoney to set
+     * @param drawbackMoney
+     *            the drawbackMoney to set
      */
     public void setDrawbackMoney(BigDecimal drawbackMoney) {
         this.drawbackMoney = drawbackMoney;
@@ -103,4 +110,18 @@ public class ParkingLotBooking {
         return insertedMoney;
     }
 
+    /**
+     * @return the notEnoughMoney
+     */
+    public boolean isNotEnoughMoney() {
+        return notEnoughMoney;
+    }
+
+    /**
+     * @param notEnoughMoney
+     *            the notEnoughMoney to set
+     */
+    public void setNotEnoughMoney(boolean notEnoughMoney) {
+        this.notEnoughMoney = notEnoughMoney;
+    }
 }

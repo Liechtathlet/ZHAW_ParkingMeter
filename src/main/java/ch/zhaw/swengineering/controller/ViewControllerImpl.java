@@ -14,6 +14,7 @@ import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShowAllParkingCharge;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
@@ -38,7 +39,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Autowired
     private ConfigurableApplicationContext appContext;
-    
+
     @Autowired
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
@@ -92,11 +93,26 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Override
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
-        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: " + slotMachine.getAmountOfCurrentlyInsertedMoney());
-        // TODO money insert
-        // ParkingLotBooking: dateFrom, dateTill, paid
-        //calculate
-        //slotMachine.finishTransaction(null);
+        BigDecimal insertedMoney = slotMachine
+                .getAmountOfCurrentlyInsertedMoney();
+        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
+                + insertedMoney);
+
+        ParkingLotBooking booking = parkingMeterController
+                .calculateBookingForParkingLot(
+                        moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
+
+        if (booking.isNotEnoughMoney()) {
+            view.displayNotEnoughMoneyError();
+            view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
+        } else {
+            // TODO: Persist booking
+            view.displayParkingLotNumberAndParkingTime(
+                    moneyInsertedEvent.getParkingLotNumber(),
+                    booking.getPaidTill());
+            slotMachine.finishTransaction(booking.getDrawbackMoney());
+            view.promptForParkingLotNumber();
+        }
     }
 
     @Override
@@ -116,6 +132,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
         // TODO Auto-generated method stub
-        
+
     }
 }

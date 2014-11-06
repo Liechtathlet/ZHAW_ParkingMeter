@@ -86,6 +86,9 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_COIN_INVALID = "view.slot.machine.coin.invalid";
     private static final String MSG_VAL_COIN_INVALID = "coininvalid";
 
+    private static final String MSG_KEY_NOTENOUGH_MONEY = "view.booking.not.enough.money";
+    private static final String MSG_VAL_NOTENOUGH_MONEY = "notenoughmoney";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -155,6 +158,9 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_COIN_INVALID)).thenReturn(
                 MSG_VAL_COIN_INVALID);
+
+        when(messageProvider.get(MSG_KEY_NOTENOUGH_MONEY)).thenReturn(
+                MSG_VAL_NOTENOUGH_MONEY);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -308,7 +314,7 @@ public class ConsoleSimulationViewTest {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5);
 
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("0.5 1.0");
@@ -336,7 +342,7 @@ public class ConsoleSimulationViewTest {
                 + ": ", 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("abc");
@@ -393,7 +399,7 @@ public class ConsoleSimulationViewTest {
                 + ": ", 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view);
+        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("0.5,0.6");
@@ -445,8 +451,6 @@ public class ConsoleSimulationViewTest {
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
-                + MSG_VAL_ONE_CB_FULL
-                + System.lineSeparator()
                 + MSG_VAL_DRAWBACK + System.lineSeparator();
 
         BigDecimal coin = new BigDecimal(2.00);
@@ -519,6 +523,16 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(MSG_VAL_SHUTDOWN + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public void testDisplayNotEnoughMoneyError() throws IOException {
+        // Run
+        view.displayNotEnoughMoneyError();
+
+        // Assert
+        assertEquals(MSG_VAL_NOTENOUGH_MONEY + System.lineSeparator(),
                 outContent.toString());
     }
 

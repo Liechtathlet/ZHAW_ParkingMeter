@@ -18,6 +18,10 @@ import ch.zhaw.swengineering.event.ViewEventListener;
  * @author Daniel Brun
  *
  */
+/**
+ * @author Daniel Brun
+ *
+ */
 public abstract class SimulationView implements Runnable {
 
     private static final Logger LOG = LogManager
@@ -145,4 +149,10 @@ public abstract class SimulationView implements Runnable {
      * TODO: Anpassen.
      */
     public abstract void displayAllInformation();
+
+    
+    /**
+     * Displays an error message, that not enough money was inserted.
+     */
+    public abstract void displayNotEnoughMoneyError();
 }
