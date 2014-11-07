@@ -534,21 +534,20 @@ public class ConsoleSimulationViewTest {
         coin = coin.setScale(2);
 
         drawbackMap.put(coin, new Integer(1));
-        
+
         coin = new BigDecimal(0.5);
         coin = coin.setScale(2);
 
         drawbackMap.put(coin, new Integer(2));
-        
+
         when(slotMachine.getDrawback()).thenReturn(drawbackMap);
-        
+
         // Run
         view.displayMessageForDrawback();
 
         // Assert
-        assertEquals(
-                MessageFormat.format(MSG_VAL_DRAWBACK, "1 x 0.5, 1 x 2.0")
-                        + System.lineSeparator(), outContent.toString());
+        assertEquals(MessageFormat.format(MSG_VAL_DRAWBACK, "1 x 0.5, 1 x 2.0")
+                + System.lineSeparator(), outContent.toString());
     }
 
     @Test

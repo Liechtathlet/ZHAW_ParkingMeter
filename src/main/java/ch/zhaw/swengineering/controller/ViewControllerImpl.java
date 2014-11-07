@@ -109,7 +109,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
         slotMachine.finishTransaction(BigDecimal.ZERO);
         view.promptForParkingLotNumber();
-        //TODO: Abort transaction
     }
 
     @Override
@@ -140,7 +139,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void shutdownRequested(final ShutdownEvent shutdownEvent) {
         LOG.info("Received request for shutdown...");
-        // TODO: Persist current coin level
         // TODO: Persist parking lot allocation
 
         // TODO: If all ok

@@ -209,7 +209,7 @@ public class ConsoleSimulationView extends SimulationView {
                 parseAndInsertCoins(input);
             } catch (CoinBoxFullException e) {
                 error = true;
-
+                drawback = true;
                 LOG.error("Received exception "
                         + "from slot machine: coin box is full!", e);
 
@@ -220,9 +220,7 @@ public class ConsoleSimulationView extends SimulationView {
                     printToConsole("view.slot.machine.coin.box.single.full",
                             false, e.getCoinValue());
                 }
-                Map<BigDecimal, Integer> drawbackMap = slotMachine
-                        .rolebackTransaction();
-                displayMessageForDrawback(drawbackMap);
+
             } catch (NoTransactionException e) {
                 error = true;
                 drawback = true;
@@ -252,9 +250,7 @@ public class ConsoleSimulationView extends SimulationView {
 
             if (error) {
                 if (drawback) {
-                    Map<BigDecimal, Integer> drawbackMap = slotMachine
-                            .rolebackTransaction();
-                    displayMessageForDrawback(drawbackMap);
+                    roleBackTransaction();
                 }
             } else {
                 // Reset view state if operation was successful.
@@ -397,15 +393,29 @@ public class ConsoleSimulationView extends SimulationView {
             if (line.toLowerCase().equals(ABORT_COMMAND)) {
                 line = null;
                 viewState = ConsoleViewStateEnum.INIT;
+                roleBackTransaction();
                 notifyForActionAborted();
             } else if (line.toLowerCase().equals(EXIT_COMMAND)) {
                 line = null;
                 viewState = ConsoleViewStateEnum.INIT;
+                roleBackTransaction();
                 notifyForShutdownRequested();
             }
         }
 
         return line;
+    }
+
+    /**
+     * Rolesback the transaction.
+     */
+    private void roleBackTransaction() {
+        Map<BigDecimal, Integer> drawbackMap = slotMachine
+                .rolebackTransaction();
+
+        if (!drawbackMap.isEmpty()) {
+            displayMessageForDrawback(drawbackMap);
+        }
     }
 
     /**
