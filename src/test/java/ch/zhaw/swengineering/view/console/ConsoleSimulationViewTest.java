@@ -370,8 +370,7 @@ public class ConsoleSimulationViewTest {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
                 + MSG_VAL_COIN_INVALID
-                + System.lineSeparator()
-                + MSG_VAL_DRAWBACK + System.lineSeparator();
+                + System.lineSeparator();
 
         List<BigDecimal> validCoins = new ArrayList<BigDecimal>();
         validCoins.add(new BigDecimal("2.00").setScale(2));
