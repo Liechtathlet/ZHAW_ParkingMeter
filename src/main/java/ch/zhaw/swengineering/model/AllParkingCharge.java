@@ -1,6 +1,5 @@
 package ch.zhaw.swengineering.model;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -26,23 +25,38 @@ public class AllParkingCharge {
 	 */
 	public AllParkingCharge(ArrayList<ParkingLot> parkingLots) {
 
-		// Aktuelle Uhrzeit im Format hh:mm ermitteln
-		SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
 		ArrayList<ParkingLot> allParkingLots = new ArrayList<ParkingLot>(
 				parkingLots);
+		getAllBookedParkingLots(allParkingLots);
+	}
 
-		ArrayList<ParkingLot> bookedParkingLots = new ArrayList<ParkingLot>();
+	private ArrayList<Object> getAllBookedParkingLots(
+			ArrayList<ParkingLot> allParkingLots) {
 
-		ParkingLot parkingLot = null;
+		Object[] arrBookedParkingLot = new Object[3];
+		arrBookedParkingLot[0] = new ParkingLot();
+		arrBookedParkingLot[1] = new Date();
+		arrBookedParkingLot[2] = new long[10];
+
+		ArrayList<Object> bookedParkingLots = new ArrayList<Object>();
+
 		for (ParkingLot pl : allParkingLots) {
 			Date paidUntil = null;
-			int minutesRemain = 0;
-			// TODO Action
-			// paidUntil = ParkingLot.getParkingLot(pl)
-			// irgendwie Vergleich, ob 'bezahlt bis' > als sdf,
-			// Parkplatz in ArrayList bookedParkingLots aufnehmen mit pnr,
-			// bezbis und Berechnung der restlichen Zeit in m.
+			long minutesRemain = 0;
+
+			paidUntil = pl.getParkingLotPaidUntil();
+			minutesRemain = new CalculateRemainingTime(paidUntil)
+					.getDifferenceMinutes();
+
+			arrBookedParkingLot[0] = pl;
+			arrBookedParkingLot[1] = paidUntil;
+			arrBookedParkingLot[2] = minutesRemain;
+
+			bookedParkingLots.add(arrBookedParkingLot);
+
 		}
+		return bookedParkingLots;
+
 	}
 
 }

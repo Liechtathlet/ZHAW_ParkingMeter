@@ -104,6 +104,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
 		return parkingLot;
 	}
 
+	@Override
 	public void callAllBookedParkingLots() {
 		ArrayList<ParkingLot> parkingLots = new ArrayList<ParkingLot>();
 		parkingLots = (ArrayList<ParkingLot>) parkingMeter.parkingLots;
