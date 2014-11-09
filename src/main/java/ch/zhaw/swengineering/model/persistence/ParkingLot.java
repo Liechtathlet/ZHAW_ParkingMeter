@@ -14,7 +14,7 @@ public class ParkingLot {
 
 	@XmlAttribute
 	public Date paidUntil;
-	
+
 	/**
 	 * Empty constructor for serialization
 	 */
@@ -25,12 +25,22 @@ public class ParkingLot {
 	/**
 	 * Creates a new instance of this class.
 	 * 
-	 * @param number The parking lot number.
-	 * @param paidUntil The date until which the parking lot is paid
+	 * @param number
+	 *            The parking lot number.
+	 * @param paidUntil
+	 *            The date until which the parking lot is paid
 	 */
 	public ParkingLot(int number, Date paidUntil) {
 		this.number = number;
 		this.paidUntil = paidUntil;
 	}
-	
+
+	public int getParkingLotNumber() {
+		return number;
+	}
+
+	public Date getParkingLotPaidUntil() {
+		return paidUntil;
+	}
+
 }
