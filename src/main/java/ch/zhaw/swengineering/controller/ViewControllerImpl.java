@@ -26,134 +26,132 @@ import ch.zhaw.swengineering.view.SimulationView;
 @Controller
 public class ViewControllerImpl implements ViewController, ViewEventListener {
 
-	/**
-	 * The Logger.
-	 */
-	private static final Logger LOG = LogManager
-			.getLogger(ViewControllerImpl.class);
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ViewControllerImpl.class);
 
-	@Autowired
-	private SimulationView view;
+    @Autowired
+    private SimulationView view;
 
-	@Autowired
-	private ParkingMeterController parkingMeterController;
+    @Autowired
+    private ParkingMeterController parkingMeterController;
 
-	@Autowired
-	private ConfigurableApplicationContext appContext;
+    @Autowired
+    private ConfigurableApplicationContext appContext;
 
-	@Autowired
-	private IntelligentSlotMachineBackendInteractionInterface slotMachine;
+    @Autowired
+    private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
-	@Override
-	public final void start() {
-		LOG.info("Starting controller...");
+    @Override
+    public final void start() {
+        LOG.info("Starting controller...");
 
-		// Register event listener.
-		view.addViewEventListener(this);
+        // Register event listener.
+        view.addViewEventListener(this);
 
-		// Start simulation view.
-		view.startSimulationView();
+        // Start simulation view.
+        view.startSimulationView();
 
-		// Start process
-		view.promptForParkingLotNumber();
-	}
+        // Start process
+        view.promptForParkingLotNumber();
+    }
 
-	@Override
-	public final void parkingLotEntered(
-			final ParkingLotEnteredEvent parkingLotEnteredEvent) {
-		LOG.debug("User entered parking lot number: "
-				+ parkingLotEnteredEvent.getParkingLotNumber());
+    @Override
+    public final void parkingLotEntered(
+            final ParkingLotEnteredEvent parkingLotEnteredEvent) {
+        LOG.debug("User entered parking lot number: "
+                + parkingLotEnteredEvent.getParkingLotNumber());
 
-		boolean processed = false;
-		ParkingLot parkingLot = parkingMeterController
-				.getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
+        boolean processed = false;
+        ParkingLot parkingLot = parkingMeterController
+                .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
-		// Step One: Check if it is a parking lot number
-		if (parkingLot != null) {
-			processed = true;
-			slotMachine.startTransaction();
-			view.displayParkingLotNumberAndParkingTime(parkingLot.number,
-					parkingLot.paidUntil);
-			view.promptForMoney(parkingLot.number);
-		}
+        // Step One: Check if it is a parking lot number
+        if (parkingLot != null) {
+            processed = true;
+            slotMachine.startTransaction();
+            view.displayParkingLotNumberAndParkingTime(parkingLot.getNumber(),
+                    parkingLot.getPaidUntil());
+            view.promptForMoney(parkingLot.getNumber());
+        }
 
-		// Step Two: Check if it is a secret number
-		try {
-			SecretActionEnum actionEnum = parkingMeterController
-					.getSecretAction(parkingLotEnteredEvent
-							.getParkingLotNumber());
+        // Step Two: Check if it is a secret number
+        try {
+            SecretActionEnum actionEnum = parkingMeterController
+                    .getSecretAction(parkingLotEnteredEvent
+                            .getParkingLotNumber());
 
-			switch (actionEnum) {
-			case VIEW_ALL_PARKING_CHARGE:
-				processed = true;
-				parkingMeterController.callAllBookedParkingLots();
-				// 0: Modell für Ausgabe erstellen.
-				// 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
-				// konvertieren
-				// 2: Rückgabe an View: view.display...
-				break;
-			case VIEW_ALL_INFORMATION:
+            switch (actionEnum) {
+            case VIEW_ALL_PARKING_CHARGE:
+                processed = true;
+                parkingMeterController.callAllBookedParkingLots();
+                // 0: Modell für Ausgabe erstellen.
+                // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
+                // konvertieren
+                // 2: Rückgabe an View: view.display...
+                break;
+            case VIEW_ALL_INFORMATION:
 
-				break;
-			}
-		} catch (Exception e) {
-			// Nothing to do here..
-		}
+                break;
+            }
+        } catch (Exception e) {
+            // Nothing to do here..
+        }
 
-		// Step Three: Print error if nothing matched
-		if (!processed) {
-			view.displayParkingLotNumberInvalid();
-			view.promptForParkingLotNumber();
-		}
-	}
+        // Step Three: Print error if nothing matched
+        if (!processed) {
+            view.displayParkingLotNumberInvalid();
+            view.promptForParkingLotNumber();
+        }
+    }
 
-	@Override
-	public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
-		slotMachine.finishTransaction(BigDecimal.ZERO);
-		view.promptForParkingLotNumber();
-	}
+    @Override
+    public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
+        slotMachine.finishTransaction(BigDecimal.ZERO);
+        view.promptForParkingLotNumber();
+    }
 
-	@Override
-	public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
-		BigDecimal insertedMoney = slotMachine
-				.getAmountOfCurrentlyInsertedMoney();
-		LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
-				+ insertedMoney);
+    @Override
+    public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
+        BigDecimal insertedMoney = slotMachine
+                .getAmountOfCurrentlyInsertedMoney();
+        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
+                + insertedMoney);
 
-		ParkingLotBooking booking = parkingMeterController
-				.calculateBookingForParkingLot(
-						moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
+        ParkingLotBooking booking = parkingMeterController
+                .calculateBookingForParkingLot(
+                        moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
 
-		if (booking.isNotEnoughMoney()) {
-			view.displayNotEnoughMoneyError();
-			view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
-		} else {
-			// TODO: Persist booking
-			view.displayParkingLotNumberAndParkingTime(
-					moneyInsertedEvent.getParkingLotNumber(),
-					booking.getPaidTill());
-			slotMachine.finishTransaction(booking.getDrawbackMoney());
-			view.displayMessageForDrawback();
-			view.promptForParkingLotNumber();
-		}
-	}
+        if (booking.isNotEnoughMoney()) {
+            view.displayNotEnoughMoneyError();
+            view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
+        } else {
+            // TODO: Persist booking
+            view.displayParkingLotNumberAndParkingTime(
+                    moneyInsertedEvent.getParkingLotNumber(),
+                    booking.getPaidTill());
+            slotMachine.finishTransaction(booking.getDrawbackMoney());
+            view.displayMessageForDrawback();
+            view.promptForParkingLotNumber();
+        }
+    }
 
-	@Override
-	public void shutdownRequested(final ShutdownEvent shutdownEvent) {
-		LOG.info("Received request for shutdown...");
-		// TODO: Persist parking lot allocation
+    @Override
+    public void shutdownRequested(final ShutdownEvent shutdownEvent) {
+        LOG.info("Received request for shutdown...");
 
-		// TODO: If all ok
-		LOG.info("Proceeding with shutdown...");
-		view.displayShutdownMessage();
-		view.shutdown();
-		LOG.info("Shutdown complete...exit");
-		appContext.close();
-	}
+        LOG.info("Proceeding with shutdown...");
+        view.displayShutdownMessage();
+        view.shutdown();
+        LOG.info("Shutdown complete...exit");
+        appContext.close();
+    }
 
-	@Override
-	public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
-		// TODO Auto-generated method stub
+    @Override
+    public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
+        // TODO Auto-generated method stub
 
-	}
+    }
 }

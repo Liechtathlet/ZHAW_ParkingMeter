@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
@@ -15,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 
+import ch.zhaw.swengineering.helper.AssertHelper;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.AllParkingCharge;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
@@ -31,212 +34,222 @@ import ch.zhaw.swengineering.model.persistence.SecretCodes;
 @Controller
 public class ParkingMeterControllerImpl implements ParkingMeterController {
 
-	/**
-	 * The Logger.
-	 */
-	private static final Logger LOG = LogManager
-			.getLogger(ParkingMeterControllerImpl.class);
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ParkingMeterControllerImpl.class);
 
-	/**
-	 * ConfigurationProvider for the 'ParkingMeter'.
-	 */
-	@Autowired
-	@Qualifier("parkingMeter")
-	private ConfigurationProvider parkingMeterProvider;
+    /**
+     * ConfigurationProvider for the 'ParkingMeter'.
+     */
+    @Autowired
+    @Qualifier("parkingMeter")
+    private ConfigurationProvider parkingMeterProvider;
 
-	@Autowired
-	@Qualifier("secretCodes")
-	private ConfigurationProvider secretCodesProvider;
+    @Autowired
+    @Qualifier("secretCodes")
+    private ConfigurationProvider secretCodesProvider;
 
-	@Autowired
-	@Qualifier("parkingTimeDef")
-	private ConfigurationProvider parkingTimeDefinitionProvider;
+    @Autowired
+    @Qualifier("parkingTimeDef")
+    private ConfigurationProvider parkingTimeDefinitionProvider;
 
-	/**
-	 * The ParkingMeter.
-	 */
-	private ParkingMeter parkingMeter;
+    @Autowired
+    @Qualifier("parkingMeter")
+    private ConfigurationWriter parkingMeterWriter;
 
-	private SecretCodes secretCodes;
+    /**
+     * The ParkingMeter.
+     */
+    private ParkingMeter parkingMeter;
 
-	private ParkingTimeDefinitions definitions;
+    private SecretCodes secretCodes;
 
-	/**
-	 * Initializes the class after the properties have been injected.
-	 */
-	@PostConstruct
-	public final void init() {
-		LOG.info("Initialize ParkingMeter Controller");
+    private ParkingTimeDefinitions definitions;
 
-		LOG.info("Load ParkingLots");
-		if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
-			parkingMeter = (ParkingMeter) parkingMeterProvider.get();
-		}
+    /**
+     * Initializes the class after the properties have been injected.
+     */
+    @PostConstruct
+    public final void init() {
+        LOG.info("Initialize ParkingMeter Controller");
 
-		LOG.info("Loading SecretCodes...");
-		if (secretCodesProvider != null && secretCodesProvider.get() != null) {
-			secretCodes = (SecretCodes) secretCodesProvider.get();
-			validateSecretCodes();
-		}
+        LOG.info("Load ParkingLots");
+        if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
+            parkingMeter = (ParkingMeter) parkingMeterProvider.get();
+        }
 
-		LOG.info("Loading ParkingTimeDefinitions...");
-		if (parkingTimeDefinitionProvider != null
-				&& parkingTimeDefinitionProvider.get() != null) {
-			definitions = (ParkingTimeDefinitions) parkingTimeDefinitionProvider
-					.get();
-			validateParkingTimeDefinitions();
-			sortParkingTimeDefinitions();
-		}
-	}
+        LOG.info("Loading SecretCodes...");
+        if (secretCodesProvider != null && secretCodesProvider.get() != null) {
+            secretCodes = (SecretCodes) secretCodesProvider.get();
+            validateSecretCodes();
+        }
 
-	@Override
-	public ParkingLot getParkingLot(final int aNumber) {
-		ParkingLot parkingLot = null;
+        LOG.info("Loading ParkingTimeDefinitions...");
+        if (parkingTimeDefinitionProvider != null
+                && parkingTimeDefinitionProvider.get() != null) {
+            definitions = (ParkingTimeDefinitions) parkingTimeDefinitionProvider
+                    .get();
+            validateParkingTimeDefinitions();
+            sortParkingTimeDefinitions();
+        }
+    }
 
-		// TODO: Not efficient...
-		for (ParkingLot pl : parkingMeter.parkingLots) {
-			if (pl.number == aNumber) {
-				parkingLot = pl;
-				break;
-			}
-		}
+    @Override
+    public ParkingLot getParkingLot(final int aNumber) {
+        ParkingLot parkingLot = null;
 
-		return parkingLot;
-	}
+        // TODO: Not efficient...
+        for (ParkingLot pl : parkingMeter.parkingLots) {
+            if (pl.getNumber() == aNumber) {
+                parkingLot = pl;
+                break;
+            }
+        }
 
-	@Override
-	public void callAllBookedParkingLots() {
-		ArrayList<ParkingLot> parkingLots = new ArrayList<ParkingLot>();
-		parkingLots = (ArrayList<ParkingLot>) parkingMeter.parkingLots;
+        return parkingLot;
+    }
 
-		AllParkingCharge allParkingCharge = new AllParkingCharge(parkingLots);
+    @Override
+    public void callAllBookedParkingLots() {
+        ArrayList<ParkingLot> parkingLots = new ArrayList<ParkingLot>();
+        parkingLots = (ArrayList<ParkingLot>) parkingMeter.parkingLots;
 
-	}
+        AllParkingCharge allParkingCharge = new AllParkingCharge(parkingLots);
 
-	@Override
-	public SecretActionEnum getSecretAction(int secretKey) throws Exception {
+    }
 
-		if (secretCodes == null) {
-			// /TODO: Please change...no proper error
-			throw new Exception();
-		}
+    @Override
+    public SecretActionEnum getSecretAction(int secretKey) throws Exception {
 
-		// TODO: What the hell?
-		for (Object o : secretCodes.getCodeMapping().entrySet()) {
-			Map.Entry secretCodeEntry = (Map.Entry) o;
-			if (secretCodeEntry.getKey().equals(secretKey)) {
-				return (SecretActionEnum) secretCodeEntry.getValue();
-			}
-		}
+        if (secretCodes == null) {
+            // /TODO: Please change...no proper error
+            throw new Exception();
+        }
 
-		throw new IllegalArgumentException();
-	}
+        for (Entry<Integer, SecretActionEnum> secretCodeEntry : secretCodes
+                .getCodeMapping().entrySet()) {
+            if (secretCodeEntry.getKey().equals(secretKey)) {
+                return (SecretActionEnum) secretCodeEntry.getValue();
+            }
+        }
 
-	@Override
-	public void persistBooking(ParkingLotBooking aBooking) {
-		// TODO Auto-generated method stub
+        throw new IllegalArgumentException();
+    }
 
-	}
+    @Override
+    public void persistBooking(ParkingLotBooking aBooking) {
+        AssertHelper.isNotNull(aBooking, "aBooking");
 
-	@Override
-	public ParkingLotBooking calculateBookingForParkingLot(int aParkingLot,
-			BigDecimal someInsertedMoney) {
+        LOG.info("Persisting parking time for parking lot: '"
+                + aBooking.getParkingLotNumber() + "', paid until:"
+                + aBooking.getPaidTill());
+        ParkingLot parkingLot = getParkingLot(aBooking.getParkingLotNumber());
+        parkingLot.setPaidUntil(aBooking.getPaidTill());
 
-		ParkingLotBooking booking = new ParkingLotBooking(aParkingLot,
-				someInsertedMoney);
+        parkingMeterWriter.write(parkingMeter);
+    }
 
-		BigDecimal leftoverMoney = someInsertedMoney;
-		boolean minimumBooking = false;
-		int bookingInMinutes = 0;
+    @Override
+    public ParkingLotBooking calculateBookingForParkingLot(int aParkingLot,
+            BigDecimal someInsertedMoney) {
 
-		// Loop over definitions...
-		for (ParkingTimeDefinition def : definitions
-				.getParkingTimeDefinitions()) {
+        ParkingLotBooking booking = new ParkingLotBooking(aParkingLot,
+                someInsertedMoney);
 
-			int periodCount = leftoverMoney
-					.divideToIntegralValue(def.getPricePerPeriod())
-					.toBigInteger().intValue();
+        BigDecimal leftoverMoney = someInsertedMoney;
+        boolean minimumBooking = false;
+        int bookingInMinutes = 0;
 
-			if (periodCount == 0) {
-				booking.setDrawbackMoney(leftoverMoney);
-				booking.setNotEnoughMoney(!minimumBooking);
-				break;
-			} else {
-				// At least one period is covered.
-				minimumBooking = true;
+        // Loop over definitions...
+        for (ParkingTimeDefinition def : definitions
+                .getParkingTimeDefinitions()) {
 
-				int countOfSuccessivePeriods = def
-						.getCountOfSuccessivePeriods().intValue();
+            int periodCount = leftoverMoney
+                    .divideToIntegralValue(def.getPricePerPeriod())
+                    .toBigInteger().intValue();
 
-				// Limit period count
-				if (countOfSuccessivePeriods != 0
-						&& periodCount > countOfSuccessivePeriods) {
-					periodCount = countOfSuccessivePeriods;
-				}
+            if (periodCount == 0) {
+                booking.setDrawbackMoney(leftoverMoney);
+                booking.setNotEnoughMoney(!minimumBooking);
+                break;
+            } else {
+                // At least one period is covered.
+                minimumBooking = true;
 
-				// Calculate
-				bookingInMinutes += def.getDurationOfPeriodInMinutes()
-						.intValue() * periodCount;
-				leftoverMoney = leftoverMoney.subtract(def.getPricePerPeriod()
-						.multiply(new BigDecimal(periodCount)));
-			}
-		}
+                int countOfSuccessivePeriods = def
+                        .getCountOfSuccessivePeriods().intValue();
 
-		// Do final calculations.
-		if (minimumBooking) {
-			booking.setDrawbackMoney(leftoverMoney);
-			booking.setChargedMoney(someInsertedMoney.subtract(leftoverMoney));
+                // Limit period count
+                if (countOfSuccessivePeriods != 0
+                        && periodCount > countOfSuccessivePeriods) {
+                    periodCount = countOfSuccessivePeriods;
+                }
 
-			Calendar cal = Calendar.getInstance();
-			booking.setPaidFrom(cal.getTime());
+                // Calculate
+                bookingInMinutes += def.getDurationOfPeriodInMinutes()
+                        .intValue() * periodCount;
+                leftoverMoney = leftoverMoney.subtract(def.getPricePerPeriod()
+                        .multiply(new BigDecimal(periodCount)));
+            }
+        }
 
-			cal.add(Calendar.MINUTE, bookingInMinutes);
+        // Do final calculations.
+        if (minimumBooking) {
+            booking.setDrawbackMoney(leftoverMoney);
+            booking.setChargedMoney(someInsertedMoney.subtract(leftoverMoney));
 
-			booking.setPaidTill(cal.getTime());
-		}
+            Calendar cal = Calendar.getInstance();
+            booking.setPaidFrom(cal.getTime());
 
-		return booking;
-	}
+            cal.add(Calendar.MINUTE, bookingInMinutes);
 
-	/**
-	 * Validates if multiple codes are stored for an action.
-	 */
-	public final void validateSecretCodes() {
-		Map<Integer, SecretActionEnum> mapping = secretCodes.getCodeMapping();
+            booking.setPaidTill(cal.getTime());
+        }
 
-		Collection<SecretActionEnum> values = mapping.values();
-		for (SecretActionEnum actionEnum : SecretActionEnum.values()) {
-			int count = 0;
-			for (SecretActionEnum actionEnumToCompare : values) {
-				if (actionEnumToCompare.equals(actionEnum)) {
-					count++;
-				}
-			}
+        return booking;
+    }
 
-			if (count > 1) {
-				throw new IllegalArgumentException(
-						"A secret action can only be mapped "
-								+ "once to a secret code!");
-			}
-		}
+    /**
+     * Validates if multiple codes are stored for an action.
+     */
+    public final void validateSecretCodes() {
+        Map<Integer, SecretActionEnum> mapping = secretCodes.getCodeMapping();
 
-	}
+        Collection<SecretActionEnum> values = mapping.values();
+        for (SecretActionEnum actionEnum : SecretActionEnum.values()) {
+            int count = 0;
+            for (SecretActionEnum actionEnumToCompare : values) {
+                if (actionEnumToCompare.equals(actionEnum)) {
+                    count++;
+                }
+            }
 
-	/**
-	 * Validates the loaded parking time definitions.
-	 */
-	public final void validateParkingTimeDefinitions() {
-		if (definitions.getParkingTimeDefinitions() == null
-				|| definitions.getParkingTimeDefinitions().size() == 0) {
-			throw new IllegalArgumentException(
-					"At least one parking time definition must be configured.");
-		}
-	}
+            if (count > 1) {
+                throw new IllegalArgumentException(
+                        "A secret action can only be mapped "
+                                + "once to a secret code!");
+            }
+        }
 
-	/**
-	 * Executes a sort on the parking time definitions.
-	 */
-	private void sortParkingTimeDefinitions() {
-		Collections.sort(definitions.getParkingTimeDefinitions());
-	}
+    }
+
+    /**
+     * Validates the loaded parking time definitions.
+     */
+    public final void validateParkingTimeDefinitions() {
+        if (definitions.getParkingTimeDefinitions() == null
+                || definitions.getParkingTimeDefinitions().size() == 0) {
+            throw new IllegalArgumentException(
+                    "At least one parking time definition must be configured.");
+        }
+    }
+
+    /**
+     * Executes a sort on the parking time definitions.
+     */
+    private void sortParkingTimeDefinitions() {
+        Collections.sort(definitions.getParkingTimeDefinitions());
+    }
 }

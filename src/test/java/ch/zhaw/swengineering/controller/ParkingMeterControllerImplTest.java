@@ -1,10 +1,14 @@
 package ch.zhaw.swengineering.controller;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -20,6 +24,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingMeter;
@@ -41,6 +46,9 @@ public class ParkingMeterControllerImplTest {
 
     @Mock(name = "parkingTimeDefinitionProvider")
     private ConfigurationProvider configProviderTimeDef;
+
+    @Mock(name = "parkingMeterWriter")
+    private ConfigurationWriter configWriterParkingMeter;
 
     @InjectMocks
     private ParkingMeterControllerImpl controller;
@@ -103,11 +111,11 @@ public class ParkingMeterControllerImplTest {
 
         // Assert
         for (ParkingLot pl : parkingMeter.parkingLots) {
-            ParkingLot reqParkingLot = controller.getParkingLot(pl.number);
+            ParkingLot reqParkingLot = controller.getParkingLot(pl.getNumber());
 
             Assert.assertNotNull(reqParkingLot);
-            Assert.assertEquals(pl.number, reqParkingLot.number);
-            Assert.assertEquals(pl.paidUntil, reqParkingLot.paidUntil);
+            Assert.assertEquals(pl.getNumber(), reqParkingLot.getNumber());
+            Assert.assertEquals(pl.getPaidUntil(), reqParkingLot.getPaidUntil());
         }
     }
 
@@ -206,10 +214,8 @@ public class ParkingMeterControllerImplTest {
 
         // 5.0 ->
         Assert.assertNotNull(booking);
-        Assert.assertEquals(new BigDecimal(4),
-                booking.getChargedMoney());
-        Assert.assertEquals(new BigDecimal(1),
-                booking.getDrawbackMoney());
+        Assert.assertEquals(new BigDecimal(4), booking.getChargedMoney());
+        Assert.assertEquals(new BigDecimal(1), booking.getDrawbackMoney());
         Assert.assertEquals(new BigDecimal(5), booking.getInsertedMoney());
         Assert.assertEquals(booking.isNotEnoughMoney(), false);
 
@@ -242,6 +248,31 @@ public class ParkingMeterControllerImplTest {
         Assert.assertNull(booking.getChargedMoney());
         Assert.assertEquals(booking.getDrawbackMoney(), new BigDecimal(0.5));
         Assert.assertEquals(new BigDecimal(0.5), booking.getInsertedMoney());
+    }
+
+    /**
+     * Argument: A valid booking.
+     * 
+     * Method: 'persistBooking'
+     * 
+     * Expected: All results are correct.
+     */
+    @Test
+    public final void testPersistBookingWithValidBooking() {
+        // Setup
+        initStandard();
+
+        Date paidUntil = new Date();
+        ParkingLotBooking booking = new ParkingLotBooking(5,
+                new BigDecimal(5.0));
+        booking.setPaidTill(paidUntil);
+
+        controller.persistBooking(booking);
+        ParkingLot lot = controller.getParkingLot(5);
+
+        assertEquals(paidUntil, lot.getPaidUntil());
+        verify(configWriterParkingMeter).write(any(ParkingMeter.class));
+
     }
 
     /**

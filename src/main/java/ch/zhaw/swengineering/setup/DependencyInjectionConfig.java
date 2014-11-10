@@ -88,6 +88,13 @@ public class DependencyInjectionConfig {
     }
 
     @Bean
+    @Qualifier("parkingMeter")
+    public ConfigurationWriter parkingMeterConfigurationWriter() {
+        return new ConfigurationWriter("./src/main/resources/parkingMeter.xml",
+                "ch.zhaw.swengineering.model.persistence.ParkingMeter");
+    }
+
+    @Bean
     @Qualifier("transactionLog")
     public ConfigurationProvider transactionLogConfigurationProvider() {
         return new ConfigurationProvider(

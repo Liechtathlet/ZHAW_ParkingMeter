@@ -9,38 +9,59 @@ import javax.xml.bind.annotation.XmlAttribute;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ParkingLot {
 
-	@XmlAttribute
-	public int number;
+    @XmlAttribute
+    private int number;
 
-	@XmlAttribute
-	public Date paidUntil;
+    @XmlAttribute
+    private Date paidUntil;
 
-	/**
-	 * Empty constructor for serialization
-	 */
-	public ParkingLot() {
-		// Empty constructor for serialization
-	}
+    /**
+     * Empty constructor for serialization
+     */
+    public ParkingLot() {
+        // Empty constructor for serialization
+    }
 
-	/**
-	 * Creates a new instance of this class.
-	 * 
-	 * @param number
-	 *            The parking lot number.
-	 * @param paidUntil
-	 *            The date until which the parking lot is paid
-	 */
-	public ParkingLot(int number, Date paidUntil) {
-		this.number = number;
-		this.paidUntil = paidUntil;
-	}
+    /**
+     * Creates a new instance of this class.
+     * 
+     * @param number
+     *            The parking lot number.
+     * @param paidUntil
+     *            The date until which the parking lot is paid
+     */
+    public ParkingLot(int number, Date paidUntil) {
+        this.number = number;
+        this.paidUntil = paidUntil;
+    }
 
-	public int getParkingLotNumber() {
-		return number;
-	}
+    /**
+     * @return the number
+     */
+    public int getNumber() {
+        return number;
+    }
 
-	public Date getParkingLotPaidUntil() {
-		return paidUntil;
-	}
+    /**
+     * @param number
+     *            the number to set
+     */
+    public void setNumber(int number) {
+        this.number = number;
+    }
 
+    /**
+     * @return the paidUntil
+     */
+    public Date getPaidUntil() {
+        return paidUntil;
+    }
+
+    /**
+     * @param paidUntil
+     *            the paidUntil to set
+     */
+    public void setPaidUntil(Date paidUntil) {
+        this.paidUntil = paidUntil;
+    }
 }

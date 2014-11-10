@@ -44,7 +44,7 @@ public class AllParkingCharge {
 			Date paidUntil = null;
 			long minutesRemain = 0;
 
-			paidUntil = pl.getParkingLotPaidUntil();
+			paidUntil = pl.getPaidUntil();
 			minutesRemain = new CalculateRemainingTime(paidUntil)
 					.getDifferenceMinutes();
 
