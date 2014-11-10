@@ -3,8 +3,16 @@ package ch.zhaw.swengineering.model;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 public class CalculateRemainingTime {
 
+	/**
+	 * The Logger.
+	 */
+	private static final Logger LOG = LogManager
+			.getLogger(CalculateRemainingTime.class);
 	Date now = new Date();
 	Date until = new Date();
 
@@ -17,8 +25,6 @@ public class CalculateRemainingTime {
 		Calendar cal_now = Calendar.getInstance();
 		Calendar cal_until = Calendar.getInstance();
 
-		// cal_now.setTime(now);
-		// cal_until.setTime(until);
 		long diff = 0;
 		long diffMinutesOnly = 0;
 		if (until != null) {
@@ -34,6 +40,10 @@ public class CalculateRemainingTime {
 		} else {
 			diffMinutesOnly = 0;
 		}
+		LOG.debug("CalculatingRemainingTime:");
+		LOG.debug("Input Time now: " + now.getTime());
+		LOG.debug("Input Paid until: " + until.getTime());
+		LOG.debug("Output CalculateDiffMinutes: " + diffMinutesOnly);
 
 		return diffMinutesOnly;
 
