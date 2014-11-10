@@ -3,6 +3,9 @@ package ch.zhaw.swengineering.model;
 import java.util.ArrayList;
 import java.util.Date;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 
 /**
@@ -12,6 +15,11 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
  *         Booking is finished and the actually remaining time.
  */
 public class AllParkingCharge {
+	/**
+	 * The Logger.
+	 */
+	private static final Logger LOG = LogManager
+			.getLogger(AllParkingCharge.class);
 
 	private int parkingLotNumber;
 
@@ -51,6 +59,9 @@ public class AllParkingCharge {
 			arrBookedParkingLot[0] = pl;
 			arrBookedParkingLot[1] = paidUntil;
 			arrBookedParkingLot[2] = minutesRemain;
+
+			LOG.info("AllParkingCharge - Adding to ArrayList:");
+			LOG.info(pl + ", " + paidUntil + ", " + minutesRemain);
 
 			bookedParkingLots.add(arrBookedParkingLot);
 
