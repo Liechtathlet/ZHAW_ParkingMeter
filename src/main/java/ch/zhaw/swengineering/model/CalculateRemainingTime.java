@@ -1,6 +1,5 @@
 package ch.zhaw.swengineering.model;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import org.apache.log4j.LogManager;
@@ -15,6 +14,7 @@ public class CalculateRemainingTime {
 			.getLogger(CalculateRemainingTime.class);
 	Date now = new Date();
 	Date until = new Date();
+	long diffMinutesOnly = 0;
 
 	public CalculateRemainingTime(Date endBookingDate) {
 		until = endBookingDate;
@@ -22,11 +22,11 @@ public class CalculateRemainingTime {
 
 	public long getDifferenceMinutes() {
 
-		Calendar cal_now = Calendar.getInstance();
-		Calendar cal_until = Calendar.getInstance();
+		// Calendar cal_now = Calendar.getInstance();
+		// Calendar cal_until = Calendar.getInstance();
 
 		long diff = 0;
-		long diffMinutesOnly = 0;
+
 		if (until != null) {
 			diff = until.getTime() - now.getTime();
 			diffMinutesOnly = 0;
