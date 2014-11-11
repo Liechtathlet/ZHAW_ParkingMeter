@@ -2,7 +2,7 @@ package ch.zhaw.swengineering.controller;
 
 import java.math.BigDecimal;
 
-import ch.zhaw.swengineering.business.ParkingMeterController;
+import ch.zhaw.swengineering.business.ParkingMeter;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +37,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     private SimulationView view;
 
     @Autowired
-    private ParkingMeterController parkingMeterController;
+    private ParkingMeter parkingMeter;
 
     @Autowired
     private ConfigurableApplicationContext appContext;
@@ -66,7 +66,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 + parkingLotEnteredEvent.getParkingLotNumber());
 
         boolean processed = false;
-        ParkingLot parkingLot = parkingMeterController
+        ParkingLot parkingLot = parkingMeter
                 .getParkingLot(parkingLotEnteredEvent.getParkingLotNumber());
 
         // Step One: Check if it is a parking lot number
@@ -80,22 +80,23 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Step Two: Check if it is a secret number
         try {
-            SecretActionEnum actionEnum = parkingMeterController
+            SecretActionEnum actionEnum = parkingMeter
                     .getSecretAction(parkingLotEnteredEvent
                             .getParkingLotNumber());
 
             switch (actionEnum) {
-            case VIEW_ALL_PARKING_CHARGE:
-                processed = true;
-                parkingMeterController.callAllBookedParkingLots();
-                // 0: Modell für Ausgabe erstellen.
-                // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
-                // konvertieren
-                // 2: Rückgabe an View: view.display...
-                break;
-            case VIEW_ALL_INFORMATION:
-
-                break;
+                case VIEW_ALL_PARKING_CHARGE:
+                    processed = true;
+                    parkingMeter.callAllBookedParkingLots();
+                    // 0: Modell für Ausgabe erstellen.
+                    // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
+                    // konvertieren
+                    // 2: Rückgabe an View: view.display...
+                    break;
+                case VIEW_ALL_INFORMATION:
+                    processed = true;
+                    view.displayAllInformation();
+                    break;
             }
         } catch (Exception e) {
             // Nothing to do here..
@@ -121,7 +122,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
                 + insertedMoney);
 
-        ParkingLotBooking booking = parkingMeterController
+        ParkingLotBooking booking = parkingMeter
                 .calculateBookingForParkingLot(
                         moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
 

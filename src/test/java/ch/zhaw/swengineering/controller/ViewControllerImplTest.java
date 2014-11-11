@@ -9,7 +9,9 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
-import ch.zhaw.swengineering.business.ParkingMeterControllerImpl;
+import ch.zhaw.swengineering.business.ParkingMeterImpl;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +19,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -50,7 +54,7 @@ public class ViewControllerImplTest {
     private ViewControllerImpl controller;
 
     @Mock
-    private ParkingMeterControllerImpl parkingMeterController;
+    private ParkingMeterImpl parkingMeter;
 
     @Mock
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
@@ -97,7 +101,7 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
 
         // Mock
-        when(parkingMeterController.getParkingLot(parkingLotNumber))
+        when(parkingMeter.getParkingLot(parkingLotNumber))
                 .thenReturn(parkingLot);
 
         // Setup
@@ -107,7 +111,7 @@ public class ViewControllerImplTest {
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
-        verify(parkingMeterController).getParkingLot(parkingLotNumber);
+        verify(parkingMeter).getParkingLot(parkingLotNumber);
         verify(view).displayParkingLotNumberAndParkingTime(parkingLotNumber,
                 paidUntil);
         verify(view).promptForMoney(parkingLotNumber);
@@ -132,7 +136,7 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
 
         // Mock
-        when(parkingMeterController.getParkingLot(parkingLotNumber))
+        when(parkingMeter.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
 
         // Setup
@@ -142,7 +146,7 @@ public class ViewControllerImplTest {
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
-        verify(parkingMeterController).getParkingLot(parkingLotNumber);
+        verify(parkingMeter).getParkingLot(parkingLotNumber);
         verify(view).displayParkingLotNumberInvalid();
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
 
@@ -150,6 +154,34 @@ public class ViewControllerImplTest {
         verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(
                 eq(parkingLotNumber), any(Date.class));
         verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: A valid parking lot number is entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewAllInformationSecretNumber() throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber))
+                .thenReturn(SecretActionEnum.VIEW_ALL_INFORMATION);
+
+        // Setup
+        controller.start();
+
+        // Execute Test
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeter).getSecretAction(parkingLotNumber);
+        verify(view).displayAllInformation();
     }
 
     /**
@@ -181,10 +213,10 @@ public class ViewControllerImplTest {
         // Mock
         when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
                 insertedMoney);
-        when(parkingMeterController.getParkingLot(parkingLotNumber))
+        when(parkingMeter.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
         when(
-                parkingMeterController.calculateBookingForParkingLot(5,
+                parkingMeter.calculateBookingForParkingLot(5,
                         insertedMoney)).thenReturn(booking);
 
         // Setup
@@ -194,7 +226,7 @@ public class ViewControllerImplTest {
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
-        verify(parkingMeterController).calculateBookingForParkingLot(5,
+        verify(parkingMeter).calculateBookingForParkingLot(5,
                 insertedMoney);
         verify(slotMachine).finishTransaction(drawback);
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
@@ -236,10 +268,10 @@ public class ViewControllerImplTest {
         // Mock
         when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
                 insertedMoney);
-        when(parkingMeterController.getParkingLot(parkingLotNumber))
+        when(parkingMeter.getParkingLot(parkingLotNumber))
                 .thenReturn(null);
         when(
-                parkingMeterController.calculateBookingForParkingLot(5,
+                parkingMeter.calculateBookingForParkingLot(5,
                         insertedMoney)).thenReturn(booking);
 
         // Setup
@@ -251,7 +283,7 @@ public class ViewControllerImplTest {
         // Assert positive
         verify(view).displayNotEnoughMoneyError();
         verify(view).promptForMoney(5);
-        verify(parkingMeterController).calculateBookingForParkingLot(5,
+        verify(parkingMeter).calculateBookingForParkingLot(5,
                 insertedMoney);
        
         verify(view).promptForParkingLotNumber();

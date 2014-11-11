@@ -18,16 +18,16 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * @author Daniel Brun Implementation of the {@link ParkingMeterController}
+ * @author Daniel Brun Implementation of the {@link ParkingMeter}
  */
 @Component
-public class ParkingMeterControllerImpl implements ParkingMeterController {
+public class ParkingMeterImpl implements ParkingMeter {
 
     /**
      * The Logger.
      */
     private static final Logger LOG = LogManager
-            .getLogger(ParkingMeterControllerImpl.class);
+            .getLogger(ParkingMeterImpl.class);
 
     /**
      * ConfigurationProvider for the 'ParkingMeter'.
@@ -51,7 +51,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
     /**
      * The ParkingMeter.
      */
-    private ParkingMeter parkingMeter;
+    private ch.zhaw.swengineering.model.persistence.ParkingMeter parkingMeter;
 
     private SecretCodes secretCodes;
 
@@ -66,7 +66,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
 
         LOG.info("Load ParkingLots");
         if (parkingMeterProvider != null && parkingMeterProvider.get() != null) {
-            parkingMeter = (ParkingMeter) parkingMeterProvider.get();
+            parkingMeter = (ch.zhaw.swengineering.model.persistence.ParkingMeter) parkingMeterProvider.get();
         }
 
         LOG.info("Loading SecretCodes...");

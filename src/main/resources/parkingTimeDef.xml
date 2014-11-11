@@ -1,5 +1,11 @@
 <parkingTimeDefinitions>
     <parkingTimeDefinition>
+        <pricePerPeriod>1</pricePerPeriod>
+        <durationOfPeriodInMinutes>15</durationOfPeriodInMinutes>
+        <countOfSuccessivePeriods>4</countOfSuccessivePeriods>
+        <orderId>2</orderId>
+    </parkingTimeDefinition>
+    <parkingTimeDefinition>
         <pricePerPeriod>0.5</pricePerPeriod>
         <durationOfPeriodInMinutes>30</durationOfPeriodInMinutes>
         <countOfSuccessivePeriods>4</countOfSuccessivePeriods>

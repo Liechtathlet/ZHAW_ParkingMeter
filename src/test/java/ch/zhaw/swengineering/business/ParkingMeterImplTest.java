@@ -1,4 +1,4 @@
-package ch.zhaw.swengineering.controller;
+package ch.zhaw.swengineering.business;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
-import ch.zhaw.swengineering.business.ParkingMeterControllerImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +36,7 @@ import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
-public class ParkingMeterControllerImplTest {
+public class ParkingMeterImplTest {
 
     @Mock(name = "parkingMeterProvider")
     private ConfigurationProvider configProviderParkingMeter;
@@ -52,7 +51,7 @@ public class ParkingMeterControllerImplTest {
     private ConfigurationWriter configWriterParkingMeter;
 
     @InjectMocks
-    private ParkingMeterControllerImpl controller;
+    private ParkingMeterImpl controller;
 
     private ParkingMeter parkingMeter;
 
@@ -115,8 +114,8 @@ public class ParkingMeterControllerImplTest {
             ParkingLot reqParkingLot = controller.getParkingLot(pl.getNumber());
 
             Assert.assertNotNull(reqParkingLot);
-            Assert.assertEquals(pl.getNumber(), reqParkingLot.getNumber());
-            Assert.assertEquals(pl.getPaidUntil(), reqParkingLot.getPaidUntil());
+            assertEquals(pl.getNumber(), reqParkingLot.getNumber());
+            assertEquals(pl.getPaidUntil(), reqParkingLot.getPaidUntil());
         }
     }
 
@@ -147,7 +146,7 @@ public class ParkingMeterControllerImplTest {
         controller.init();
 
         // Assert
-        Assert.assertEquals(secretAction, controller.getSecretAction(secretKey));
+        assertEquals(secretAction, controller.getSecretAction(secretKey));
     }
 
     /**
@@ -175,7 +174,7 @@ public class ParkingMeterControllerImplTest {
      * Expectation: The validation is not successful and an exception is thrown.
      */
     @Test(expected = IllegalArgumentException.class)
-    public final void illegalArgumentexceptionShouldBeThrownWhenNoSecretActionCanBefound()
+    public final void illegalArgumentExceptionShouldBeThrownWhenNoSecretActionCanBefound()
             throws Exception {
 
         int secretKey = 999;
@@ -215,17 +214,17 @@ public class ParkingMeterControllerImplTest {
 
         // 5.0 ->
         Assert.assertNotNull(booking);
-        Assert.assertEquals(new BigDecimal(4), booking.getChargedMoney());
-        Assert.assertEquals(new BigDecimal(1), booking.getDrawbackMoney());
-        Assert.assertEquals(new BigDecimal(5), booking.getInsertedMoney());
-        Assert.assertEquals(booking.isNotEnoughMoney(), false);
+        assertEquals(new BigDecimal(4), booking.getChargedMoney());
+        assertEquals(new BigDecimal(1), booking.getDrawbackMoney());
+        assertEquals(new BigDecimal(5), booking.getInsertedMoney());
+        assertEquals(booking.isNotEnoughMoney(), false);
 
         int diff = (int) (booking.getPaidTill().getTime() - booking
                 .getPaidFrom().getTime());
 
         int minutes = diff / 1000 / 60;
 
-        Assert.assertEquals(90, minutes);
+        assertEquals(90, minutes);
     }
 
     /**
@@ -245,10 +244,10 @@ public class ParkingMeterControllerImplTest {
 
         // 5.0 ->
         Assert.assertNotNull(booking);
-        Assert.assertEquals(booking.isNotEnoughMoney(), true);
+        assertEquals(booking.isNotEnoughMoney(), true);
         Assert.assertNull(booking.getChargedMoney());
-        Assert.assertEquals(booking.getDrawbackMoney(), new BigDecimal(0.5));
-        Assert.assertEquals(new BigDecimal(0.5), booking.getInsertedMoney());
+        assertEquals(booking.getDrawbackMoney(), new BigDecimal(0.5));
+        assertEquals(new BigDecimal(0.5), booking.getInsertedMoney());
     }
 
     /**

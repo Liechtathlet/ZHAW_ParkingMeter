@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * @author Daniel Brun Interface for ParkingMeter Controllers Provides methods
  *         to access the parking lot information, book parking lots and so on.
  */
-public interface ParkingMeterController {
+public interface ParkingMeter {
 
 	/**
 	 * Gets the information about the given parking lot.

@@ -116,6 +116,9 @@ public class ConsoleSimulationView extends SimulationView {
                 case DROPPING_IN_MONEY:
                     executeActionsForDroppingInMoney();
                     break;
+                case DISPLAY_ALL_INFORMATION:
+                    executeActionForViewingAllInformation();
+                    break;
                 case EXIT:
                     run = false;
                     break;
@@ -172,6 +175,10 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void displayAllInformation() {
+        setViewState(ConsoleViewStateEnum.DISPLAY_ALL_INFORMATION);
+    }
+
+    public void executeActionForViewingAllInformation() {
         printToConsole("view.all.information.title.template", false, 2,
                 messageProvider.get("view.parking.time.def").trim());
 
@@ -196,6 +203,8 @@ public class ConsoleSimulationView extends SimulationView {
                 i++;
             }
         }
+
+        setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
     }
 
     private String formatPrice(BigDecimal price) {
