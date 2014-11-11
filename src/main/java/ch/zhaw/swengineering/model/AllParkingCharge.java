@@ -48,6 +48,7 @@ public class AllParkingCharge {
 
 		ArrayList<Object> bookedParkingLots = new ArrayList<Object>();
 
+		LOG.info("AllParkingCharge - Adding to ArrayList:");
 		for (ParkingLot pl : allParkingLots) {
 			Date paidUntil = null;
 			long minutesRemain = 0;
@@ -60,7 +61,6 @@ public class AllParkingCharge {
 			arrBookedParkingLot[1] = paidUntil;
 			arrBookedParkingLot[2] = minutesRemain;
 
-			LOG.info("AllParkingCharge - Adding to ArrayList:");
 			LOG.info(pl + ", " + paidUntil + ", " + minutesRemain);
 
 			bookedParkingLots.add(arrBookedParkingLot);
