@@ -1,31 +1,35 @@
 package ch.zhaw.swengineering.view.console;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.SimulationView;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Daniel Brun Console implementation of the interface
@@ -69,6 +73,10 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
+
+    @Autowired
+    @Qualifier("parkingTimeDef")
+    private ConfigurationProvider parkingTimeConfigurationProvider;
 
     @Autowired
     private PrintStream writer;
@@ -164,8 +172,39 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void displayAllInformation() {
-        // TODO sl: Implement...
-        System.out.print("test");
+        printToConsole("view.all.information.title.template", false, 2,
+                messageProvider.get("view.parking.time.def").trim());
+
+        ParkingTimeDefinitions parkingTimes =
+                (ParkingTimeDefinitions) parkingTimeConfigurationProvider.get();
+        int i = 1;
+        int lastMinuteCount = 0;
+        BigDecimal lastPrice = new BigDecimal(0);
+        for (ParkingTimeDefinition parkingTime :
+                parkingTimes.getParkingTimeDefinitions()) {
+            for (int j = 0; j < parkingTime.getCountOfSuccessivePeriods(); j++) {
+                BigDecimal newPrice = lastPrice.add(parkingTime.getPricePerPeriod());
+                int newMinuteCount = lastMinuteCount + parkingTime.getDurationOfPeriodInMinutes();
+                printToConsole("view.all.information.parking.time",
+                        false,
+                        i,
+                        formatPrice(lastPrice),
+                        formatPrice(newPrice),
+                        newMinuteCount);
+                lastPrice = newPrice;
+                lastMinuteCount = newMinuteCount;
+                i++;
+            }
+        }
+    }
+
+    private String formatPrice(BigDecimal price) {
+        price = price.setScale(2, BigDecimal.ROUND_DOWN);
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
+        df.setGroupingUsed(false);
+        return df.format(price);
     }
 
     /**
@@ -350,7 +389,8 @@ public class ConsoleSimulationView extends SimulationView {
 
     /**
      * Prints a text with the given key to the console.
-     * 
+     * TODO sl: Move print methods to its own class
+     *
      * @param aKey
      *            the key of the text to output.
      * @param prompt
@@ -359,11 +399,11 @@ public class ConsoleSimulationView extends SimulationView {
      *            The arguments for the message.
      */
     private void printToConsole(final String aKey, final boolean prompt,
-            final Object... arguments) {
-
-        if (prompt) {
-            writer.print(MessageFormat.format(messageProvider.get(aKey).trim()
-                    + ": ", arguments));
+                                final Object... arguments) {        if (prompt) {
+        writer.print(
+                MessageFormat.format(
+                        messageProvider.get(aKey).trim() +
+                                messageProvider.get("view.prompt.separator"), arguments));
         } else {
             writer.println(MessageFormat.format(messageProvider.get(aKey)
                     .trim(), arguments));
@@ -407,7 +447,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     /**
-     * Rolesback the transaction.
+     * Roles back the transaction.
      */
     private void roleBackTransaction() {
         Map<BigDecimal, Integer> drawbackMap = slotMachine

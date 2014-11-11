@@ -1,12 +1,12 @@
 package ch.zhaw.swengineering.model.persistence;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author Daniel Brun
@@ -24,7 +24,7 @@ public class ParkingTimeDefinitions {
      * Creates a new instance of this class.
      */
     public ParkingTimeDefinitions() {
-        parkingTimeDefinitions = new ArrayList<ParkingTimeDefinition>();
+        parkingTimeDefinitions = new ArrayList<>();
     }
 
     /**
@@ -40,6 +40,7 @@ public class ParkingTimeDefinitions {
      */
     public void setParkingTimeDefinitions(
             List<ParkingTimeDefinition> parkingTimeDefinitions) {
+        Collections.sort(parkingTimeDefinitions);
         this.parkingTimeDefinitions = parkingTimeDefinitions;
     }
 }

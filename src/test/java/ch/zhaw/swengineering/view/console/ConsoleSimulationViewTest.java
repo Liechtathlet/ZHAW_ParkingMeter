@@ -22,6 +22,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -89,6 +92,18 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_NOTENOUGH_MONEY = "view.booking.not.enough.money";
     private static final String MSG_VAL_NOTENOUGH_MONEY = "notenoughmoney";
 
+    private static final String MSG_KEY_PROMPT_SEPARATOR = "view.prompt.separator";
+    private static final String MSG_VAL_PROMPT_SEPARATOR = ": ";
+
+    private static final String MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE = "view.all.information.title.template";
+    private static final String MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE = "{0}) {1}";
+
+    private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE = "view.parking.time.def";
+    private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE = "parking time def";
+
+    private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "view.all.information.parking.time";
+    private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "timerange [{0}] | from {1} € | to {2} € | time: {3} min |";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -107,8 +122,10 @@ public class ConsoleSimulationViewTest {
     @Mock
     private IntelligentSlotMachine slotMachine;
 
-    private DateFormatter dateFormatter;
+    @Mock
+    private ConfigurationProvider parkingTimeConfigurationProvider;
 
+    private DateFormatter dateFormatter;
     private ViewEventListener listener;
 
     /**
@@ -161,6 +178,18 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_NOTENOUGH_MONEY)).thenReturn(
                 MSG_VAL_NOTENOUGH_MONEY);
+
+        when(messageProvider.get(MSG_KEY_PROMPT_SEPARATOR)).thenReturn(
+                MSG_VAL_PROMPT_SEPARATOR);
+
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)).thenReturn(
+                MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
+
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE)).thenReturn(
+                MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE);
+
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE)).thenReturn(
+                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -230,7 +259,6 @@ public class ConsoleSimulationViewTest {
     @Test
     public final void WhenAskedForParkingLotNumberItPrintsText()
             throws IOException {
-        String parkingLotText = "Parkplatznummer eingeben";
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("0");
@@ -244,7 +272,6 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void WhenASpaceIsAtTheEndOfTheTextTrimTheText() throws IOException {
-        String parkingLotText = "Parkplatznummer eingeben:     ";
 
         // Mock
         when(messageProvider.get(MSG_KEY_ENTER_PARKING_LOT)).thenReturn(
@@ -314,8 +341,6 @@ public class ConsoleSimulationViewTest {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5);
 
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
-
         // Mock
         when(bufferedReader.readLine()).thenReturn("0.5 1.0");
 
@@ -341,8 +366,6 @@ public class ConsoleSimulationViewTest {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
-
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("abc");
@@ -372,7 +395,7 @@ public class ConsoleSimulationViewTest {
                 + MSG_VAL_COIN_INVALID
                 + System.lineSeparator();
 
-        List<BigDecimal> validCoins = new ArrayList<BigDecimal>();
+        List<BigDecimal> validCoins = new ArrayList<>();
         validCoins.add(new BigDecimal("2.00").setScale(2));
         validCoins.add(new BigDecimal("1.00").setScale(2));
 
@@ -398,8 +421,6 @@ public class ConsoleSimulationViewTest {
                 + ": ", 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
-        MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
-
         // Mock
         when(bufferedReader.readLine()).thenReturn("0.5,0.6");
 
@@ -422,12 +443,12 @@ public class ConsoleSimulationViewTest {
                 + MSG_VAL_DRAWBACK
                 + System.lineSeparator();
 
-        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
 
-        drawbackMap.put(coin, new Integer(1));
+        drawbackMap.put(coin, 1);
 
         // Mock
         doThrow(new CoinBoxFullException("coinboxfull")).when(slotMachine)
@@ -446,7 +467,7 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyWithNoTransaction()
             throws IOException, CoinBoxFullException, NoTransactionException,
             InvalidCoinException {
-        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
@@ -455,7 +476,7 @@ public class ConsoleSimulationViewTest {
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
 
-        drawbackMap.put(coin, new Integer(1));
+        drawbackMap.put(coin, 1);
 
         // Mock
         doThrow(new NoTransactionException("noTransaction")).when(slotMachine)
@@ -481,12 +502,12 @@ public class ConsoleSimulationViewTest {
                 + System.lineSeparator()
                 + MSG_VAL_DRAWBACK + System.lineSeparator();
 
-        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
 
-        drawbackMap.put(coin, new Integer(2));
+        drawbackMap.put(coin, 2);
 
         // Mock
         doThrow(new CoinBoxFullException("coinboxfull", coin))
@@ -501,6 +522,51 @@ public class ConsoleSimulationViewTest {
 
         assertEquals(exptectedMessage, outContent.toString());
 
+    }
+
+    @Test
+    public void testWhenDisplayAllInformationIsCalledItShouldOutputTest() {
+        // Mock
+        ParkingTimeDefinition definition1 = new ParkingTimeDefinition();
+        definition1.setPricePerPeriod(new BigDecimal(0.5));
+        definition1.setDurationOfPeriodInMinutes(30);
+        definition1.setCountOfSuccessivePeriods(2);
+        definition1.setOrderId(1);
+
+        ParkingTimeDefinition definition2 = new ParkingTimeDefinition();
+        definition2.setPricePerPeriod(new BigDecimal(1));
+        definition2.setDurationOfPeriodInMinutes(10);
+        definition2.setCountOfSuccessivePeriods(1);
+        definition2.setOrderId(2);
+
+        List<ParkingTimeDefinition> parkingTimeDefinition = new ArrayList<>();
+        parkingTimeDefinition.add(definition1);
+        parkingTimeDefinition.add(definition2);
+
+        ParkingTimeDefinitions definitions = new ParkingTimeDefinitions();
+        definitions.setParkingTimeDefinitions(parkingTimeDefinition);
+
+        when(parkingTimeConfigurationProvider.get()).thenReturn(definitions);
+
+        // Run
+        view.displayAllInformation();
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE,
+                        "2",
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE) +
+                        System.lineSeparator() +
+                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "1", "0.00", "0.50", "30") +
+                        System.lineSeparator() +
+                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "2", "0.50", "1.00", "60") +
+                        System.lineSeparator() +
+                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "3", "1.00", "2.00", "70") +
+                        System.lineSeparator(),
+                outContent.toString());
     }
 
     // ************** Tests for Entering Secret Codes **************
@@ -527,17 +593,17 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testDisplayDrawbackMessage() throws IOException {
-        Map<BigDecimal, Integer> drawbackMap = new Hashtable<BigDecimal, Integer>();
+        Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
 
-        drawbackMap.put(coin, new Integer(1));
+        drawbackMap.put(coin, 1);
 
         coin = new BigDecimal(0.5);
         coin = coin.setScale(2);
 
-        drawbackMap.put(coin, new Integer(2));
+        drawbackMap.put(coin, 2);
 
         when(slotMachine.getDrawback()).thenReturn(drawbackMap);
 

@@ -15,4 +15,8 @@
     <message key="view.slot.machine.coin.box.full">Die Münzfächer sind voll!</message>
     <message key="view.info.allParkingCharge">ParkingMeter (alle Parking-Gebühren) Info vom:</message>
     <message key="view.booking.not.enough.money">Es wurden zu wenige Münzen eingeworfen.</message>
+    <message key="view.parking.time.def">Parkzeit Definition</message>
+    <message key="view.prompt.separator">: </message>
+    <message key="view.all.information.title.template">{0}) {1}</message>
+    <message key="view.all.information.parking.time">Zeitbereich[{0}] | von {1} € | bis {2} € | Zeit: {3} min |</message>
 </messages>
