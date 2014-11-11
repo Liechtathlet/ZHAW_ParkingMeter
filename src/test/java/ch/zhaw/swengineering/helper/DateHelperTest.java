@@ -51,7 +51,7 @@ public class DateHelperTest {
         calOne.set(Calendar.AM_PM, Calendar.AM);
         calTwo.set(Calendar.AM_PM, Calendar.AM);
 
-        // Test hour and minute
+        // Test hour and minute.
         calOne.set(2014, 10, 2, 12, 30, 0);
         calTwo.set(2014, 10, 2, 10, 15, 0);
 
