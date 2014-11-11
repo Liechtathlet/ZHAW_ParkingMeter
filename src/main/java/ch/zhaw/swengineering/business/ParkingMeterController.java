@@ -1,18 +1,15 @@
-package ch.zhaw.swengineering.controller;
-
-import java.math.BigDecimal;
-
-import org.springframework.stereotype.Controller;
+package ch.zhaw.swengineering.business;
 
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 
+import java.math.BigDecimal;
+
 /**
  * @author Daniel Brun Interface for ParkingMeter Controllers Provides methods
  *         to access the parking lot information, book parking lots and so on.
  */
-@Controller
 public interface ParkingMeterController {
 
 	/**

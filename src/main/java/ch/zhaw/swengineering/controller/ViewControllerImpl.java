@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.controller;
 
 import java.math.BigDecimal;
 
+import ch.zhaw.swengineering.business.ParkingMeterController;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;

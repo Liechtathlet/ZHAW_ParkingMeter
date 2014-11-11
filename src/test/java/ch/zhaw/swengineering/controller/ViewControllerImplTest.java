@@ -9,6 +9,7 @@ import java.math.BigDecimal;
 import java.util.Calendar;
 import java.util.Date;
 
+import ch.zhaw.swengineering.business.ParkingMeterControllerImpl;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,7 +28,6 @@ import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 

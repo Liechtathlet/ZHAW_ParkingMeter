@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import ch.zhaw.swengineering.business.ParkingMeterControllerImpl;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -320,12 +321,10 @@ public class ParkingMeterControllerImplTest {
     private ParkingTimeDefinitions getParkingTimeDefinitionMock() {
         ParkingTimeDefinitions definitions = new ParkingTimeDefinitions();
 
-        List<ParkingTimeDefinition> defList = new ArrayList<ParkingTimeDefinition>();
+        List<ParkingTimeDefinition> defList = new ArrayList<>();
 
-        defList.add(new ParkingTimeDefinition(new BigDecimal(2.0), new Integer(
-                30), new Integer(2), 2));
-        defList.add(new ParkingTimeDefinition(new BigDecimal(1.0), new Integer(
-                30), new Integer(2), 1));
+        defList.add(new ParkingTimeDefinition(new BigDecimal(2.0), 30, 2, 2));
+        defList.add(new ParkingTimeDefinition(new BigDecimal(1.0), 30, 2, 1));
 
         definitions.setParkingTimeDefinitions(defList);
 

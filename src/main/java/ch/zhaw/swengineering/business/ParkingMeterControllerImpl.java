@@ -1,37 +1,26 @@
-package ch.zhaw.swengineering.controller;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.PostConstruct;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.stereotype.Controller;
+package ch.zhaw.swengineering.business;
 
 import ch.zhaw.swengineering.helper.AssertHelper;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.AllParkingCharge;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.model.persistence.ParkingMeter;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-import ch.zhaw.swengineering.model.persistence.SecretCodes;
+import ch.zhaw.swengineering.model.persistence.*;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * @author Daniel Brun Implementation of the {@link ParkingMeterController}
  */
-@Controller
+@Component
 public class ParkingMeterControllerImpl implements ParkingMeterController {
 
     /**
@@ -113,7 +102,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
 
     @Override
     public void callAllBookedParkingLots() {
-        ArrayList<ParkingLot> parkingLots = new ArrayList<ParkingLot>();
+        ArrayList<ParkingLot> parkingLots;
         parkingLots = (ArrayList<ParkingLot>) parkingMeter.parkingLots;
 
         AllParkingCharge allParkingCharge = new AllParkingCharge(parkingLots);
@@ -131,7 +120,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
         for (Entry<Integer, SecretActionEnum> secretCodeEntry : secretCodes
                 .getCodeMapping().entrySet()) {
             if (secretCodeEntry.getKey().equals(secretKey)) {
-                return (SecretActionEnum) secretCodeEntry.getValue();
+                return secretCodeEntry.getValue();
             }
         }
 
@@ -179,7 +168,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
                 minimumBooking = true;
 
                 int countOfSuccessivePeriods = def
-                        .getCountOfSuccessivePeriods().intValue();
+                        .getCountOfSuccessivePeriods();
 
                 // Limit period count
                 if (countOfSuccessivePeriods != 0
@@ -188,8 +177,7 @@ public class ParkingMeterControllerImpl implements ParkingMeterController {
                 }
 
                 // Calculate
-                bookingInMinutes += def.getDurationOfPeriodInMinutes()
-                        .intValue() * periodCount;
+                bookingInMinutes += def.getDurationOfPeriodInMinutes() * periodCount;
                 leftoverMoney = leftoverMoney.subtract(def.getPricePerPeriod()
                         .multiply(new BigDecimal(periodCount)));
             }
