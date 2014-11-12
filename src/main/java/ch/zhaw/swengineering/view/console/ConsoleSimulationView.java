@@ -159,44 +159,43 @@ public class ConsoleSimulationView extends SimulationView {
                     LocaleContextHolder.getLocale());
         }
 
-        printToConsole("view.info.parkingTime", false, aParkingLotNumber,
-                formattedDate);
+        print("view.info.parkingTime", false, aParkingLotNumber, formattedDate);
     }
 
     @Override
     public void displayParkingLotNumberInvalid() {
-        printToConsole("view.enter.parkinglotnumber.invalid", false);
+        print("view.enter.parkinglotnumber.invalid", false);
     }
 
     @Override
     public void displayShutdownMessage() {
-        printToConsole("application.bye", false);
+        print("application.bye", false);
     }
 
     @Override
     public void displayAllInformation() {
+        //TODO: Der View-State ist nicht notwendig -> Parameter -> Output
         setViewState(ConsoleViewStateEnum.DISPLAY_ALL_INFORMATION);
     }
 
     public void executeActionForViewingAllInformation() {
-        printToConsole("view.all.information.title.template", false, 2,
-                messageProvider.get("view.parking.time.def").trim());
+        print("view.all.information.title.template", false, 2, messageProvider
+                .get("view.parking.time.def").trim());
 
-        ParkingTimeDefinitions parkingTimes =
-                (ParkingTimeDefinitions) parkingTimeConfigurationProvider.get();
+        ParkingTimeDefinitions parkingTimes = (ParkingTimeDefinitions) parkingTimeConfigurationProvider
+                .get();
         int i = 1;
         int lastMinuteCount = 0;
         BigDecimal lastPrice = new BigDecimal(0);
-        for (ParkingTimeDefinition parkingTime :
-                parkingTimes.getParkingTimeDefinitions()) {
+        for (ParkingTimeDefinition parkingTime : parkingTimes
+                .getParkingTimeDefinitions()) {
             for (int j = 0; j < parkingTime.getCountOfSuccessivePeriods(); j++) {
-                BigDecimal newPrice = lastPrice.add(parkingTime.getPricePerPeriod());
-                int newMinuteCount = lastMinuteCount + parkingTime.getDurationOfPeriodInMinutes();
-                printToConsole("view.all.information.parking.time",
-                        false,
-                        i,
-                        formatPrice(lastPrice),
-                        formatPrice(newPrice),
+                BigDecimal newPrice = lastPrice.add(parkingTime
+                        .getPricePerPeriod());
+                int newMinuteCount = lastMinuteCount
+                        + parkingTime.getDurationOfPeriodInMinutes();
+                print("view.all.information.parking.time", false, i,
+                        formatPrice(lastPrice), formatPrice(newPrice),
                         newMinuteCount);
                 lastPrice = newPrice;
                 lastMinuteCount = newMinuteCount;
@@ -208,6 +207,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     private String formatPrice(BigDecimal price) {
+        //TODO: Auslagern in Helper
         price = price.setScale(2, BigDecimal.ROUND_DOWN);
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
@@ -221,7 +221,7 @@ public class ConsoleSimulationView extends SimulationView {
      * 'EnteringParkingLotNumber'.
      */
     public void executeActionsForStateEnteringParkingLotNumber() {
-        printToConsole("view.enter.parkinglotnumber", true);
+        print("view.enter.parkinglotnumber", true);
         String input = readFromConsole();
 
         if (input != null) {
@@ -230,7 +230,7 @@ public class ConsoleSimulationView extends SimulationView {
             try {
                 parkingLotNumber = new Integer(input);
             } catch (NumberFormatException e) {
-                printToConsole("view.enter.parkinglotnumber.invalid", false);
+                print("view.enter.parkinglotnumber.invalid", false);
             }
 
             if (parkingLotNumber != null) {
@@ -245,7 +245,7 @@ public class ConsoleSimulationView extends SimulationView {
      * 'DroppingInMoney'.
      */
     public void executeActionsForDroppingInMoney() {
-        printToConsole("view.enter.coins", true, storeParkingLotNumber);
+        print("view.enter.coins", true, storeParkingLotNumber);
         String input = readFromConsole();
 
         // if input == null: no input was provided or another event occurred.
@@ -262,11 +262,11 @@ public class ConsoleSimulationView extends SimulationView {
                         + "from slot machine: coin box is full!", e);
 
                 if (e.isAllCoinBoxesFull()) {
-                    printToConsole("view.slot.machine.coin.box.full", false,
+                    print("view.slot.machine.coin.box.full", false,
                             e.getCoinValue());
                 } else {
-                    printToConsole("view.slot.machine.coin.box.single.full",
-                            false, e.getCoinValue());
+                    print("view.slot.machine.coin.box.single.full", false,
+                            e.getCoinValue());
                 }
 
             } catch (NoTransactionException e) {
@@ -289,11 +289,10 @@ public class ConsoleSimulationView extends SimulationView {
 
                 LOG.error("Received exception "
                         + "from slot machine: invalid coin!", e);
-                printToConsole("view.slot.machine.coin.invalid", false,
-                        coinString);
+                print("view.slot.machine.coin.invalid", false, coinString);
             } catch (NumberFormatException e) {
                 error = true;
-                printToConsole("view.slot.machine.format.invalid", false);
+                print("view.slot.machine.format.invalid", false);
             }
 
             if (error) {
@@ -303,7 +302,7 @@ public class ConsoleSimulationView extends SimulationView {
             } else {
                 // Reset view state if operation was successful.
                 setViewState(ConsoleViewStateEnum.INIT);
-                notifyForMoneyInserted();
+                notifyForMoneyInserted(storeParkingLotNumber);
             }
         }
     }
@@ -330,7 +329,7 @@ public class ConsoleSimulationView extends SimulationView {
             }
         }
 
-        printToConsole("view.slot.machine.drawback", false, sb.toString());
+        print("view.slot.machine.drawback", false, sb.toString());
 
     }
 
@@ -359,47 +358,9 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     /**
-     * Notifies all attached listeners about the entered parking lot.
+     * Prints a text with the given key to the console. TODO sl: Move print
+     * methods to its own class
      * 
-     * @param parkingLotNumber
-     *            The parking lot number.
-     */
-    private void notifyForParkingLotNumberEntered(final int parkingLotNumber) {
-        ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
-                parkingLotNumber);
-
-        for (ViewEventListener listener : eventListeners) {
-            listener.parkingLotEntered(event);
-        }
-    }
-
-    /**
-     * Notifies all attached listeners about the aborted action.
-     */
-    private void notifyForActionAborted() {
-        ActionAbortedEvent event = new ActionAbortedEvent(this);
-
-        for (ViewEventListener listener : eventListeners) {
-            listener.actionAborted(event);
-        }
-    }
-
-    /**
-     * Notifies all attached listeners about the entered money.
-     */
-    private void notifyForMoneyInserted() {
-        MoneyInsertedEvent event = new MoneyInsertedEvent(this,
-                storeParkingLotNumber);
-
-        for (ViewEventListener listener : eventListeners) {
-            listener.moneyInserted(event);
-        }
-    }
-
-    /**
-     * Prints a text with the given key to the console.
-     * TODO sl: Move print methods to its own class
-     *
      * @param aKey
      *            the key of the text to output.
      * @param prompt
@@ -407,12 +368,12 @@ public class ConsoleSimulationView extends SimulationView {
      * @param arguments
      *            The arguments for the message.
      */
-    private void printToConsole(final String aKey, final boolean prompt,
-                                final Object... arguments) {        if (prompt) {
-        writer.print(
-                MessageFormat.format(
-                        messageProvider.get(aKey).trim() +
-                                messageProvider.get("view.prompt.separator"), arguments));
+    @Override
+    protected void print(final String aKey, final boolean prompt,
+            final Object... arguments) {
+        if (prompt) {
+            writer.print(MessageFormat.format(messageProvider.get(aKey).trim()
+                    + messageProvider.get("view.prompt.separator"), arguments));
         } else {
             writer.println(MessageFormat.format(messageProvider.get(aKey)
                     .trim(), arguments));
@@ -490,11 +451,6 @@ public class ConsoleSimulationView extends SimulationView {
         LOG.info("Shutting down the view...");
         run = false;
         setViewState(ConsoleViewStateEnum.EXIT);
-    }
-
-    @Override
-    public void displayNotEnoughMoneyError() {
-        printToConsole("view.booking.not.enough.money", false);
     }
 
     @Override

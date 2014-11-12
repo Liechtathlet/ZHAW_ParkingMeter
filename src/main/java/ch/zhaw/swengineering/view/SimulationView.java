@@ -8,6 +8,9 @@ import java.util.List;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 
@@ -21,7 +24,7 @@ import ch.zhaw.swengineering.event.ViewEventListener;
  */
 /**
  * @author Daniel Brun
- *
+ * 
  */
 public abstract class SimulationView implements Runnable {
 
@@ -49,7 +52,7 @@ public abstract class SimulationView implements Runnable {
             // Create and start thread
             thread = new Thread(this);
             thread.start();
-            
+
             LOG.info("Simulation started");
         } else {
             // TODO: Throw exception.
@@ -65,7 +68,7 @@ public abstract class SimulationView implements Runnable {
      * Shuts down the view.
      */
     public abstract void shutdown();
-    
+
     /**
      * Prompts the user to choose / enter a parking lot number.
      */
@@ -82,8 +85,8 @@ public abstract class SimulationView implements Runnable {
     /**
      * Prompts the user for the new coin box levels.
      */
-    //public abstract void promptForNewCoinBoxLevels();
-    
+    // public abstract void promptForNewCoinBoxLevels();
+
     /**
      * Displays the information about the current parking lot.
      * 
@@ -104,7 +107,24 @@ public abstract class SimulationView implements Runnable {
      * Displays a message, that the system is shutting down.
      */
     public abstract void displayShutdownMessage();
-    
+
+    /**
+     * Displays all available information. TODO: Anpassen.
+     */
+    public abstract void displayAllInformation();
+
+    /**
+     * Displays an error message, that not enough money was inserted.
+     */
+    public final void displayNotEnoughMoneyError() {
+        print("view.booking.not.enough.money", false);
+    }
+
+    /**
+     * Displays a message with the drawback.
+     */
+    public abstract void displayMessageForDrawback();
+
     /**
      * Registers a view event listener.
      * 
@@ -138,7 +158,7 @@ public abstract class SimulationView implements Runnable {
             eventListeners.remove(aListener);
         }
     }
-    
+
     /**
      * Notifies all attached listeners about the shutdown request.
      */
@@ -151,18 +171,56 @@ public abstract class SimulationView implements Runnable {
     }
 
     /**
-     * Displays all available information.
-     * TODO: Anpassen.
+     * Notifies all attached listeners about the entered parking lot.
+     * 
+     * @param parkingLotNumber
+     *            The parking lot number.
      */
-    public abstract void displayAllInformation();
-    
-    /**
-     * Displays an error message, that not enough money was inserted.
-     */
-    public abstract void displayNotEnoughMoneyError();
+    protected void notifyForParkingLotNumberEntered(final int parkingLotNumber) {
+        ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
+                parkingLotNumber);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.parkingLotEntered(event);
+        }
+    }
 
     /**
-     * Displays a message with the drawback.
+     * Notifies all attached listeners about the aborted action.
      */
-    public abstract void displayMessageForDrawback();
+    protected void notifyForActionAborted() {
+        ActionAbortedEvent event = new ActionAbortedEvent(this);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.actionAborted(event);
+        }
+    }
+
+    /**
+     * Notifies all attached listeners about the entered money.
+     * 
+     * @param aParkingLotNumber
+     *            The parking lot number.
+     */
+    protected void notifyForMoneyInserted(final int aParkingLotNumber) {
+        MoneyInsertedEvent event = new MoneyInsertedEvent(this,
+                aParkingLotNumber);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.moneyInserted(event);
+        }
+    }
+
+    /**
+     * Prints a message to the output.
+     * 
+     * @param aKey
+     *            the key of the message.
+     * @param prompt
+     *            True if the message is a prompt.
+     * @param arguments
+     *            The arguments for the message.
+     */
+    protected abstract void print(final String aKey, final boolean prompt,
+            final Object... arguments);
 }

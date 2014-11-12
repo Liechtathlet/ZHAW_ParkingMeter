@@ -124,13 +124,13 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
-    public void displayNotEnoughMoneyError() {
+    public void displayMessageForDrawback() {
         // TODO Auto-generated method stub
         
     }
 
     @Override
-    public void displayMessageForDrawback() {
+    protected void print(String aKey, boolean prompt, Object... arguments) {
         // TODO Auto-generated method stub
         
     }
