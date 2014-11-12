@@ -97,6 +97,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                     processed = true;
                     view.displayAllInformation();
                     break;
+                case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
+                    //view.promptForNewCoinBoxLevels();
+                    break;
             }
         } catch (Exception e) {
             // Nothing to do here..

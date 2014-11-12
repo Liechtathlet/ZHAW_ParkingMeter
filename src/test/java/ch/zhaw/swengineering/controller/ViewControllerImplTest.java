@@ -183,6 +183,36 @@ public class ViewControllerImplTest {
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         verify(view).displayAllInformation();
     }
+    
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario:    A valid secret code is entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithSCEnteringCoinBoxLevel() throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber))
+                .thenReturn(SecretActionEnum.ENTER_NEW_LEVEL_FOR_COIN_BOXES);
+
+        // Setup
+        controller.start();
+
+        // Execute Test
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeter).getSecretAction(parkingLotNumber);
+        //verify(view).displayAllInformation();
+        
+        //TODO: Further asserts
+    }
 
     /**
      * Method-Under-Test: moneyInserted(...).

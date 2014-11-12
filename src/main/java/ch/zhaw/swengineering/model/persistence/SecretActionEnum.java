@@ -13,11 +13,23 @@ public enum SecretActionEnum {
      */
     VIEW_ALL_INFORMATION,
 
+    /**
+     * Action for viewing the current state of the parking lots.
+     */
     VIEW_ALL_PARKING_CHARGE,
 
+    /**
+     * Action for viewing the transaction log.
+     */
     VIEW_TRANSACTION_LOG,
 
+    /**
+     * Action for viewing the content of the coin boxes.
+     */
     VIEW_CONTENT_OF_COIN_BOXES,
 
+    /**
+     * Action for entering a new level for the coin box.
+     */
     ENTER_NEW_LEVEL_FOR_COIN_BOXES;
 }

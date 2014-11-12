@@ -80,6 +80,11 @@ public abstract class SimulationView implements Runnable {
     public abstract void promptForMoney(int aParkingLotNumber);
 
     /**
+     * Prompts the user for the new coin box levels.
+     */
+    //public abstract void promptForNewCoinBoxLevels();
+    
+    /**
      * Displays the information about the current parking lot.
      * 
      * @param aParkingLotNumber

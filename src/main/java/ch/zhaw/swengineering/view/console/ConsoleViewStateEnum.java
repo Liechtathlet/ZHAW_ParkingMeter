@@ -16,6 +16,10 @@ public enum ConsoleViewStateEnum {
      */
     ENTERING_PARKING_LOT,
     /**
+     * State if the user must enter a new level for the coin boxes.
+     */
+    ENTERING_COIN_BOX_COIN_LEVEL,
+    /**
      * State if the user must drop in some money.
      */
     DROPPING_IN_MONEY,
