@@ -51,6 +51,51 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
+    public void windowDeactivated(final WindowEvent e) {
+        // Not used.
+    }
+
+    @Override
+    public void windowDeiconified(final WindowEvent e) {
+        // Not used.
+    }
+
+    @Override
+    public void windowIconified(final WindowEvent e) {
+        // Not used.
+    }
+
+    @Override
+    public void windowOpened(final WindowEvent e) {
+        // Not used.
+    }
+
+    @Override
+    public void displayAllInformation() {
+        // TODO Auto-generated method stub
+
+    }
+
+    @Override
+    public void displayMessageForDrawback() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void print(String aKey, boolean prompt, Object... arguments) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void promptForNewCoinBoxLevels(
+            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
+        // TODO Auto-generated method stub
+        
+    }
+    
+    @Override
     public void promptForParkingLotNumber() {
     }
 
@@ -97,50 +142,5 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void windowClosing(final WindowEvent e) {
         notifyForShutdownRequested();
-    }
-
-    @Override
-    public void windowDeactivated(final WindowEvent e) {
-        // Not used.
-    }
-
-    @Override
-    public void windowDeiconified(final WindowEvent e) {
-        // Not used.
-    }
-
-    @Override
-    public void windowIconified(final WindowEvent e) {
-        // Not used.
-    }
-
-    @Override
-    public void windowOpened(final WindowEvent e) {
-        // Not used.
-    }
-
-    @Override
-    public void displayAllInformation() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void displayMessageForDrawback() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    protected void print(String aKey, boolean prompt, Object... arguments) {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
-    public void promptForNewCoinBoxLevels(
-            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
-        // TODO Auto-generated method stub
-        
     }
 }
