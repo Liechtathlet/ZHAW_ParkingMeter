@@ -92,6 +92,7 @@ public class ConsoleSimulationView extends SimulationView {
     private DateFormatter dateFormatter;
 
     private int storeParkingLotNumber;
+    private List<CoinBoxLevel> coinBoxLevels;
 
     /**
      * Creates a new instance of this class and sets the initial state.
@@ -130,6 +131,9 @@ public class ConsoleSimulationView extends SimulationView {
                         break;
                     case EXIT:
                         run = false;
+                        break;
+                    case ENTERING_COIN_BOX_COIN_LEVEL:
+                        executeActionsForEnteringCoinBoxLevels();
                         break;
                     case INIT:
                     default:
@@ -478,7 +482,17 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void promptForNewCoinBoxLevels(
             List<CoinBoxLevel> someCurrentCoinBoxLevels) {
-        for (CoinBoxLevel cbl : someCurrentCoinBoxLevels) {
+        coinBoxLevels = someCurrentCoinBoxLevels;
+        setViewState(ConsoleViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
+    }
+
+    /**
+     * Executes all necessary actions, which are required in the state
+     * 'EnteringCoinBoxLevels'.
+     */
+    public void executeActionsForEnteringCoinBoxLevels() {
+        boolean failure = false;
+        for (CoinBoxLevel cbl : coinBoxLevels) {
 
             // TODO: Evtl. auslagern.
             BigDecimal total = cbl.getCoinValue().multiply(
@@ -490,10 +504,32 @@ public class ConsoleSimulationView extends SimulationView {
 
             String input = readFromConsole();
 
-            // int between 0 and 100
-            // view.info.coin.box.content.limit
-            // Invalid entry
-            // view.slot.machine.format.invalid
+            try {
+                int coinCount = new Integer(input);
+
+                if (coinCount >= 1 && coinCount <= 100) {
+                    cbl.setCurrentCoinCount(coinCount);
+                } else {
+                    LOG.info("Coin count for coin box not in range!");
+                    failure = true;
+                    print("view.info.coin.box.content.limit", false);
+
+                    // Early return for quick failure
+                    return;
+                }
+            } catch (NumberFormatException e) {
+                LOG.info("Coin count is not a valid number!");
+                failure = true;
+                print("view.slot.machine.format.invalid", false);
+
+                // Early return for quick failure
+                return;
+            }
+        }
+
+        if (!failure) {
+            setViewState(ConsoleViewStateEnum.INIT);
+            notifyForCoinBoxLevelEntered(coinBoxLevels);
         }
     }
 

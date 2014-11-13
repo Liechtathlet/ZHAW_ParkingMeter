@@ -20,7 +20,7 @@
     <message key="view.all.information.title.template">{0}) {1}</message>
     <message key="view.all.information.parking.time">Zeitbereich[{0}] | von {1} € | bis {2} € | Zeit: {3} min |</message>
     <message key="view.slot.machine.coin.box.level.too.high">Für die Münzeinheit {0} wurde die maximale Anzahl von Münzen überschritten!</message>
-    <message key="view.info.coin.box.content">Aktueller Bestand in Münzeinheit [{0}] {1} x € {0} = € {3}</message>
+    <message key="view.info.coin.box.content">Aktueller Bestand in Münzeinheit [{0}] {1} x € {0} = € {2}</message>
     <message key="view.info.coin.box.content.new">Neuer Bestand in Münzeinheit [{0}]</message>
     <message key="view.info.coin.box.content.limit">Die Anzahl muss zwischen 1 und 100 liegen. </message>
     

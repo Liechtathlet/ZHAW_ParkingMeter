@@ -21,7 +21,9 @@ import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.SimulationView;
+import ch.zhaw.swengineering.view.console.ConsoleViewStateEnum;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -100,6 +102,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 view.displayAllInformation();
                 break;
             case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
+                processed = true;
                 view.promptForNewCoinBoxLevels(slotMachine
                         .getCurrentCoinBoxLevel());
                 break;
@@ -166,9 +169,15 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void coinBoxLevelEntered(
             CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
         LOG.info("Coin box level entered...");
-        slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevelEnteredEvent
-                .getCoinBoxLevels());
-        //TODO: Ouput coin box levels (secret code method)
-        view.promptForParkingLotNumber();
+        try {
+            slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevelEnteredEvent
+                    .getCoinBoxLevels());
+
+            // TODO: Ouput coin box levels (secret code method)
+            view.promptForParkingLotNumber();
+        } catch (CoinBoxFullException e) {
+            view.displayCoinCountTooHigh(e.getCoinValue());
+            view.promptForNewCoinBoxLevels(slotMachine.getCurrentCoinBoxLevel());
+        }
     }
 }

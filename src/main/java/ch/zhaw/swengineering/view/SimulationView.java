@@ -1,5 +1,6 @@
 package ch.zhaw.swengineering.view;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -131,6 +132,16 @@ public abstract class SimulationView implements Runnable {
     public abstract void displayMessageForDrawback();
 
     /**
+     * Displays a message with the error message, that the entered coin count
+     * was too high.
+     * 
+     * @param aCoinValue The coin value of the coin box.
+     */
+    public final void displayCoinCountTooHigh(BigDecimal aCoinValue) {
+        print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
+    }
+
+    /**
      * Registers a view event listener.
      * 
      * @param aListener
@@ -222,7 +233,7 @@ public abstract class SimulationView implements Runnable {
      * @param someCoinBoxLevels
      *            The coin box levels.
      */
-    protected void notifyForMoneyInserted(
+    protected void notifyForCoinBoxLevelEntered(
             final List<CoinBoxLevel> someCoinBoxLevels) {
         CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(this,
                 someCoinBoxLevels);
