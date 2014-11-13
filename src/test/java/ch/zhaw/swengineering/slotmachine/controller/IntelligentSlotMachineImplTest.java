@@ -2,12 +2,15 @@ package ch.zhaw.swengineering.slotmachine.controller;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
+
+import junit.framework.Assert;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -21,6 +24,7 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.ConfigurationWriter;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.CoinBox;
 import ch.zhaw.swengineering.model.persistence.CoinBoxes;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
@@ -39,8 +43,8 @@ public class IntelligentSlotMachineImplTest {
 
     @Mock(name = "coinBoxesProvider")
     private ConfigurationProvider configProviderCoinBoxes;
-    
-    @Mock(name ="coinBoxesWriter")
+
+    @Mock(name = "coinBoxesWriter")
     private ConfigurationWriter configWriterCoinBoxes;
 
     /**
@@ -228,7 +232,7 @@ public class IntelligentSlotMachineImplTest {
 
         assertEquals(0, BigDecimal.ZERO.compareTo(slotMachine
                 .getAmountOfCurrentlyInsertedMoney()));
-        
+
         verify(configWriterCoinBoxes).write(any(Object.class));
     }
 
@@ -286,6 +290,76 @@ public class IntelligentSlotMachineImplTest {
     }
 
     /**
+     * Method: getCoinBoxLevels(...)
+     * 
+     * Scenario: gets the current coin box levels
+     * 
+     * Expected: The coin box levels are returned.
+     */
+    @Test
+    public final void testGetCoinBoxLevels() {
+        List<CoinBoxLevel> coinBoxLevels = slotMachine.getCurrentCoinBoxLevel();
+
+        for (CoinBoxLevel cbLevel : coinBoxLevels) {
+
+            for (CoinBox cb : getMockedCoinBoxes().getCoinBoxes()) {
+                if (cbLevel.getCoinValue().equals(cb.getCoinValue())) {
+                    assertEquals(cb.getCurrentCoinCount(),
+                            cbLevel.getCurrentCoinCount());
+                }
+            }
+        }
+    }
+
+    /**
+     * Method: updateCoinBoxLevels(...)
+     * 
+     * Scenario: Updates the coin box levels
+     * 
+     * Expected: The coin box levels are updated and correctly returned.
+     */
+    @Test
+    public final void testUpdateCoinBoxLevels() {
+        List<CoinBoxLevel> coinBoxLevels = slotMachine.getCurrentCoinBoxLevel();
+
+        for (CoinBoxLevel cbLevel : coinBoxLevels) {
+            cbLevel.setCurrentCoinCount(cbLevel.getCurrentCoinCount() + 2);
+        }
+
+        slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevels);
+
+        coinBoxLevels = slotMachine.getCurrentCoinBoxLevel();
+
+        for (CoinBoxLevel cbLevel : coinBoxLevels) {
+
+            for (CoinBox cb : getMockedCoinBoxes().getCoinBoxes()) {
+                if (cbLevel.getCoinValue().equals(cb.getCoinValue())) {
+                    assertEquals(cb.getCurrentCoinCount(),
+                            cbLevel.getCurrentCoinCount());
+                }
+            }
+        }
+    }
+
+    /**
+     * Method: updateCoinBoxLevels(...)
+     * 
+     * Scenario: Updates the coin box levels over the maximum capacity.
+     * 
+     * Expected: An exception is thrown.
+     */
+    @Test(expected = CoinBoxFullException.class)
+    public final void testUpdateCoinBoxLevelsOverTheMax() {
+        List<CoinBoxLevel> coinBoxLevels = slotMachine.getCurrentCoinBoxLevel();
+
+        for (CoinBoxLevel cbLevel : coinBoxLevels) {
+            cbLevel.setCurrentCoinCount(cbLevel.getCurrentCoinCount() + 15);
+        }
+
+        slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevels);
+    }
+
+    /**
      * Creates coin boxes for testing.
      * 
      * @return the mocked coin box.
@@ -296,7 +370,7 @@ public class IntelligentSlotMachineImplTest {
         CoinBox cb1 = new CoinBox(BigDecimal.valueOf(0.5), 5, 10);
         coinBoxes.getCoinBoxes().add(cb1);
 
-        CoinBox cb2 = new CoinBox(BigDecimal.valueOf(1.0), 7, 8);
+        CoinBox cb2 = new CoinBox(BigDecimal.valueOf(1.0), 6, 8);
         coinBoxes.getCoinBoxes().add(cb2);
 
         CoinBox cb3 = new CoinBox(BigDecimal.valueOf(2.0), 3, 7);

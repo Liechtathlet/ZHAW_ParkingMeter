@@ -6,12 +6,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
-import ch.zhaw.swengineering.business.ParkingMeterImpl;
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,18 +18,20 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
+import ch.zhaw.swengineering.business.ParkingMeterImpl;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
@@ -101,8 +102,8 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
 
         // Mock
-        when(parkingMeter.getParkingLot(parkingLotNumber))
-                .thenReturn(parkingLot);
+        when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(
+                parkingLot);
 
         // Setup
         controller.start();
@@ -136,8 +137,7 @@ public class ViewControllerImplTest {
                 view, parkingLotNumber);
 
         // Mock
-        when(parkingMeter.getParkingLot(parkingLotNumber))
-                .thenReturn(null);
+        when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(null);
 
         // Setup
         controller.start();
@@ -158,20 +158,21 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
+     * 
      * Scenario: A valid parking lot number is entered.
-     *
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
-    public final void testParkingLotEnteredEventWithValidViewAllInformationSecretNumber() throws Exception {
+    public final void testParkingLotEnteredEventWithValidViewAllInformationSecretNumber()
+            throws Exception {
         int parkingLotNumber = 123456;
 
         // Mock
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
-        when(parkingMeter.getSecretAction(parkingLotNumber))
-                .thenReturn(SecretActionEnum.VIEW_ALL_INFORMATION);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_ALL_INFORMATION);
 
         // Setup
         controller.start();
@@ -183,23 +184,24 @@ public class ViewControllerImplTest {
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         verify(view).displayAllInformation();
     }
-    
+
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
-     * Scenario:    A valid secret code is entered.
-     *
+     * 
+     * Scenario: A valid secret code is entered.
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
-    public final void testParkingLotEnteredEventWithSCEnteringCoinBoxLevel() throws Exception {
+    public final void testParkingLotEnteredEventWithSCEnteringCoinBoxLevel()
+            throws Exception {
         int parkingLotNumber = 123456;
 
         // Mock
         ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
                 view, parkingLotNumber);
-        when(parkingMeter.getSecretAction(parkingLotNumber))
-                .thenReturn(SecretActionEnum.ENTER_NEW_LEVEL_FOR_COIN_BOXES);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.ENTER_NEW_LEVEL_FOR_COIN_BOXES);
 
         // Setup
         controller.start();
@@ -209,9 +211,9 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
-        //verify(view).displayAllInformation();
-        
-        //TODO: Further asserts
+        // verify(view).displayAllInformation();
+
+        // TODO: Further asserts
     }
 
     /**
@@ -243,11 +245,9 @@ public class ViewControllerImplTest {
         // Mock
         when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
                 insertedMoney);
-        when(parkingMeter.getParkingLot(parkingLotNumber))
-                .thenReturn(null);
-        when(
-                parkingMeter.calculateBookingForParkingLot(5,
-                        insertedMoney)).thenReturn(booking);
+        when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(null);
+        when(parkingMeter.calculateBookingForParkingLot(5, insertedMoney))
+                .thenReturn(booking);
 
         // Setup
         controller.start();
@@ -256,8 +256,7 @@ public class ViewControllerImplTest {
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
-        verify(parkingMeter).calculateBookingForParkingLot(5,
-                insertedMoney);
+        verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
         verify(slotMachine).finishTransaction(drawback);
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
         verify(view).displayParkingLotNumberAndParkingTime(5, end);
@@ -298,11 +297,9 @@ public class ViewControllerImplTest {
         // Mock
         when(slotMachine.getAmountOfCurrentlyInsertedMoney()).thenReturn(
                 insertedMoney);
-        when(parkingMeter.getParkingLot(parkingLotNumber))
-                .thenReturn(null);
-        when(
-                parkingMeter.calculateBookingForParkingLot(5,
-                        insertedMoney)).thenReturn(booking);
+        when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(null);
+        when(parkingMeter.calculateBookingForParkingLot(5, insertedMoney))
+                .thenReturn(booking);
 
         // Setup
         controller.start();
@@ -313,16 +310,38 @@ public class ViewControllerImplTest {
         // Assert positive
         verify(view).displayNotEnoughMoneyError();
         verify(view).promptForMoney(5);
-        verify(parkingMeter).calculateBookingForParkingLot(5,
-                insertedMoney);
-       
+        verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
+
         verify(view).promptForParkingLotNumber();
-       
+
         // Assert negative
         verify(slotMachine, Mockito.times(0)).finishTransaction(drawback);
-        verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(5, end);
+        verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(5,
+                end);
     }
-    
+
+    /**
+     * Method-Under-Test: coinBoxLevelEntered(...).
+     * 
+     * Scenario: All data is valid.
+     * 
+     * Expectation: The coin box level is set correctly.
+     */
+    @Test
+    public final void testCoinBoxLevelEntered() {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        cbLevels.add(new CoinBoxLevel(new BigDecimal(5), 4, 10));
+
+        CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(view,
+                cbLevels);
+
+        controller.coinBoxLevelEntered(event);
+
+        // Assert positive
+        verify(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
+    }
+
     /**
      * Method-Under-Test: shutdownRequested(...).
      * 

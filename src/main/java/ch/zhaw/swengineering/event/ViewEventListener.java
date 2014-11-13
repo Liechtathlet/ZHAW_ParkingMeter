@@ -48,5 +48,13 @@ public interface ViewEventListener extends EventListener {
 	 *            the event data.
 	 */
 	void shutdownRequested(ShutdownEvent shutdownEvent);
+	
+	
+	/**
+	 * Called when the user entered the new coin box levels.
+	 * 
+	 * @param coinBoxLevelEnteredEvent the event data.
+	 */
+	void coinBoxLevelEntered(CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent);
 
 }

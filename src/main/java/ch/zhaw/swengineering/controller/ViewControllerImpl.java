@@ -3,6 +3,7 @@ package ch.zhaw.swengineering.controller;
 import java.math.BigDecimal;
 
 import ch.zhaw.swengineering.business.ParkingMeter;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShowAllParkingCharge;
@@ -85,21 +87,22 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                             .getParkingLotNumber());
 
             switch (actionEnum) {
-                case VIEW_ALL_PARKING_CHARGE:
-                    processed = true;
-                    parkingMeter.callAllBookedParkingLots();
-                    // 0: Modell für Ausgabe erstellen.
-                    // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
-                    // konvertieren
-                    // 2: Rückgabe an View: view.display...
-                    break;
-                case VIEW_ALL_INFORMATION:
-                    processed = true;
-                    view.displayAllInformation();
-                    break;
-                case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
-                    //view.promptForNewCoinBoxLevels();
-                    break;
+            case VIEW_ALL_PARKING_CHARGE:
+                processed = true;
+                parkingMeter.callAllBookedParkingLots();
+                // 0: Modell für Ausgabe erstellen.
+                // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
+                // konvertieren
+                // 2: Rückgabe an View: view.display...
+                break;
+            case VIEW_ALL_INFORMATION:
+                processed = true;
+                view.displayAllInformation();
+                break;
+            case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
+                view.promptForNewCoinBoxLevels(slotMachine
+                        .getCurrentCoinBoxLevel());
+                break;
             }
         } catch (Exception e) {
             // Nothing to do here..
@@ -125,15 +128,14 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
                 + insertedMoney);
 
-        ParkingLotBooking booking = parkingMeter
-                .calculateBookingForParkingLot(
-                        moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
+        ParkingLotBooking booking = parkingMeter.calculateBookingForParkingLot(
+                moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
 
         if (booking.isNotEnoughMoney()) {
             view.displayNotEnoughMoneyError();
             view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
         } else {
-            // TODO: Persist booking
+            parkingMeter.persistBooking(booking);
             view.displayParkingLotNumberAndParkingTime(
                     moneyInsertedEvent.getParkingLotNumber(),
                     booking.getPaidTill());
@@ -158,5 +160,15 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    public void coinBoxLevelEntered(
+            CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
+        LOG.info("Coin box level entered...");
+        slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevelEnteredEvent
+                .getCoinBoxLevels());
+        //TODO: Ouput coin box levels (secret code method)
+        view.promptForParkingLotNumber();
     }
 }

@@ -1,7 +1,9 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedException;
 
 /**
@@ -22,10 +24,11 @@ public interface IntelligentSlotMachineBackendInteractionInterface {
 
     /**
      * Finishes the transaction and transfers the coin to the coin box. The
-     * drawback will be subtracted and prepared for returning to the user.
-     * If no transaction is active, this method will have no effect.
+     * drawback will be subtracted and prepared for returning to the user. If no
+     * transaction is active, this method will have no effect.
      * 
-     * @param drawback the drawback to issue.
+     * @param drawback
+     *            the drawback to issue.
      */
     void finishTransaction(BigDecimal drawback);
 
@@ -36,5 +39,20 @@ public interface IntelligentSlotMachineBackendInteractionInterface {
      *             thrown if a transaction was already started.
      */
     void startTransaction();
+
+    /**
+     * Gets the current coin boxes.
+     * 
+     * @return the coin boxe levels.
+     */
+    List<CoinBoxLevel> getCurrentCoinBoxLevel();
+
+    /**
+     * Updates the coin box levels.
+     * 
+     * @param someCoinBoxLevels
+     *            The coin box levels.
+     */
+    void updateCoinLevelInCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
 
 }

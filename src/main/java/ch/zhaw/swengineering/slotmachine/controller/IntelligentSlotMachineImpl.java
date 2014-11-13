@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.SortedSet;
@@ -19,6 +20,7 @@ import org.springframework.stereotype.Controller;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.ConfigurationWriter;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.CoinBox;
 import ch.zhaw.swengineering.model.persistence.CoinBoxes;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
@@ -45,13 +47,13 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     @Autowired
     @Qualifier("coinBoxes")
     private ConfigurationProvider coinBoxesProvider;
-    
+
     @Autowired
     @Qualifier("coinBoxes")
     private ConfigurationWriter coinBoxesWriter;
-    
+
     private CoinBoxes coinBoxes;
-    
+
     private boolean transactionStarted;
 
     private Map<BigDecimal, Integer> transactionCoinCache;
@@ -111,7 +113,8 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
             // work?
             for (BigDecimal coinVal : reverseAvailableCoinList) {
                 CoinBox cb = coinBoxes.getCoinBox(coinVal);
-                int count = currDrawback.divideToIntegralValue(cb.getCoinValue())
+                int count = currDrawback
+                        .divideToIntegralValue(cb.getCoinValue())
                         .toBigInteger().intValue();
 
                 // Check if enough coins are available
@@ -142,7 +145,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                 throw new SlotMachineException(
                         "Error during drawback calculation...");
             }
-            
+
             coinBoxesWriter.write(coinBoxes);
         }
     }
@@ -269,6 +272,36 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public List<CoinBoxLevel> getCurrentCoinBoxLevel() {
+        List<CoinBoxLevel> cbLevelList = new ArrayList<CoinBoxLevel>();
+
+        for (CoinBox cb : coinBoxes.getCoinBoxes()) {
+            cbLevelList.add(new CoinBoxLevel(cb.getCoinValue(), cb
+                    .getCurrentCoinCount(), cb.getMaxCoinCount()));
+        }
+
+        return cbLevelList;
+    }
+
+    @Override
+    public void updateCoinLevelInCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels) {
+        for (CoinBoxLevel cbl : someCoinBoxLevels) {
+            CoinBox cb = coinBoxes.getCoinBox(cbl.getCoinValue());
+
+            if (cbl.getCurrentCoinCount() > cb.getMaxCoinCount()) {
+                throw new CoinBoxFullException(
+                        "view.slot.machine.coin.box.level.too.high",
+                        cbl.getCoinValue());
+            } else {
+                //TODO: Write to transaction log.
+                cb.setCurrentCoinCount(cbl.getCurrentCoinCount());
+            }
+        }
+        
+        coinBoxesWriter.write(coinBoxes);
     }
 
 }

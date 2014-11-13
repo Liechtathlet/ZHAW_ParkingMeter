@@ -1,25 +1,5 @@
 package ch.zhaw.swengineering.view.console;
 
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import ch.zhaw.swengineering.view.SimulationView;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -30,6 +10,27 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.SimulationView;
 
 /**
  * @author Daniel Brun Console implementation of the interface
@@ -65,6 +66,9 @@ public class ConsoleSimulationView extends SimulationView {
     private static final Logger LOG = LogManager
             .getLogger(ConsoleSimulationView.class);
 
+    private final Lock runLock;
+    private final Condition waitCondition;
+
     @Autowired
     private MessageProvider messageProvider;
 
@@ -99,6 +103,9 @@ public class ConsoleSimulationView extends SimulationView {
         dateFormatter = new DateFormatter(DATE_FORMAT);
 
         storeParkingLotNumber = -1;
+
+        runLock = new ReentrantLock();
+        waitCondition = runLock.newCondition();
     }
 
     @Override
@@ -108,28 +115,33 @@ public class ConsoleSimulationView extends SimulationView {
             run = true;
 
             while (run) {
+                try {
+                    runLock.lock();
 
-                switch (viewState) {
-                case ENTERING_PARKING_LOT:
-                    executeActionsForStateEnteringParkingLotNumber();
-                    break;
-                case DROPPING_IN_MONEY:
-                    executeActionsForDroppingInMoney();
-                    break;
-                case DISPLAY_ALL_INFORMATION:
-                    executeActionForViewingAllInformation();
-                    break;
-                case EXIT:
-                    run = false;
-                    break;
-                case INIT:
-                default:
-                    try {
-                        Thread.sleep(SLEEP_TIME);
-                    } catch (InterruptedException e) {
-                        LOG.error("Sleep in loop failed.", e);
+                    switch (viewState) {
+                    case ENTERING_PARKING_LOT:
+                        executeActionsForStateEnteringParkingLotNumber();
+                        break;
+                    case DROPPING_IN_MONEY:
+                        executeActionsForDroppingInMoney();
+                        break;
+                    case DISPLAY_ALL_INFORMATION:
+                        executeActionForViewingAllInformation();
+                        break;
+                    case EXIT:
+                        run = false;
+                        break;
+                    case INIT:
+                    default:
+                        try {
+                            waitCondition.await();
+                        } catch (InterruptedException e) {
+                            LOG.error("Wait condition failed", e);
+                        }
+                        break;
                     }
-                    break;
+                } finally {
+                    runLock.unlock();
                 }
             }
         }
@@ -174,7 +186,7 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void displayAllInformation() {
-        //TODO: Der View-State ist nicht notwendig -> Parameter -> Output
+        // TODO: Der View-State ist nicht notwendig -> Parameter -> Output
         setViewState(ConsoleViewStateEnum.DISPLAY_ALL_INFORMATION);
     }
 
@@ -207,7 +219,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     private String formatPrice(BigDecimal price) {
-        //TODO: Auslagern in Helper
+        // TODO: Auslagern in Helper
         price = price.setScale(2, BigDecimal.ROUND_DOWN);
         DecimalFormat df = new DecimalFormat();
         df.setMaximumFractionDigits(2);
@@ -444,6 +456,11 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private synchronized void setViewState(final ConsoleViewStateEnum aState) {
         viewState = aState;
+        try {
+            waitCondition.signal();
+        } catch (Exception e) {
+            // Nothing to do here..
+        }
     }
 
     @Override
@@ -456,6 +473,28 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void displayMessageForDrawback() {
         displayMessageForDrawback(slotMachine.getDrawback());
+    }
+
+    @Override
+    public void promptForNewCoinBoxLevels(
+            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
+        for (CoinBoxLevel cbl : someCurrentCoinBoxLevels) {
+
+            // TODO: Evtl. auslagern.
+            BigDecimal total = cbl.getCoinValue().multiply(
+                    new BigDecimal(cbl.getCurrentCoinCount()));
+            print("view.info.coin.box.content", false, cbl.getCoinValue(),
+                    cbl.getCurrentCoinCount(), total);
+
+            print("view.info.coin.box.content.new", true, cbl.getCoinValue());
+
+            String input = readFromConsole();
+
+            // int between 0 and 100
+            // view.info.coin.box.content.limit
+            // Invalid entry
+            // view.slot.machine.format.invalid
+        }
     }
 
 }

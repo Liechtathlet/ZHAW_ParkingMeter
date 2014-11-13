@@ -1,6 +1,5 @@
 package ch.zhaw.swengineering.view;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -9,10 +8,12 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -84,8 +85,12 @@ public abstract class SimulationView implements Runnable {
 
     /**
      * Prompts the user for the new coin box levels.
+     * 
+     * @param someCurrentCoinBoxLevels
+     *            The current coin box levels.
      */
-    // public abstract void promptForNewCoinBoxLevels();
+    public abstract void promptForNewCoinBoxLevels(
+            List<CoinBoxLevel> someCurrentCoinBoxLevels);
 
     /**
      * Displays the information about the current parking lot.
@@ -212,6 +217,22 @@ public abstract class SimulationView implements Runnable {
     }
 
     /**
+     * Notifies all attached listeners about the entered coin box level.
+     * 
+     * @param someCoinBoxLevels
+     *            The coin box levels.
+     */
+    protected void notifyForMoneyInserted(
+            final List<CoinBoxLevel> someCoinBoxLevels) {
+        CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(this,
+                someCoinBoxLevels);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.coinBoxLevelEntered(event);
+        }
+    }
+
+    /**
      * Prints a message to the output.
      * 
      * @param aKey
@@ -223,4 +244,5 @@ public abstract class SimulationView implements Runnable {
      */
     protected abstract void print(final String aKey, final boolean prompt,
             final Object... arguments);
+
 }

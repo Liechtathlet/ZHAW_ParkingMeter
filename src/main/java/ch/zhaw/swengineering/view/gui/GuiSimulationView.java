@@ -5,12 +5,14 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
 import javax.swing.JFrame;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -131,6 +133,13 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     @Override
     protected void print(String aKey, boolean prompt, Object... arguments) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public void promptForNewCoinBoxLevels(
+            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
         // TODO Auto-generated method stub
         
     }
