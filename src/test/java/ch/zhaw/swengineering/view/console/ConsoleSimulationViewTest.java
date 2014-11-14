@@ -708,8 +708,7 @@ public class ConsoleSimulationViewTest {
         assertEquals(
                 MessageFormat.format(MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH, coin)
                         + System.lineSeparator(), outContent.toString());
-        assertEquals(view.getViewState(),
-                ConsoleViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
+        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
     }
 
     @Test
