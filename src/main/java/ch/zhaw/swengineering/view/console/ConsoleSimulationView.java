@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -236,9 +237,56 @@ public class ConsoleSimulationView extends SimulationView {
 	}
 
 	public void executeActionForDisplayBookedParkingLots() {
+		Date now = new Date();
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD  hh:mm");
+		print("view.booked.parkinglots.title.template", false, sdf.format(now));
 		// ToDo Action für Ausgabe
+		for (ParkingLot parkingLot : parkingLots) {
+			print("view.booked.parkinglot", false,
+					getParkingLotNumber(parkingLot),
+					getParkingLotPaidUntil(parkingLot),
+					getParkingLotDifferenceTime(parkingLot));
+
+			//
+			// print("view.parkingLot", false, parkingLot.getNumber());
+			// print("view.parkingLot.paidUntil", false,
+			// parkingLot.getPaidUntil());
+			// print("view.parkingLot.difference", false,
+			// giveRemainingTimeInMinutes(parkingLot
+			// .getRemainingTimeInMillisec()));
+		}
+
 		setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
 	}
+
+	private int getParkingLotNumber(ParkingLot parkingLot) {
+		return parkingLot.getNumber();
+	}
+
+	private Date getParkingLotPaidUntil(ParkingLot parkingLot) {
+		return parkingLot.getPaidUntil();
+	}
+
+	private String getParkingLotDifferenceTime(ParkingLot parkingLot) {
+
+		int hh = 00;
+		int mm = 00;
+		int ss = 00;
+
+		hh = (int) (parkingLot.getRemainingTimeInMillisec() / (3600 * 1000));
+		mm = (int) ((parkingLot.getRemainingTimeInMillisec() % (3600 * 1000)) / (60 * 1000));
+		ss = (int) ((parkingLot.getRemainingTimeInMillisec()) - (mm * (60 * 1000)) / 1000);
+
+		String diffTime = hh + ":" + mm + ":" + ss;
+		return diffTime;
+
+	}
+
+	// private int giveRemainingTimeInMinutes(int timeInMillisec) {
+	// int timeInMinutes = timeInMillisec / (60 * 1000);
+	// return timeInMinutes;
+	//
+	// }
 
 	private String formatPrice(BigDecimal price) {
 		// TODO: Auslagern in Helper

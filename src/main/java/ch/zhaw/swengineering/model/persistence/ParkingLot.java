@@ -1,5 +1,7 @@
 package ch.zhaw.swengineering.model.persistence;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -15,7 +17,7 @@ public class ParkingLot {
 	@XmlAttribute
 	private Date paidUntil;
 
-	private int remainingMillisec;
+	private long remainingMillisec;
 
 	/**
 	 * Empty constructor for serialization
@@ -67,9 +69,20 @@ public class ParkingLot {
 		this.paidUntil = paidUntil;
 	}
 
-	public int getRemainingTimeInMillisec() {
+	public long getRemainingTimeInMillisec() {
 		Date now = new Date();
-		this.remainingMillisec = (int) (paidUntil.getTime() - now.getTime());
+		Date init = null;
+		String initDate = "01.11.2014";
+		SimpleDateFormat sdf = new SimpleDateFormat("dd.MM.yyyy");
+		try {
+			init = sdf.parse(initDate);
+		} catch (ParseException e) {
+			// ToDo LOG.
+		}
+		if (paidUntil == null) {
+			setPaidUntil(init);
+		}
+		this.remainingMillisec = (paidUntil.getTime() - now.getTime());
 		return remainingMillisec;
 	}
 
