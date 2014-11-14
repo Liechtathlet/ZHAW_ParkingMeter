@@ -1,27 +1,12 @@
 package ch.zhaw.swengineering.view.console;
 
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.springframework.format.datetime.DateFormatter;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -29,12 +14,44 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
+import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -88,6 +105,18 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "view.all.information.parking.time";
     private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "timerange [{0}] | from {1} € | to {2} € | time: {3} min |";
 
+    private static final String MSG_KEY_ALL_COIN_LEVEL_TOO_HIGH = "view.slot.machine.coin.box.level.too.high";
+    private static final String MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH = "too high: {0}";
+
+    private static final String MSG_KEY_ALL_VIEW_CBL_CONTENT = "view.info.coin.box.content";
+    private static final String MSG_VAL_ALL_VIEW_CBL_CONTENT = "CB-Content: {0} {1} {2}";
+
+    private static final String MSG_KEY_ALL_VIEW_CBL_CONTENT_NEW = "view.info.coin.box.content.new";
+    private static final String MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW = "new";
+
+    private static final String MSG_KEY_VIEW_CBL_COUNT_LIMIT = "view.info.coin.box.content.limit";
+    private static final String MSG_VAL_VIEW_CBL_COUNT_LIMIT = "limitReached";
+    
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -166,15 +195,29 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_PROMPT_SEPARATOR)).thenReturn(
                 MSG_VAL_PROMPT_SEPARATOR);
 
-        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)).thenReturn(
-                MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
+        when(
+                messageProvider
+                        .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
 
-        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE)).thenReturn(
-                MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE);
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE);
 
-        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE)).thenReturn(
-                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE);
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE);
 
+        when(messageProvider.get(MSG_KEY_ALL_COIN_LEVEL_TOO_HIGH)).thenReturn(
+                MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH);
+
+        when(messageProvider.get(MSG_KEY_ALL_VIEW_CBL_CONTENT)).thenReturn(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT);
+
+        when(messageProvider.get(MSG_KEY_ALL_VIEW_CBL_CONTENT_NEW)).thenReturn(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW);
+
+        when(messageProvider.get(MSG_KEY_VIEW_CBL_COUNT_LIMIT)).thenReturn(
+                MSG_VAL_VIEW_CBL_COUNT_LIMIT);
+        
         // Initialize view
         view.addViewEventListener(listener);
     }
@@ -376,8 +419,7 @@ public class ConsoleSimulationViewTest {
             InvalidCoinException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
                 + ": ", 5)
-                + MSG_VAL_COIN_INVALID
-                + System.lineSeparator();
+                + MSG_VAL_COIN_INVALID + System.lineSeparator();
 
         List<BigDecimal> validCoins = new ArrayList<>();
         validCoins.add(new BigDecimal("2.00").setScale(2));
@@ -538,19 +580,20 @@ public class ConsoleSimulationViewTest {
         // Assert
         assertEquals(
                 MessageFormat.format(MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE,
-                        "2",
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE) +
-                        System.lineSeparator() +
-                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "1", "0.00", "0.50", "30") +
-                        System.lineSeparator() +
-                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "2", "0.50", "1.00", "60") +
-                        System.lineSeparator() +
-                MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "3", "1.00", "2.00", "70") +
-                        System.lineSeparator(),
-                outContent.toString());
+                        "2", MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "1", "0.00", "0.50", "30")
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "2", "0.50", "1.00", "60")
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "3", "1.00", "2.00", "70")
+                        + System.lineSeparator(), outContent.toString());
     }
 
     // ************** Tests for Entering Secret Codes **************
@@ -652,5 +695,107 @@ public class ConsoleSimulationViewTest {
         verify(listener).actionAborted(any(ActionAbortedEvent.class));
         assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
         assertEquals(exptectedMessage, outContent.toString());
+    }
+
+    @Test
+    public void testDisplayCoinCountTooHigh() throws IOException {
+        BigDecimal coin = new BigDecimal(5);
+
+        // Run
+        view.displayCoinCountTooHigh(coin);
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH, coin)
+                        + System.lineSeparator(), outContent.toString());
+        assertEquals(view.getViewState(),
+                ConsoleViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
+    }
+
+    @Test
+    public void testStateForEnteringCoinBoxLevelWidthInvalidNumber()
+            throws IOException {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        BigDecimal coin = new BigDecimal(5);
+        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+
+        String exptectedMessage = MessageFormat.format(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
+                coin.multiply(new BigDecimal(4)))
+                + System.lineSeparator()
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": " 
+                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("abc");
+
+        // Run
+        view.promptForNewCoinBoxLevels(cbLevels);
+        view.executeActionsForEnteringCoinBoxLevels();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        verify(listener, Mockito.times(0)).coinBoxLevelEntered(
+                any(CoinBoxLevelEnteredEvent.class));
+    }
+    
+
+    @Test
+    public void testStateForEnteringCoinBoxLevelWidthToHighNumber()
+            throws IOException {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        BigDecimal coin = new BigDecimal(5);
+        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+
+        String exptectedMessage = MessageFormat.format(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
+                coin.multiply(new BigDecimal(4)))
+                + System.lineSeparator()
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": " 
+                + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("200");
+
+        // Run
+        view.promptForNewCoinBoxLevels(cbLevels);
+        view.executeActionsForEnteringCoinBoxLevels();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        verify(listener, Mockito.times(0)).coinBoxLevelEntered(
+                any(CoinBoxLevelEnteredEvent.class));
+    }
+    
+    @Test
+    public void testStateForEnteringCoinBoxLevel()
+            throws IOException {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        BigDecimal coin = new BigDecimal(5);
+        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+
+        String exptectedMessage = MessageFormat.format(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
+                coin.multiply(new BigDecimal(4)))
+                + System.lineSeparator()
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": ";
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn("5");
+
+        // Run
+        view.promptForNewCoinBoxLevels(cbLevels);
+        view.executeActionsForEnteringCoinBoxLevels();
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
+
+        verify(listener).coinBoxLevelEntered(
+                any(CoinBoxLevelEnteredEvent.class));
     }
 }

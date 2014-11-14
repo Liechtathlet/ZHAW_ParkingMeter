@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.controller;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +35,7 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 
 /**
@@ -340,6 +342,35 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
+    }
+
+    /**
+     * Method-Under-Test: coinBoxLevelEntered(...).
+     * 
+     * Scenario: The entered coin count is too high.
+     * 
+     * Expectation: An error message is displayed and the prompt displayed
+     * again.
+     */
+    @Test
+    public final void testCoinBoxLevelEnteredWithLimitReached() {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        BigDecimal coin = new BigDecimal(5);
+        cbLevels.add(new CoinBoxLevel(coin, 50, 10));
+
+        CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(view,
+                cbLevels);
+
+        doThrow(new CoinBoxFullException("coinboxfull", coin))
+                .when(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
+
+        controller.coinBoxLevelEntered(event);
+
+        // Assert positive
+        verify(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
+        verify(view).displayCoinCountTooHigh(coin);
+        verify(view).promptForNewCoinBoxLevels(any(List.class));
     }
 
     /**
