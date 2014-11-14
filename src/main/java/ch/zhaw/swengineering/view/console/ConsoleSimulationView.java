@@ -239,7 +239,7 @@ public class ConsoleSimulationView extends SimulationView {
 	}
 
 	public void executeActionForDisplayBookedParkingLots() {
-		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-DD  hh:mm");
+		SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd  HH:mm");
 		print("view.booked.parkinglots.title.template", false, sdf.format(now));
 		for (ParkingLot parkingLot : parkingLots) {
 			print("view.booked.parkinglot", false,
@@ -256,8 +256,13 @@ public class ConsoleSimulationView extends SimulationView {
 		return parkingLot.getNumber();
 	}
 
-	private Date getParkingLotPaidUntil(ParkingLot parkingLot) {
-		return parkingLot.getPaidUntil();
+	private String getParkingLotPaidUntil(ParkingLot parkingLot) {
+		if (parkingLot.getPaidUntil() == null) {
+			return "--";
+		} else {
+			SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd  HH:mm");
+			return sdf.format(parkingLot.getPaidUntil());
+		}
 	}
 
 	private String getParkingLotDifferenceTime(ParkingLot parkingLot) {
@@ -267,16 +272,22 @@ public class ConsoleSimulationView extends SimulationView {
 		int mm = 00;
 		int ss = 00;
 
-		hh = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) / 3600);
-		mm = (int) (((parkingLot.getRemainingTimeInMillisec() / 1000) % 3600) / 60);
-		ss = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) - ((mm * 60) + (hh * 3600)));
+		if (parkingLot.getPaidUntil() == null) {
+			return "--";
+		} else {
+			hh = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) / 3600);
+			mm = (int) (((parkingLot.getRemainingTimeInMillisec() / 1000) % 3600) / 60);
+			ss = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) - ((mm * 60) + (hh * 3600)));
 
-		String diffTime = hh + ":" + df.format(mm) + ":" + df.format(ss);
-		return diffTime;
+			String diffTime = hh + ":" + df.format(mm) + ":" + df.format(ss);
+			return diffTime;
+		}
 	}
 
 	private String getParkingLotOutOfPaidTime(ParkingLot parkingLot) {
-		if (parkingLot.getPaidUntil().getTime() <= now.getTime()) {
+		if (parkingLot.getPaidUntil() == null) {
+			return "** Parkzeit abgelaufen **";
+		} else if (parkingLot.getPaidUntil().getTime() <= now.getTime()) {
 			return "** Parkzeit abgelaufen **";
 		} else {
 			return "";
