@@ -9,59 +9,68 @@ import javax.xml.bind.annotation.XmlAttribute;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class ParkingLot {
 
-    @XmlAttribute
-    private int number;
+	@XmlAttribute
+	private int number;
 
-    @XmlAttribute
-    private Date paidUntil;
+	@XmlAttribute
+	private Date paidUntil;
 
-    /**
-     * Empty constructor for serialization
-     */
-    public ParkingLot() {
-        // Empty constructor for serialization
-    }
+	private int remainingMillisec;
 
-    /**
-     * Creates a new instance of this class.
-     * 
-     * @param number
-     *            The parking lot number.
-     * @param paidUntil
-     *            The date until which the parking lot is paid
-     */
-    public ParkingLot(int number, Date paidUntil) {
-        this.number = number;
-        this.paidUntil = paidUntil;
-    }
+	/**
+	 * Empty constructor for serialization
+	 */
+	public ParkingLot() {
+		// Empty constructor for serialization
+	}
 
-    /**
-     * @return the number
-     */
-    public int getNumber() {
-        return number;
-    }
+	/**
+	 * Creates a new instance of this class.
+	 * 
+	 * @param number
+	 *            The parking lot number.
+	 * @param paidUntil
+	 *            The date until which the parking lot is paid
+	 */
+	public ParkingLot(int number, Date paidUntil) {
+		this.number = number;
+		this.paidUntil = paidUntil;
+	}
 
-    /**
-     * @param number
-     *            the number to set
-     */
-    public void setNumber(int number) {
-        this.number = number;
-    }
+	/**
+	 * @return the number
+	 */
+	public int getNumber() {
+		return number;
+	}
 
-    /**
-     * @return the paidUntil
-     */
-    public Date getPaidUntil() {
-        return paidUntil;
-    }
+	/**
+	 * @param number
+	 *            the number to set
+	 */
+	public void setNumber(int number) {
+		this.number = number;
+	}
 
-    /**
-     * @param paidUntil
-     *            the paidUntil to set
-     */
-    public void setPaidUntil(Date paidUntil) {
-        this.paidUntil = paidUntil;
-    }
+	/**
+	 * @return the paidUntil
+	 */
+	public Date getPaidUntil() {
+		return paidUntil;
+	}
+
+	/**
+	 * @param paidUntil
+	 *            the paidUntil to set
+	 */
+	public void setPaidUntil(Date paidUntil) {
+		this.paidUntil = paidUntil;
+	}
+
+	public int getRemainingTimeInMillisec() {
+		Date now = new Date();
+		this.remainingMillisec = (int) (paidUntil.getTime() - now.getTime());
+		return remainingMillisec;
+	}
+
 }
