@@ -1,10 +1,11 @@
 package ch.zhaw.swengineering.business;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-
-import java.math.BigDecimal;
 
 /**
  * @author Daniel Brun Interface for ParkingMeter Controllers Provides methods
@@ -36,9 +37,9 @@ public interface ParkingMeter {
 	SecretActionEnum getSecretAction(int secretKey) throws Exception;
 
 	/**
-	 * Call Method for given bookedParkingLots
+	 * Call Method for given existingParkingLots
 	 */
-	void callAllBookedParkingLots();
+	List<ParkingLot> getParkingLots();
 
 	/**
 	 * Calculates the booking for the parking lot and the given amount of money.

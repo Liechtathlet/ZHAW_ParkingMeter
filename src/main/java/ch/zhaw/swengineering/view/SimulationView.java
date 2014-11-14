@@ -15,6 +15,7 @@ import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -30,230 +31,251 @@ import ch.zhaw.swengineering.model.CoinBoxLevel;
  */
 public abstract class SimulationView implements Runnable {
 
-    private static final Logger LOG = LogManager
-            .getLogger(SimulationView.class);
+	private static final Logger LOG = LogManager
+			.getLogger(SimulationView.class);
 
-    private Thread thread;
+	private Thread thread;
 
-    protected List<ViewEventListener> eventListeners;
+	protected List<ViewEventListener> eventListeners;
 
-    /**
-     * Creates a new instance of this class.
-     */
-    public SimulationView() {
-        eventListeners = new ArrayList<>();
-    }
+	/**
+	 * Creates a new instance of this class.
+	 */
+	public SimulationView() {
+		eventListeners = new ArrayList<>();
+	}
 
-    /**
-     * Starts the simulation gui.
-     */
-    public void startSimulationView() {
-        LOG.info("Trying to start simulation view");
+	/**
+	 * Starts the simulation gui.
+	 */
+	public void startSimulationView() {
+		LOG.info("Trying to start simulation view");
 
-        if (thread == null) {
-            // Create and start thread
-            thread = new Thread(this);
-            thread.start();
+		if (thread == null) {
+			// Create and start thread
+			thread = new Thread(this);
+			thread.start();
 
-            LOG.info("Simulation started");
-        } else {
-            // TODO: Throw exception.
-        }
-    }
+			LOG.info("Simulation started");
+		} else {
+			// TODO: Throw exception.
+		}
+	}
 
-    /**
-     * @see java.lang.Runnable#run()
-     */
-    public abstract void run();
+	/**
+	 * @see java.lang.Runnable#run()
+	 */
+	public abstract void run();
 
-    /**
-     * Shuts down the view.
-     */
-    public abstract void shutdown();
+	/**
+	 * Shuts down the view.
+	 */
+	public abstract void shutdown();
 
-    /**
-     * Prompts the user to choose / enter a parking lot number.
-     */
-    public abstract void promptForParkingLotNumber();
+	/**
+	 * Prompts the user to choose / enter a parking lot number.
+	 */
+	public abstract void promptForParkingLotNumber();
 
-    /**
-     * Prompts the user to drop in some money.
-     * 
-     * @param aParkingLotNumber
-     *            The number of the parking lot.
-     */
-    public abstract void promptForMoney(int aParkingLotNumber);
+	/**
+	 * Prompts the user to drop in some money.
+	 * 
+	 * @param aParkingLotNumber
+	 *            The number of the parking lot.
+	 */
+	public abstract void promptForMoney(int aParkingLotNumber);
 
-    /**
-     * Prompts the user for the new coin box levels.
-     * 
-     * @param someCurrentCoinBoxLevels
-     *            The current coin box levels.
-     */
-    public abstract void promptForNewCoinBoxLevels(
-            List<CoinBoxLevel> someCurrentCoinBoxLevels);
+	/**
+	 * Prompts the user for the new coin box levels.
+	 * 
+	 * @param someCurrentCoinBoxLevels
+	 *            The current coin box levels.
+	 */
+	public abstract void promptForNewCoinBoxLevels(
+			List<CoinBoxLevel> someCurrentCoinBoxLevels);
 
-    /**
-     * Displays the information about the current parking lot.
-     * 
-     * @param aParkingLotNumber
-     *            The number of the parking lot.
-     * @param aPaidParkingtime
-     *            The time until the parking lot is / was paid.
-     */
-    public abstract void displayParkingLotNumberAndParkingTime(
-            int aParkingLotNumber, Date aPaidParkingtime);
+	/**
+	 * Displays the information about the current parking lot.
+	 * 
+	 * @param aParkingLotNumber
+	 *            The number of the parking lot.
+	 * @param aPaidParkingtime
+	 *            The time until the parking lot is / was paid.
+	 */
+	public abstract void displayParkingLotNumberAndParkingTime(
+			int aParkingLotNumber, Date aPaidParkingtime);
 
-    /**
-     * Displays a message, that the entered parking lot number was invalid.
-     */
-    public abstract void displayParkingLotNumberInvalid();
+	/**
+	 * Displays the information about the current booking parking lots.
+	 * 
+	 * @param parkingLots
+	 *            The List of all existing parking lots with all Information
+	 *            about the ParkingLot.
+	 */
+	public abstract void displayBookedParkingLots(List<ParkingLot> parkingLots);
 
-    /**
-     * Displays a message, that the system is shutting down.
-     */
-    public abstract void displayShutdownMessage();
+	/**
+	 * Displays a message, that the entered parking lot number was invalid.
+	 */
+	public abstract void displayParkingLotNumberInvalid();
 
-    /**
-     * Displays all available information. TODO: Anpassen.
-     */
-    public abstract void displayAllInformation();
+	/**
+	 * Displays a message, that the system is shutting down.
+	 */
+	public abstract void displayShutdownMessage();
 
-    /**
-     * Displays an error message, that not enough money was inserted.
-     */
-    public final void displayNotEnoughMoneyError() {
-        print("view.booking.not.enough.money", false);
-    }
+	/**
+	 * Displays all available information. TODO: Anpassen.
+	 */
+	public abstract void displayAllInformation();
 
-    /**
-     * Displays a message with the drawback.
-     */
-    public abstract void displayMessageForDrawback();
+	/**
+	 * Displays an error message, that not enough money was inserted.
+	 */
+	public final void displayNotEnoughMoneyError() {
+		print("view.booking.not.enough.money", false);
+	}
 
-    /**
-     * Displays a message with the error message, that the entered coin count
-     * was too high.
-     * 
-     * @param aCoinValue The coin value of the coin box.
-     */
-    public final void displayCoinCountTooHigh(BigDecimal aCoinValue) {
-        print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
-    }
+	/**
+	 * Displays a message with the drawback.
+	 */
+	public abstract void displayMessageForDrawback();
 
-    /**
-     * Registers a view event listener.
-     * 
-     * @param aListener
-     *            The listener to register.
-     */
-    public void addViewEventListener(final ViewEventListener aListener) {
-        if (aListener == null) {
-            throw new IllegalArgumentException(
-                    "The parameter 'aListener' must not be null!");
-        }
+	/**
+	 * Displays a message with the error message, that the entered coin count
+	 * was too high.
+	 * 
+	 * @param aCoinValue
+	 *            The coin value of the coin box.
+	 */
+	public final void displayCoinCountTooHigh(BigDecimal aCoinValue) {
+		print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
+	}
 
-        if (!eventListeners.contains(aListener)) {
-            eventListeners.add(aListener);
-        }
-    }
+	/**
+	 * Registers a view event listener.
+	 * 
+	 * @param aListener
+	 *            The listener to register.
+	 */
+	public void addViewEventListener(final ViewEventListener aListener) {
+		if (aListener == null) {
+			throw new IllegalArgumentException(
+					"The parameter 'aListener' must not be null!");
+		}
 
-    /**
-     * Deregisters a view event listener.
-     * 
-     * @param aListener
-     *            The listener to deregister.
-     */
-    public void removeViewEventListener(final ViewEventListener aListener) {
-        if (aListener == null) {
-            throw new IllegalArgumentException(
-                    "The parameter 'aListener' must not be null!");
-        }
+		if (!eventListeners.contains(aListener)) {
+			eventListeners.add(aListener);
+		}
+	}
 
-        if (eventListeners.contains(aListener)) {
-            eventListeners.remove(aListener);
-        }
-    }
+	/**
+	 * Deregisters a view event listener.
+	 * 
+	 * @param aListener
+	 *            The listener to deregister.
+	 */
+	public void removeViewEventListener(final ViewEventListener aListener) {
+		if (aListener == null) {
+			throw new IllegalArgumentException(
+					"The parameter 'aListener' must not be null!");
+		}
 
-    /**
-     * Notifies all attached listeners about the shutdown request.
-     */
-    protected final void notifyForShutdownRequested() {
-        ShutdownEvent event = new ShutdownEvent(this);
+		if (eventListeners.contains(aListener)) {
+			eventListeners.remove(aListener);
+		}
+	}
 
-        for (ViewEventListener listener : eventListeners) {
-            listener.shutdownRequested(event);
-        }
-    }
+	/**
+	 * Notifies all attached listeners about the shutdown request.
+	 */
+	protected final void notifyForShutdownRequested() {
+		ShutdownEvent event = new ShutdownEvent(this);
 
-    /**
-     * Notifies all attached listeners about the entered parking lot.
-     * 
-     * @param parkingLotNumber
-     *            The parking lot number.
-     */
-    protected void notifyForParkingLotNumberEntered(final int parkingLotNumber) {
-        ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
-                parkingLotNumber);
+		for (ViewEventListener listener : eventListeners) {
+			listener.shutdownRequested(event);
+		}
+	}
 
-        for (ViewEventListener listener : eventListeners) {
-            listener.parkingLotEntered(event);
-        }
-    }
+	/**
+	 * Notifies all attached listeners about the entered parking lot.
+	 * 
+	 * @param parkingLotNumber
+	 *            The parking lot number.
+	 */
+	protected void notifyForParkingLotNumberEntered(final int parkingLotNumber) {
+		ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
+				parkingLotNumber);
 
-    /**
-     * Notifies all attached listeners about the aborted action.
-     */
-    protected void notifyForActionAborted() {
-        ActionAbortedEvent event = new ActionAbortedEvent(this);
+		for (ViewEventListener listener : eventListeners) {
+			listener.parkingLotEntered(event);
+		}
+	}
 
-        for (ViewEventListener listener : eventListeners) {
-            listener.actionAborted(event);
-        }
-    }
+	// /**
+	// * Notifies all attached listeners about the bookedParkingLots.
+	// */
+	// protected void notifyForBookedParkingLots() {
+	// BookedParkingLotsEvent event = new BookedParkingLotsEvent(this);
+	//
+	// for (ViewEventListener listener : eventListeners) {
+	// listener.shutdownRequested(event);
+	// }
+	// }
 
-    /**
-     * Notifies all attached listeners about the entered money.
-     * 
-     * @param aParkingLotNumber
-     *            The parking lot number.
-     */
-    protected void notifyForMoneyInserted(final int aParkingLotNumber) {
-        MoneyInsertedEvent event = new MoneyInsertedEvent(this,
-                aParkingLotNumber);
+	/**
+	 * Notifies all attached listeners about the aborted action.
+	 */
+	protected void notifyForActionAborted() {
+		ActionAbortedEvent event = new ActionAbortedEvent(this);
 
-        for (ViewEventListener listener : eventListeners) {
-            listener.moneyInserted(event);
-        }
-    }
+		for (ViewEventListener listener : eventListeners) {
+			listener.actionAborted(event);
+		}
+	}
 
-    /**
-     * Notifies all attached listeners about the entered coin box level.
-     * 
-     * @param someCoinBoxLevels
-     *            The coin box levels.
-     */
-    protected void notifyForCoinBoxLevelEntered(
-            final List<CoinBoxLevel> someCoinBoxLevels) {
-        CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(this,
-                someCoinBoxLevels);
+	/**
+	 * Notifies all attached listeners about the entered money.
+	 * 
+	 * @param aParkingLotNumber
+	 *            The parking lot number.
+	 */
+	protected void notifyForMoneyInserted(final int aParkingLotNumber) {
+		MoneyInsertedEvent event = new MoneyInsertedEvent(this,
+				aParkingLotNumber);
 
-        for (ViewEventListener listener : eventListeners) {
-            listener.coinBoxLevelEntered(event);
-        }
-    }
+		for (ViewEventListener listener : eventListeners) {
+			listener.moneyInserted(event);
+		}
+	}
 
-    /**
-     * Prints a message to the output.
-     * 
-     * @param aKey
-     *            the key of the message.
-     * @param prompt
-     *            True if the message is a prompt.
-     * @param arguments
-     *            The arguments for the message.
-     */
-    protected abstract void print(final String aKey, final boolean prompt,
-            final Object... arguments);
+	/**
+	 * Notifies all attached listeners about the entered coin box level.
+	 * 
+	 * @param someCoinBoxLevels
+	 *            The coin box levels.
+	 */
+	protected void notifyForCoinBoxLevelEntered(
+			final List<CoinBoxLevel> someCoinBoxLevels) {
+		CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(this,
+				someCoinBoxLevels);
+
+		for (ViewEventListener listener : eventListeners) {
+			listener.coinBoxLevelEntered(event);
+		}
+	}
+
+	/**
+	 * Prints a message to the output.
+	 * 
+	 * @param aKey
+	 *            the key of the message.
+	 * @param prompt
+	 *            True if the message is a prompt.
+	 * @param arguments
+	 *            The arguments for the message.
+	 */
+	protected abstract void print(final String aKey, final boolean prompt,
+			final Object... arguments);
 
 }
