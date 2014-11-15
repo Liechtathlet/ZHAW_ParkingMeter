@@ -253,7 +253,7 @@ public class ConsoleSimulationViewTest {
     public final void whenEnteredAStringItShouldNotGenerateAnEvent()
             throws IOException {
         String expectedSequence = MSG_VAL_ENTER_PARKING_LOT + ": "
-                + MSG_VAL_ENTER_PARKING_LOT_INVALID + System.lineSeparator();
+                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         String invalidParkingLotNumber = "invalid parkinglot number";
 

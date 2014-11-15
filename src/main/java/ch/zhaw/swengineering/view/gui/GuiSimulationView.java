@@ -38,7 +38,9 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     private JFrame frame;
     private ParkingMeterPanel parkingMeterPanel;
 
-    /* (non-Javadoc)
+    /*
+     * (non-Javadoc)
+     * 
      * @see ch.zhaw.swengineering.view.SimulationView#init()
      */
     @Override
@@ -80,14 +82,6 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     /* ******** View-Implementation Methods ******** */
-    @Override
-    public void promptForParkingLotNumber() {
-        print("view.enter.parkinglotnumber", true);
-
-        Integer parkingLotNumber = parkingMeterPanel.readInteger();
-
-        notifyForParkingLotNumberEntered(parkingLotNumber);
-    }
 
     /**
      * Prints a text with the given.
@@ -140,65 +134,42 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void promptForMoney(int aParkingLotNumber) {
         print("view.enter.coins", true, aParkingLotNumber);
-        /*String input = readFromConsole();
-
-        // if input == null: no input was provided or another event occurred.
-        if (input != null) {
-            boolean error = false;
-            boolean drawback = false;
-
-            try {
-                parseAndInsertCoins(input);
-            } catch (CoinBoxFullException e) {
-                error = true;
-                drawback = true;
-                LOG.error("Received exception "
-                        + "from slot machine: coin box is full!", e);
-
-                if (e.isAllCoinBoxesFull()) {
-                    print("view.slot.machine.coin.box.full", false,
-                            e.getCoinValue());
-                } else {
-                    print("view.slot.machine.coin.box.single.full", false,
-                            e.getCoinValue());
-                }
-
-            } catch (NoTransactionException e) {
-                error = true;
-                drawback = true;
-
-                // This should not occur!
-                LOG.error("Received exception "
-                        + "from slot machine: no transaction!", e);
-            } catch (InvalidCoinException e) {
-                error = true;
-                drawback = true;
-
-                StringBuilder coinString = new StringBuilder();
-
-                for (BigDecimal validCoin : e.getValidCoins()) {
-                    coinString.append(validCoin);
-                    coinString.append(", ");
-                }
-
-                LOG.error("Received exception "
-                        + "from slot machine: invalid coin!", e);
-                print("view.slot.machine.coin.invalid", false, coinString);
-            } catch (NumberFormatException e) {
-                error = true;
-                print("view.slot.machine.format.invalid", false);
-            }
-
-            if (error) {
-                if (drawback) {
-                    roleBackTransaction();
-                }
-            } else {
-                // Reset view state if operation was successful.
-                setViewState(ConsoleViewStateEnum.INIT);
-                notifyForMoneyInserted(storeParkingLotNumber);
-            }
-        }*/
+        /*
+         * String input = readFromConsole();
+         * 
+         * // if input == null: no input was provided or another event occurred.
+         * if (input != null) { boolean error = false; boolean drawback = false;
+         * 
+         * try { parseAndInsertCoins(input); } catch (CoinBoxFullException e) {
+         * error = true; drawback = true; LOG.error("Received exception " +
+         * "from slot machine: coin box is full!", e);
+         * 
+         * if (e.isAllCoinBoxesFull()) {
+         * print("view.slot.machine.coin.box.full", false, e.getCoinValue()); }
+         * else { print("view.slot.machine.coin.box.single.full", false,
+         * e.getCoinValue()); }
+         * 
+         * } catch (NoTransactionException e) { error = true; drawback = true;
+         * 
+         * // This should not occur! LOG.error("Received exception " +
+         * "from slot machine: no transaction!", e); } catch
+         * (InvalidCoinException e) { error = true; drawback = true;
+         * 
+         * StringBuilder coinString = new StringBuilder();
+         * 
+         * for (BigDecimal validCoin : e.getValidCoins()) {
+         * coinString.append(validCoin); coinString.append(", "); }
+         * 
+         * LOG.error("Received exception " + "from slot machine: invalid coin!",
+         * e); print("view.slot.machine.coin.invalid", false, coinString); }
+         * catch (NumberFormatException e) { error = true;
+         * print("view.slot.machine.format.invalid", false); }
+         * 
+         * if (error) { if (drawback) { roleBackTransaction(); } } else { //
+         * Reset view state if operation was successful.
+         * setViewState(ConsoleViewStateEnum.INIT);
+         * notifyForMoneyInserted(storeParkingLotNumber); } }
+         */
     }
 
     @Override
@@ -241,32 +212,31 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
-    protected void executeActionsForStateEnteringParkingLotNumber() {
-        // TODO Auto-generated method stub
-        
-    }
-
-    @Override
     protected void executeActionsForStateDroppingInMoney() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     protected void executeActionsForStateViewingAllInformation() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     protected void executeActionsForStateDisplayBookedParkingLots() {
         // TODO Auto-generated method stub
-        
+
     }
 
     @Override
     protected void executeActionsForStateEnteringCoinBoxLevels() {
         // TODO Auto-generated method stub
-        
+
+    }
+
+    @Override
+    public Integer readInteger() {
+        return parkingMeterPanel.readInteger();
     }
 }

@@ -37,4 +37,9 @@ public interface SimulationViewInterface {
      *            The listener to deregister.
      */
     void removeViewEventListener(final ViewEventListener aListener);
+    
+    /**
+     * Prompts the user to choose / enter a parking lot number.
+     */
+    void promptForParkingLotNumber();
 }

@@ -110,11 +110,6 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    public void promptForParkingLotNumber() {
-        setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
-    }
-
-    @Override
     public void promptForMoney(final int aParkingLotNumber) {
         setViewState(ViewStateEnum.DROPPING_IN_MONEY);
 
@@ -252,30 +247,6 @@ public class ConsoleSimulationView extends SimulationView {
         df.setMinimumFractionDigits(2);
         df.setGroupingUsed(false);
         return df.format(price);
-    }
-
-    /**
-     * Executes all necessary actions, which are required in the state
-     * 'EnteringParkingLotNumber'.
-     */
-    public void executeActionsForStateEnteringParkingLotNumber() {
-        print("view.enter.parkinglotnumber", true);
-        String input = readFromConsole();
-
-        if (input != null) {
-            Integer parkingLotNumber = null;
-
-            try {
-                parkingLotNumber = new Integer(input);
-            } catch (NumberFormatException e) {
-                print("view.enter.parkinglotnumber.invalid", false);
-            }
-
-            if (parkingLotNumber != null) {
-                setViewState(ViewStateEnum.INIT);
-                notifyForParkingLotNumberEntered(parkingLotNumber);
-            }
-        }
     }
 
     /**
@@ -538,6 +509,23 @@ public class ConsoleSimulationView extends SimulationView {
                 notifyForCoinBoxLevelEntered(coinBoxLevels);
             }
         }
+    }
+
+    @Override
+    public Integer readInteger() {
+        //TODO: Evtl. clean up.
+        Integer enteredInteger = null;
+        String input = readFromConsole();
+
+        if (input != null) {
+            try {
+                enteredInteger = new Integer(input);
+            } catch (NumberFormatException e) {
+                print("view.slot.machine.format.invalid", false);
+            }
+        }
+
+        return enteredInteger;
     }
 
 }

@@ -176,6 +176,50 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
+    /* ********** External: Prompt methods ********** */
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @seech.zhaw.swengineering.view.SimulationViewInterface
+     * #promptForParkingLotNumber()
+     */
+    @Override
+    public void promptForParkingLotNumber() {
+        setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
+    }
+
+    /* ********** Methods for state executions and notification ********** */
+
+    /**
+     * Executes the action for the state 'EnteringParkingLotNumber'.
+     */
+    public final void executeActionsForStateEnteringParkingLotNumber() {
+        print("view.enter.parkinglotnumber", true);
+        Integer enteredInteger = readInteger();
+
+        if (enteredInteger != null) {
+            setViewState(ViewStateEnum.INIT);
+            notifyForParkingLotNumberEntered(enteredInteger);
+        }
+    }
+
+    /**
+     * Notifies all attached listeners about the entered parking lot.
+     * 
+     * @param parkingLotNumber
+     *            The parking lot number.
+     */
+    protected final void notifyForParkingLotNumberEntered(
+            final int parkingLotNumber) {
+        ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
+                parkingLotNumber);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.parkingLotEntered(event);
+        }
+    }
+    
     /* ********** Internal methods ********** */
     /**
      * @return the view state.
@@ -196,16 +240,18 @@ public abstract class SimulationView implements Runnable,
         try {
             waitCondition.signal();
         } catch (Exception e) {
-            //Nothing to do here...
+            // Nothing to do here...
         }
     }
 
     /* ********** Definition for implementation classes ********** */
 
     /**
-     * Prompts the user to choose / enter a parking lot number.
+     * Reads an integer from the input.
+     * 
+     * @return an integer or null if another action was executed.
      */
-    public abstract void promptForParkingLotNumber();
+    public abstract Integer readInteger();
 
     /**
      * Prompts the user to drop in some money.
@@ -293,20 +339,7 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
-    /**
-     * Notifies all attached listeners about the entered parking lot.
-     * 
-     * @param parkingLotNumber
-     *            The parking lot number.
-     */
-    protected void notifyForParkingLotNumberEntered(final int parkingLotNumber) {
-        ParkingLotEnteredEvent event = new ParkingLotEnteredEvent(this,
-                parkingLotNumber);
-
-        for (ViewEventListener listener : eventListeners) {
-            listener.parkingLotEntered(event);
-        }
-    }
+   
 
     /**
      * Notifies all attached listeners about the aborted action.
@@ -367,11 +400,6 @@ public abstract class SimulationView implements Runnable,
      * Initializes the implementation class.
      */
     protected abstract void init();
-
-    /**
-     * Executes the action for the state 'EnteringParkingLotNumber'.
-     */
-    protected abstract void executeActionsForStateEnteringParkingLotNumber();
 
     /**
      * Executes the action for the state 'DropppingInMoney'.
