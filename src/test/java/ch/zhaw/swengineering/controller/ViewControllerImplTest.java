@@ -121,7 +121,7 @@ public class ViewControllerImplTest {
         verify(view).promptForParkingLotNumber();
 
         // Assert negative
-        verify(view, Mockito.times(0)).displayParkingLotNumberInvalid();
+        verify(view, Mockito.times(0)).displayErrorParkingLotNumberInvalid();
     }
 
     /**
@@ -149,7 +149,7 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getParkingLot(parkingLotNumber);
-        verify(view).displayParkingLotNumberInvalid();
+        verify(view).displayErrorParkingLotNumberInvalid();
         verify(view, Mockito.times(2)).promptForParkingLotNumber();
 
         // Assert negative

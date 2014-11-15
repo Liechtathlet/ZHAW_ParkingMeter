@@ -10,6 +10,8 @@ import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
 
 import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
@@ -19,6 +21,7 @@ import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.view.data.ViewDataStore;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -27,9 +30,17 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
 public abstract class SimulationView implements Runnable,
         SimulationViewInterface {
 
+    /**
+     * Logger
+     */
     private static final Logger LOG = LogManager
             .getLogger(SimulationView.class);
 
+    /**
+     * Date-Format.
+     */
+    private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
+    
     private Thread thread;
 
     protected List<ViewEventListener> eventListeners;
@@ -41,12 +52,18 @@ public abstract class SimulationView implements Runnable,
     private final Lock runLock;
     private final Condition waitCondition;
 
+    protected ViewDataStore dataStore;
+    protected DateFormatter dateFormatter;
+    
     /**
      * Creates a new instance of this class.
      */
     public SimulationView() {
         eventListeners = new ArrayList<>();
         runLock = new ReentrantLock();
+        dataStore = new ViewDataStore();
+        dateFormatter = new DateFormatter(DATE_FORMAT);
+        
         waitCondition = runLock.newCondition();
 
         viewState = ViewStateEnum.INIT;
@@ -176,7 +193,30 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
-    /* ********** External: Prompt methods ********** */
+    @Override
+    public void displayParkingLotNumberAndParkingTime(
+            final int aParkingLotNumber, final Date aPaidParkingTime) {
+
+        String formattedDate = "-";
+        if (aPaidParkingTime != null) {
+            formattedDate = dateFormatter.print(aPaidParkingTime,
+                    LocaleContextHolder.getLocale());
+        }
+
+        print("view.info.parkingTime", false, aParkingLotNumber, formattedDate);
+    }
+
+    @Override
+    public void displayErrorParkingLotNumberInvalid() {
+        print("view.enter.parkinglotnumber.invalid", false);
+    }
+
+    @Override
+    public void displayShutdownMessage() {
+        print("application.bye", false);
+    }
+    
+    /* ********** Methods for prompt, executions and notification ********** */
 
     /*
      * (non-Javadoc)
@@ -188,8 +228,6 @@ public abstract class SimulationView implements Runnable,
     public void promptForParkingLotNumber() {
         setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
     }
-
-    /* ********** Methods for state executions and notification ********** */
 
     /**
      * Executes the action for the state 'EnteringParkingLotNumber'.
@@ -218,6 +256,16 @@ public abstract class SimulationView implements Runnable,
         for (ViewEventListener listener : eventListeners) {
             listener.parkingLotEntered(event);
         }
+    }
+
+    /* (non-Javadoc)
+     * @see ch.zhaw.swengineering.view.SimulationViewInterface#promptForMoney(java.lang.Integer)
+     */
+    @Override
+    public void promptForMoney(final Integer aParkingLotNumber) {
+        setViewState(ViewStateEnum.DROPPING_IN_MONEY);
+
+        dataStore.setParkingLotNumber(aParkingLotNumber);
     }
     
     /* ********** Internal methods ********** */
@@ -254,14 +302,6 @@ public abstract class SimulationView implements Runnable,
     public abstract Integer readInteger();
 
     /**
-     * Prompts the user to drop in some money.
-     * 
-     * @param aParkingLotNumber
-     *            The number of the parking lot.
-     */
-    public abstract void promptForMoney(int aParkingLotNumber);
-
-    /**
      * Prompts the user for the new coin box levels.
      * 
      * @param someCurrentCoinBoxLevels
@@ -270,16 +310,7 @@ public abstract class SimulationView implements Runnable,
     public abstract void promptForNewCoinBoxLevels(
             List<CoinBoxLevel> someCurrentCoinBoxLevels);
 
-    /**
-     * Displays the information about the current parking lot.
-     * 
-     * @param aParkingLotNumber
-     *            The number of the parking lot.
-     * @param aPaidParkingtime
-     *            The time until the parking lot is / was paid.
-     */
-    public abstract void displayParkingLotNumberAndParkingTime(
-            int aParkingLotNumber, Date aPaidParkingtime);
+   
 
     /**
      * Displays the information about the current booking parking lots.
@@ -289,16 +320,6 @@ public abstract class SimulationView implements Runnable,
      *            about the ParkingLot.
      */
     public abstract void displayBookedParkingLots(List<ParkingLot> parkingLots);
-
-    /**
-     * Displays a message, that the entered parking lot number was invalid.
-     */
-    public abstract void displayParkingLotNumberInvalid();
-
-    /**
-     * Displays a message, that the system is shutting down.
-     */
-    public abstract void displayShutdownMessage();
 
     /**
      * Displays all available information. TODO: Anpassen.
@@ -338,8 +359,6 @@ public abstract class SimulationView implements Runnable,
             listener.shutdownRequested(event);
         }
     }
-
-   
 
     /**
      * Notifies all attached listeners about the aborted action.
@@ -395,6 +414,7 @@ public abstract class SimulationView implements Runnable,
      */
     protected abstract void print(final String aKey, final boolean prompt,
             final Object... arguments);
+    
 
     /**
      * Initializes the implementation class.

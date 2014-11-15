@@ -115,7 +115,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Step Three: Print error if nothing matched
         if (!processed) {
-            view.displayParkingLotNumberInvalid();
+            view.displayErrorParkingLotNumberInvalid();
             view.promptForParkingLotNumber();
         }
     }

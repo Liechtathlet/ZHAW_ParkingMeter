@@ -16,8 +16,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
 
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
@@ -37,11 +35,6 @@ import ch.zhaw.swengineering.view.ViewStateEnum;
  *         {@link ch.zhaw.swengineering.view.SimulationView}.
  */
 public class ConsoleSimulationView extends SimulationView {
-
-    /**
-     * Date-Format.
-     */
-    private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
 
     /**
      * The 'command' / string which is used to abort the current action.
@@ -84,20 +77,9 @@ public class ConsoleSimulationView extends SimulationView {
     @Autowired
     private PrintStream writer;
 
-    private DateFormatter dateFormatter;
     private Date now = new Date();
 
-    private int storeParkingLotNumber;
     private List<CoinBoxLevel> coinBoxLevels;
-
-    /**
-     * Creates a new instance of this class and sets the initial state.
-     */
-    public ConsoleSimulationView() {
-        super();
-        dateFormatter = new DateFormatter(DATE_FORMAT);
-        storeParkingLotNumber = -1;
-    }
 
     /*
      * (non-Javadoc)
@@ -107,38 +89,6 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     protected void init() {
         // Nothing to do here..
-    }
-
-    @Override
-    public void promptForMoney(final int aParkingLotNumber) {
-        setViewState(ViewStateEnum.DROPPING_IN_MONEY);
-
-        // TODO: Any better ideas? Perhaps a Hash-Map as an "Object-Store" with
-        // Keys?
-        storeParkingLotNumber = aParkingLotNumber;
-    }
-
-    @Override
-    public void displayParkingLotNumberAndParkingTime(
-            final int aParkingLotNumber, final Date aPaidParkingTime) {
-
-        String formattedDate = "-";
-        if (aPaidParkingTime != null) {
-            formattedDate = dateFormatter.print(aPaidParkingTime,
-                    LocaleContextHolder.getLocale());
-        }
-
-        print("view.info.parkingTime", false, aParkingLotNumber, formattedDate);
-    }
-
-    @Override
-    public void displayParkingLotNumberInvalid() {
-        print("view.enter.parkinglotnumber.invalid", false);
-    }
-
-    @Override
-    public void displayShutdownMessage() {
-        print("application.bye", false);
     }
 
     @Override
@@ -254,7 +204,7 @@ public class ConsoleSimulationView extends SimulationView {
      * 'DroppingInMoney'.
      */
     public void executeActionsForStateDroppingInMoney() {
-        print("view.enter.coins", true, storeParkingLotNumber);
+        print("view.enter.coins", true, dataStore.getParkingLotNumber());
         String input = readFromConsole();
 
         // if input == null: no input was provided or another event occurred.
@@ -311,35 +261,9 @@ public class ConsoleSimulationView extends SimulationView {
             } else {
                 // Reset view state if operation was successful.
                 setViewState(ViewStateEnum.INIT);
-                notifyForMoneyInserted(storeParkingLotNumber);
+                notifyForMoneyInserted(dataStore.getParkingLotNumber());
             }
         }
-    }
-
-    /**
-     * Displays a message for the drawback.
-     * 
-     * @param drawbackMap
-     *            the drawback map
-     */
-    private void displayMessageForDrawback(Map<BigDecimal, Integer> drawbackMap) {
-        StringBuilder sb = new StringBuilder();
-
-        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
-        for (int i = 0; i < keyList.size(); i++) {
-            BigDecimal key = keyList.get(i);
-
-            sb.append(drawbackMap.get(key));
-            sb.append(" x ");
-            sb.append(key);
-
-            if (i < (keyList.size() - 1)) {
-                sb.append(", ");
-            }
-        }
-
-        print("view.slot.machine.drawback", false, sb.toString());
-
     }
 
     /**
@@ -367,26 +291,29 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     /**
-     * Prints a text with the given key to the console. TODO sl: Move print
-     * methods to its own class
+     * Displays a message for the drawback.
      * 
-     * @param aKey
-     *            the key of the text to output.
-     * @param prompt
-     *            True if the printed text is an input prompt
-     * @param arguments
-     *            The arguments for the message.
+     * @param drawbackMap
+     *            the drawback map
      */
-    @Override
-    protected void print(final String aKey, final boolean prompt,
-            final Object... arguments) {
-        if (prompt) {
-            writer.print(MessageFormat.format(messageProvider.get(aKey).trim()
-                    + messageProvider.get("view.prompt.separator"), arguments));
-        } else {
-            writer.println(MessageFormat.format(messageProvider.get(aKey)
-                    .trim(), arguments));
+    private void displayMessageForDrawback(Map<BigDecimal, Integer> drawbackMap) {
+        StringBuilder sb = new StringBuilder();
+
+        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            sb.append(drawbackMap.get(key));
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
         }
+
+        print("view.slot.machine.drawback", false, sb.toString());
+
     }
 
     /**
@@ -511,9 +438,23 @@ public class ConsoleSimulationView extends SimulationView {
         }
     }
 
+    /* ********** Impl methods of superclass ********** */
+
+    @Override
+    protected void print(final String aKey, final boolean prompt,
+            final Object... arguments) {
+        if (prompt) {
+            writer.print(MessageFormat.format(messageProvider.get(aKey).trim()
+                    + messageProvider.get("view.prompt.separator"), arguments));
+        } else {
+            writer.println(MessageFormat.format(messageProvider.get(aKey)
+                    .trim(), arguments));
+        }
+    }
+
     @Override
     public Integer readInteger() {
-        //TODO: Evtl. clean up.
+        // TODO: Evtl. clean up.
         Integer enteredInteger = null;
         String input = readFromConsole();
 
@@ -527,5 +468,4 @@ public class ConsoleSimulationView extends SimulationView {
 
         return enteredInteger;
     }
-
 }

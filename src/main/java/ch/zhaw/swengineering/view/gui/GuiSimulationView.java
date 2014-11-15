@@ -83,16 +83,7 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     /* ******** View-Implementation Methods ******** */
 
-    /**
-     * Prints a text with the given.
-     * 
-     * @param aKey
-     *            the key of the text to output.
-     * @param prompt
-     *            True if the printed text is an input prompt
-     * @param arguments
-     *            The arguments for the message.
-     */
+    @Override
     public final void print(final String aKey, final boolean prompt,
             final Object... arguments) {
         String message = MessageFormat.format(messageProvider.get(aKey).trim(),
@@ -100,11 +91,18 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
         if (prompt) {
             message += messageProvider.get("view.prompt.separator");
+            parkingMeterPanel.printPrompt(message);
+        } else {
+            parkingMeterPanel.printErrorOrInfo(message);
         }
-
-        parkingMeterPanel.print(message, prompt);
     }
 
+    @Override
+    public Integer readInteger() {
+        return parkingMeterPanel.readInteger();
+    }
+
+    /* *** TODO: To CleanUp *** */
     @Override
     public void displayAllInformation() {
         // TODO Auto-generated method stub
@@ -120,66 +118,6 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void promptForNewCoinBoxLevels(
             List<CoinBoxLevel> someCurrentCoinBoxLevels) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void displayParkingLotNumberAndParkingTime(int aParkingLotNumber,
-            Date aPaidParkingtime) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void promptForMoney(int aParkingLotNumber) {
-        print("view.enter.coins", true, aParkingLotNumber);
-        /*
-         * String input = readFromConsole();
-         * 
-         * // if input == null: no input was provided or another event occurred.
-         * if (input != null) { boolean error = false; boolean drawback = false;
-         * 
-         * try { parseAndInsertCoins(input); } catch (CoinBoxFullException e) {
-         * error = true; drawback = true; LOG.error("Received exception " +
-         * "from slot machine: coin box is full!", e);
-         * 
-         * if (e.isAllCoinBoxesFull()) {
-         * print("view.slot.machine.coin.box.full", false, e.getCoinValue()); }
-         * else { print("view.slot.machine.coin.box.single.full", false,
-         * e.getCoinValue()); }
-         * 
-         * } catch (NoTransactionException e) { error = true; drawback = true;
-         * 
-         * // This should not occur! LOG.error("Received exception " +
-         * "from slot machine: no transaction!", e); } catch
-         * (InvalidCoinException e) { error = true; drawback = true;
-         * 
-         * StringBuilder coinString = new StringBuilder();
-         * 
-         * for (BigDecimal validCoin : e.getValidCoins()) {
-         * coinString.append(validCoin); coinString.append(", "); }
-         * 
-         * LOG.error("Received exception " + "from slot machine: invalid coin!",
-         * e); print("view.slot.machine.coin.invalid", false, coinString); }
-         * catch (NumberFormatException e) { error = true;
-         * print("view.slot.machine.format.invalid", false); }
-         * 
-         * if (error) { if (drawback) { roleBackTransaction(); } } else { //
-         * Reset view state if operation was successful.
-         * setViewState(ConsoleViewStateEnum.INIT);
-         * notifyForMoneyInserted(storeParkingLotNumber); } }
-         */
-    }
-
-    @Override
-    public void displayParkingLotNumberInvalid() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void displayShutdownMessage() {
         // TODO Auto-generated method stub
 
     }
@@ -233,10 +171,5 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     protected void executeActionsForStateEnteringCoinBoxLevels() {
         // TODO Auto-generated method stub
 
-    }
-
-    @Override
-    public Integer readInteger() {
-        return parkingMeterPanel.readInteger();
     }
 }

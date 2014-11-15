@@ -71,11 +71,12 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JPanel slotPane;
     private JPanel ticketfieldPane;
 
+    private JTextArea errorAndInfoDisplay;
     private JTextArea display;
 
     private List<JButton> coinButtonList;
     private CoinInputActionListener coinInputListener;
-    
+
     private List<JButton> numberBlockList;
     private NumberInputActionListener numberInputListener;
 
@@ -86,12 +87,14 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JTextArea ticketfield = new JTextArea();
 
     private CyclicBarrier barrier;
-    
+
     private BigInteger integerInput;
 
     private boolean okButtonPressed;
     private boolean promptMode;
+
     private String promptText;
+    private String lastErrorAndInfoText;
 
     /**
      * Creates a new parking meter panel.
@@ -103,7 +106,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         // Init lock
         barrier = new CyclicBarrier(2);
-        
+
         // Init helper objects
         integerInput = BigInteger.ZERO;
         okButtonPressed = false;
@@ -119,7 +122,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         numberInputListener = new NumberInputActionListener(this);
         coinInputListener = new CoinInputActionListener(this);
-        
+
         parkingMeterPane = new JPanel();
         parkingBorderPane1 = new JPanel();
         parkingMeterMMI = new JPanel();
@@ -143,7 +146,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
                 FlowLayout.CENTER, 10, 20);
         BorderLayout borderLayoutParkingTicketPane = new BorderLayout();
         FlowLayout flowLayoutParkingDisplayPane = new FlowLayout(
-                FlowLayout.CENTER, 5, 10);
+                FlowLayout.CENTER, 5, 3);
         FlowLayout flowLayoutParkingCoinsButtonPane = new FlowLayout(
                 FlowLayout.CENTER, 5, 10);
         FlowLayout flowLayoutParkingSlotPane = new FlowLayout();
@@ -225,7 +228,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
                 (int) ((initialWidth - 50) * factor),
-                (int) ((initialHeight - 250) * factor)));
+                (int) ((initialHeight - 250 - 12) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
         display.setWrapStyleWord(true);
@@ -233,6 +236,17 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         display.setBackground(BG_DISPLAY);
 
         displayPane.add(display);
+
+        errorAndInfoDisplay = new JTextArea();
+        Dimension dimensionErrorDisplay = new Dimension(new Dimension(
+                (int) ((initialWidth - 50) * factor), (int) (10 * factor)));
+        errorAndInfoDisplay.setPreferredSize(dimensionErrorDisplay);
+        errorAndInfoDisplay.setEditable(false);
+        errorAndInfoDisplay.setWrapStyleWord(true);
+        errorAndInfoDisplay.setLineWrap(true);
+        errorAndInfoDisplay.setBackground(BG_DISPLAY);
+
+        displayPane.add(errorAndInfoDisplay);
 
         // Create coin buttons
         for (BigDecimal coinValue : someAvailableCoins) {
@@ -279,8 +293,9 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
+                resetErrorAndInfoDisplay();
                 numberInputListener.reset();
-                //TODO: abort all event
+                // TODO: abort all event
             }
         });
         buttonOk.addActionListener(new ActionListener() {
@@ -295,6 +310,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
+                resetErrorAndInfoDisplay();
             }
         });
     }
@@ -302,24 +318,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     @Override
     public void actionPerformed(ActionEvent anEvent) {
 
-    }
-
-    /**
-     * Prints a text to the display.
-     * 
-     * @param aMessage
-     *            the message.
-     * @param prompt
-     *            True if the printed text is an input prompt
-     */
-    public final void print(final String aMessage, final boolean prompt) {
-        if (prompt) {
-            promptText = aMessage;
-            promptMode = true;
-            numberInputListener.reset();
-        }
-
-        display.setText(aMessage);
     }
 
     /**
@@ -370,10 +368,49 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
     @Override
     public void appendTextToDisplay(String aText) {
-        
-        //TODO: prompt mode unterscheiden -> coin insert / number insert...
+
+        // TODO: prompt mode unterscheiden -> coin insert / number insert...
         if (promptMode) {
             display.setText(promptText + aText);
         }
+    }
+
+    /**
+     * Prints a text to the display.
+     * 
+     * @param aMessage
+     *            the message.
+     */
+    public final void printPrompt(final String aMessage) {
+        promptText = aMessage;
+        promptMode = true;
+        numberInputListener.reset();
+
+        display.setText(promptText);
+
+        if (lastErrorAndInfoText != null
+                && lastErrorAndInfoText.equals(errorAndInfoDisplay.getText())) {
+            resetErrorAndInfoDisplay();
+        } else if (errorAndInfoDisplay.getText().trim().length() > 0) {
+            lastErrorAndInfoText = errorAndInfoDisplay.getText();
+        }
+    }
+
+    /**
+     * Prints an error message to the display.
+     * 
+     * @param aMessage
+     *            the message to print.
+     */
+    public final void printErrorOrInfo(final String aMessage) {
+        errorAndInfoDisplay.setText(aMessage);
+    }
+    
+    /**
+     * Resets the error and info display.
+     */
+    private void resetErrorAndInfoDisplay(){
+        errorAndInfoDisplay.setText("");
+        lastErrorAndInfoText = null;
     }
 }

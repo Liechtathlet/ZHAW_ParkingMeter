@@ -340,7 +340,7 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testDisplayParkingLotInvalid() throws IOException {
         // Run
-        view.displayParkingLotNumberInvalid();
+        view.displayErrorParkingLotNumberInvalid();
 
         // Assert
         assertEquals(
