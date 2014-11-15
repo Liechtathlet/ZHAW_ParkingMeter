@@ -10,23 +10,44 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
 
 /**
  * @author Roland Hofer
  * 
  *         Panel which displays a parking meter.
  */
-public class ParkingMeterPanel extends JPanel {
+public class ParkingMeterPanel extends JPanel implements ActionListener,
+        DisplayTextAppenderInterface {
 
     /**
      * Generates Serial Version UID.
      */
     private static final long serialVersionUID = 1258929181774396319L;
 
+    private static final Logger LOG = LogManager
+            .getLogger(ParkingMeterPanel.class);
+
+    /**
+     * Static color-definitions
+     */
     private static final Color BG = new Color(93, 92, 102);
     private static final Color BG_INNER = new Color(26, 51, 115);
     private static final Color BG_DISPLAY = new Color(162, 205, 90);
@@ -34,9 +55,6 @@ public class ParkingMeterPanel extends JPanel {
     private static final Color BG_OK = new Color(0, 153, 0);
     private static final Color BG_SLUT = new Color(119, 136, 153);
     private static final Color BG_TICKETFIELD = new Color(92, 172, 238);
-
-    // private static final Color BG_MARKER = new Color(200, 139, 50);
-    // private static final Color BG_NUMBER_FIELD = new Color(200, 207, 215);
 
     private double factor = 3.0;
     private int initialHeight;
@@ -57,33 +75,50 @@ public class ParkingMeterPanel extends JPanel {
 
     private JTextArea display;
 
-    private JButton coin1 = new JButton("Wert1");
-    private JButton coin2 = new JButton("Wert2");
-    private JButton coin3 = new JButton("Wert3");
-    private JButton coin4 = new JButton("Wert4");
+    private List<JButton> coinButtonList;
 
-    private JButton button1 = new JButton("1");
-    private JButton button2 = new JButton("2");
-    private JButton button3 = new JButton("3");
-    private JButton button4 = new JButton("4");
-    private JButton button5 = new JButton("5");
-    private JButton button6 = new JButton("6");
-    private JButton button7 = new JButton("7");
-    private JButton button8 = new JButton("8");
-    private JButton button9 = new JButton("9");
-    private JButton button0 = new JButton("0");
+    private List<JButton> numberBlockList;
+    private NumberInputActionListener numberBlockListener;
+
     private JButton buttonCancel = new JButton("C");
     private JButton buttonOk = new JButton("OK");
 
     private JTextArea coinSlut = new JTextArea("");
     private JTextArea ticketfield = new JTextArea();
 
-    public ParkingMeterPanel() {
+    private CyclicBarrier barrier;
+    
+    private BigInteger integerInput;
+
+    private boolean okButtonPressed;
+    private boolean promptMode;
+    private String promptText;
+
+    /**
+     * Creates a new parking meter panel.
+     * 
+     * @param someAvailableCoins
+     *            The coins which should be available in the parking meter.
+     */
+    public ParkingMeterPanel(List<BigDecimal> someAvailableCoins) {
+
+        // Init lock
+        barrier = new CyclicBarrier(2);
+        
+        // Init helper objects
+        integerInput = BigInteger.ZERO;
+        okButtonPressed = false;
+        promptMode = false;
 
         initialHeight = 300;
         initialWidth = 100;
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
+
+        coinButtonList = new ArrayList<JButton>();
+        numberBlockList = new ArrayList<JButton>();
+
+        numberBlockListener = new NumberInputActionListener(this);
 
         parkingMeterPane = new JPanel();
         parkingBorderPane1 = new JPanel();
@@ -188,31 +223,43 @@ public class ParkingMeterPanel extends JPanel {
         ticketPane.add(ticketfieldPane, BorderLayout.WEST);
 
         display = new JTextArea();
-        Dimension dimensionDisplay = new Dimension((int) (45 * factor),
-                (int) (20 * factor));
+        Dimension dimensionDisplay = new Dimension(new Dimension(
+                (int) ((initialWidth - 50) * factor),
+                (int) ((initialHeight - 250) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
+        display.setWrapStyleWord(true);
+        display.setLineWrap(true);
         display.setBackground(BG_DISPLAY);
 
         displayPane.add(display);
 
-        coinsButtonPane.add(coin1);
-        coinsButtonPane.add(coin2);
-        coinsButtonPane.add(coin3);
-        coinsButtonPane.add(coin4);
+        // Create coin buttons
+        for (BigDecimal coinValue : someAvailableCoins) {
+            JButton coinBtn = new JButton(coinValue.toString());
+            // TODO: evtl. hash map with mapping.
+            // coinBtn.addActionListener(this);
+            coinButtonList.add(coinBtn);
+            coinsButtonPane.add(coinBtn);
+        }
 
-        buttonPane.add(button1);
-        buttonPane.add(button2);
-        buttonPane.add(button3);
-        buttonPane.add(button4);
-        buttonPane.add(button5);
-        buttonPane.add(button6);
-        buttonPane.add(button7);
-        buttonPane.add(button8);
-        buttonPane.add(button9);
+        // Create number buttons from 1 to 9
+        for (int i = 1; i <= 9; i++) {
+            JButton numberButton = new JButton(i + "");
+            numberButton.addActionListener(numberBlockListener);
+            numberBlockList.add(numberButton);
+
+            buttonPane.add(numberButton);
+        }
+
+        // Crate zero button
+        JButton numberButtonZero = new JButton("0");
+        numberButtonZero.addActionListener(numberBlockListener);
+        numberBlockList.add(numberButtonZero);
+
         buttonCancel.setBackground(BG_CANCEL);
         buttonPane.add(buttonCancel);
-        buttonPane.add(button0);
+        buttonPane.add(numberButtonZero);
         buttonOk.setBackground(BG_OK);
         buttonPane.add(buttonOk);
 
@@ -230,86 +277,101 @@ public class ParkingMeterPanel extends JPanel {
         ticketfield.setBackground(BG_TICKETFIELD);
         ticketfieldPane.add(ticketfield);
 
-        button1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "1");
-            }
-        });
-        button2.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "2");
-            }
-        });
-        button3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "3");
-            }
-        });
-        button4.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "4");
-            }
-        });
-        button5.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "5");
-            }
-        });
-        button6.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "6");
-            }
-        });
-        button7.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "7");
-            }
-        });
-        button8.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "8");
-            }
-        });
-        button9.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "9");
-            }
-        });
-        button0.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae) {
-                display.setText(display.getText() + "0");
-            }
-        });
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                display.setText("");
+                numberBlockListener.reset();
+                //TODO: abort all event
             }
         });
         buttonOk.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae1) {
-                // TODO generate Event
+                okButtonPressed = true;
+                try {
+                    barrier.await();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
-        coin1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae1) {
-                // TODO action for coin1
-            }
-        });
-        coin2.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae1) {
-                // TODO action for coin2
-            }
-        });
-        coin3.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae1) {
-                // TODO action for coin3
-            }
-        });
-        coin4.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent ae1) {
-                // TODO action for coin4
-            }
-        });
+    }
 
+    @Override
+    public void actionPerformed(ActionEvent anEvent) {
+
+    }
+
+    /**
+     * Prints a text to the display.
+     * 
+     * @param aMessage
+     *            the message.
+     * @param prompt
+     *            True if the printed text is an input prompt
+     */
+    public final void print(final String aMessage, final boolean prompt) {
+        if (prompt) {
+            promptText = aMessage;
+            promptMode = true;
+            numberBlockListener.reset();
+        }
+
+        display.setText(aMessage);
+    }
+
+    /**
+     * Waits for the ok button to be pressed.
+     */
+    private final void waitForRead() {
+        // Set lock.
+        try {
+            do {
+                barrier.await();
+            } while (!okButtonPressed);
+        } catch (InterruptedException e) {
+            // Nothing to do here...didn't have monitor.
+        } catch (BrokenBarrierException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } finally {
+            // Unset lock.
+            okButtonPressed = false;
+            promptMode = false;
+        }
+    }
+
+    /**
+     * Reads an integer from the input.
+     * 
+     * @return the integer which was read.
+     */
+    public final Integer readInteger() {
+        waitForRead();
+
+        BigInteger returnInt = numberBlockListener.getIntegerInput();
+        return Integer.valueOf(returnInt.intValue());
+    }
+
+    /**
+     * Reads the current coin value from the input.
+     * 
+     * @return the coin value.
+     */
+    public final BigDecimal readCoinValue() {
+        waitForRead();
+
+        // TODO: implement
+
+        return null;
+    }
+
+    @Override
+    public void appendTextToDisplay(String aText) {
+        if (promptMode) {
+            display.setText(promptText + aText);
+        }
     }
 }
