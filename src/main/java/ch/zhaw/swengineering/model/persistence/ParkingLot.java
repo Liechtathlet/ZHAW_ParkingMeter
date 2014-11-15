@@ -69,6 +69,11 @@ public class ParkingLot {
 		this.paidUntil = paidUntil;
 	}
 
+	/**
+	 * Calculates Difference between paidUntil and now
+	 * 
+	 * @return the positive numbers of millisec.
+	 */
 	public long getRemainingTimeInMillisec() {
 		Date now = new Date();
 		Date init = null;
@@ -83,7 +88,7 @@ public class ParkingLot {
 			setPaidUntil(init);
 		}
 		this.remainingMillisec = (paidUntil.getTime() - now.getTime());
-		return remainingMillisec;
+		return Math.abs(remainingMillisec);
 	}
 
 }
