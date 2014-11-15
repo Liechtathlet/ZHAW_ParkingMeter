@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
 import javax.swing.JFrame;
 
 import org.apache.log4j.LogManager;
@@ -19,10 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import ch.zhaw.swengineering.view.ViewStateEnum;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -43,10 +38,11 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     private JFrame frame;
     private ParkingMeterPanel parkingMeterPanel;
 
-    /**
-     * Creates the GUI.
+    /* (non-Javadoc)
+     * @see ch.zhaw.swengineering.view.SimulationView#init()
      */
-    public void startSimulationView() {
+    @Override
+    protected final void init() {
         LOG.debug("Initialize frame");
         frame = new JFrame("ParkingMeter");
 
@@ -61,11 +57,6 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
         frame.setVisible(true);
         LOG.debug("Frame initialized...");
 
-    }
-
-    @Override
-    public void run() {
-        // Nothing to do here...
     }
 
     @Override
@@ -224,6 +215,7 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     @Override
     public void shutdown() {
+        super.shutdown();
         frame.dispose();
     }
 
@@ -246,5 +238,35 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
         // TODO Auto-generated method stub
 
+    }
+
+    @Override
+    protected void executeActionsForStateEnteringParkingLotNumber() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void executeActionsForStateDroppingInMoney() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void executeActionsForStateViewingAllInformation() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void executeActionsForStateDisplayBookedParkingLots() {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    protected void executeActionsForStateEnteringCoinBoxLevels() {
+        // TODO Auto-generated method stub
+        
     }
 }

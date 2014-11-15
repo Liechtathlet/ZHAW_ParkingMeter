@@ -374,7 +374,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -400,7 +400,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -433,7 +433,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -453,7 +453,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -485,7 +485,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         assertEquals(exptectedMessage, outContent.toString());
     }
@@ -513,7 +513,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         assertEquals(exptectedMessage, outContent.toString());
 
@@ -545,7 +545,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         assertEquals(exptectedMessage, outContent.toString());
 
@@ -576,7 +576,7 @@ public class ConsoleSimulationViewTest {
         when(parkingTimeConfigurationProvider.get()).thenReturn(definitions);
 
         // Run
-        view.executeActionForViewingAllInformation();
+        view.executeActionsForStateViewingAllInformation();
 
         // Assert
         assertEquals(
@@ -690,7 +690,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForMoney(5);
-        view.executeActionsForDroppingInMoney();
+        view.executeActionsForStateDroppingInMoney();
 
         // Assert
         verify(listener).actionAborted(any(ActionAbortedEvent.class));
@@ -732,7 +732,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForNewCoinBoxLevels(cbLevels);
-        view.executeActionsForEnteringCoinBoxLevels();
+        view.executeActionsForStateEnteringCoinBoxLevels();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -762,7 +762,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForNewCoinBoxLevels(cbLevels);
-        view.executeActionsForEnteringCoinBoxLevels();
+        view.executeActionsForStateEnteringCoinBoxLevels();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
@@ -790,7 +790,7 @@ public class ConsoleSimulationViewTest {
 
         // Run
         view.promptForNewCoinBoxLevels(cbLevels);
-        view.executeActionsForEnteringCoinBoxLevels();
+        view.executeActionsForStateEnteringCoinBoxLevels();
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
