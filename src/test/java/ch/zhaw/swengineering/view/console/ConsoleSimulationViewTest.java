@@ -52,6 +52,7 @@ import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.ViewStateEnum;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -273,13 +274,13 @@ public class ConsoleSimulationViewTest {
     @Test
     public final void testStateOfPromptForParkingLot() {
         // Check init state.
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+        assertEquals(ViewStateEnum.INIT, view.getViewState());
 
         // Run
         view.promptForParkingLotNumber();
 
         // check state after prompt
-        assertEquals(ConsoleViewStateEnum.ENTERING_PARKING_LOT,
+        assertEquals(ViewStateEnum.ENTERING_PARKING_LOT,
                 view.getViewState());
     }
 
@@ -352,13 +353,13 @@ public class ConsoleSimulationViewTest {
     @Test
     public final void testStatetForDroppingInMoneyState() {
         // Check init state.
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+        assertEquals(ViewStateEnum.INIT, view.getViewState());
 
         // Run
         view.promptForMoney(5);
 
         // check state after prompt
-        assertEquals(ConsoleViewStateEnum.DROPPING_IN_MONEY,
+        assertEquals(ViewStateEnum.DROPPING_IN_MONEY,
                 view.getViewState());
     }
 
@@ -676,7 +677,7 @@ public class ConsoleSimulationViewTest {
         view.shutdown();
 
         // Assert
-        assertEquals(ConsoleViewStateEnum.EXIT, view.getViewState());
+        assertEquals(ViewStateEnum.EXIT, view.getViewState());
     }
 
     @Test
@@ -693,7 +694,7 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         verify(listener).actionAborted(any(ActionAbortedEvent.class));
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+        assertEquals(ViewStateEnum.INIT, view.getViewState());
         assertEquals(exptectedMessage, outContent.toString());
     }
 
@@ -708,7 +709,7 @@ public class ConsoleSimulationViewTest {
         assertEquals(
                 MessageFormat.format(MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH, coin)
                         + System.lineSeparator(), outContent.toString());
-        assertEquals(ConsoleViewStateEnum.INIT, view.getViewState());
+        assertEquals(ViewStateEnum.INIT, view.getViewState());
     }
 
     @Test

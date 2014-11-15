@@ -32,6 +32,7 @@ import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserIn
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.ViewStateEnum;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -89,7 +90,7 @@ public class ConsoleSimulationView extends SimulationView {
 	@Autowired
 	private PrintStream writer;
 
-	private ConsoleViewStateEnum viewState;
+	private ViewStateEnum viewState;
 
 	private boolean run;
 
@@ -104,7 +105,7 @@ public class ConsoleSimulationView extends SimulationView {
 	 */
 	public ConsoleSimulationView() {
 		super();
-		viewState = ConsoleViewStateEnum.INIT;
+		viewState = ViewStateEnum.INIT;
 
 		dateFormatter = new DateFormatter(DATE_FORMAT);
 
@@ -161,12 +162,12 @@ public class ConsoleSimulationView extends SimulationView {
 
 	@Override
 	public void promptForParkingLotNumber() {
-		setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
+		setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
 	}
 
 	@Override
 	public void promptForMoney(final int aParkingLotNumber) {
-		setViewState(ConsoleViewStateEnum.DROPPING_IN_MONEY);
+		setViewState(ViewStateEnum.DROPPING_IN_MONEY);
 
 		// TODO: Any better ideas? Perhaps a Hash-Map as an "Object-Store" with
 		// Keys?
@@ -199,14 +200,14 @@ public class ConsoleSimulationView extends SimulationView {
 	@Override
 	public void displayAllInformation() {
 		// TODO: Der View-State ist nicht notwendig -> Parameter -> Output
-		setViewState(ConsoleViewStateEnum.DISPLAY_ALL_INFORMATION);
+		setViewState(ViewStateEnum.DISPLAY_ALL_INFORMATION);
 	}
 
 	@Override
 	public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
 		// TODO Auto-generated method stub
 		this.parkingLots = parkingLots;
-		setViewState(ConsoleViewStateEnum.DISPLAY_BOOKED_PARKINGLOTS);
+		setViewState(ViewStateEnum.DISPLAY_BOOKED_PARKINGLOTS);
 
 	}
 
@@ -235,7 +236,7 @@ public class ConsoleSimulationView extends SimulationView {
 			}
 		}
 
-		setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
+		setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
 	}
 
 	public void executeActionForDisplayBookedParkingLots() {
@@ -249,7 +250,7 @@ public class ConsoleSimulationView extends SimulationView {
 					getParkingLotOutOfPaidTime(parkingLot));
 		}
 
-		setViewState(ConsoleViewStateEnum.ENTERING_PARKING_LOT);
+		setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
 	}
 
 	private int getParkingLotNumber(ParkingLot parkingLot) {
@@ -322,7 +323,7 @@ public class ConsoleSimulationView extends SimulationView {
 			}
 
 			if (parkingLotNumber != null) {
-				setViewState(ConsoleViewStateEnum.INIT);
+				setViewState(ViewStateEnum.INIT);
 				notifyForParkingLotNumberEntered(parkingLotNumber);
 			}
 		}
@@ -389,7 +390,7 @@ public class ConsoleSimulationView extends SimulationView {
 				}
 			} else {
 				// Reset view state if operation was successful.
-				setViewState(ConsoleViewStateEnum.INIT);
+				setViewState(ViewStateEnum.INIT);
 				notifyForMoneyInserted(storeParkingLotNumber);
 			}
 		}
@@ -490,12 +491,12 @@ public class ConsoleSimulationView extends SimulationView {
 
 			if (line.toLowerCase().equals(ABORT_COMMAND)) {
 				line = null;
-				viewState = ConsoleViewStateEnum.INIT;
+				viewState = ViewStateEnum.INIT;
 				roleBackTransaction();
 				notifyForActionAborted();
 			} else if (line.toLowerCase().equals(EXIT_COMMAND)) {
 				line = null;
-				viewState = ConsoleViewStateEnum.INIT;
+				viewState = ViewStateEnum.INIT;
 				roleBackTransaction();
 				notifyForShutdownRequested();
 			}
@@ -527,7 +528,7 @@ public class ConsoleSimulationView extends SimulationView {
 	/**
 	 * @return the view state.
 	 */
-	public final ConsoleViewStateEnum getViewState() {
+	public final ViewStateEnum getViewState() {
 		return viewState;
 	}
 
@@ -538,7 +539,7 @@ public class ConsoleSimulationView extends SimulationView {
 	 * @param aState
 	 *            the view state to set.
 	 */
-	private synchronized void setViewState(final ConsoleViewStateEnum aState) {
+	private synchronized void setViewState(final ViewStateEnum aState) {
 		viewState = aState;
 		try {
 			waitCondition.signal();
@@ -551,7 +552,7 @@ public class ConsoleSimulationView extends SimulationView {
 	public void shutdown() {
 		LOG.info("Shutting down the view...");
 		run = false;
-		setViewState(ConsoleViewStateEnum.EXIT);
+		setViewState(ViewStateEnum.EXIT);
 	}
 
 	@Override
@@ -563,7 +564,7 @@ public class ConsoleSimulationView extends SimulationView {
 	public void promptForNewCoinBoxLevels(
 			List<CoinBoxLevel> someCurrentCoinBoxLevels) {
 		coinBoxLevels = someCurrentCoinBoxLevels;
-		setViewState(ConsoleViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
+		setViewState(ViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
 	}
 
 	/**
@@ -586,7 +587,7 @@ public class ConsoleSimulationView extends SimulationView {
 
 			if (input == null) {
 				// Input was null -> common command already executed
-				setViewState(ConsoleViewStateEnum.INIT);
+				setViewState(ViewStateEnum.INIT);
 				return;
 			} else {
 				try {
@@ -614,7 +615,7 @@ public class ConsoleSimulationView extends SimulationView {
 			}
 
 			if (!failure) {
-				setViewState(ConsoleViewStateEnum.INIT);
+				setViewState(ViewStateEnum.INIT);
 				notifyForCoinBoxLevelEntered(coinBoxLevels);
 			}
 		}

@@ -22,8 +22,8 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.ViewStateEnum;
 import ch.zhaw.swengineering.view.SimulationView;
-import ch.zhaw.swengineering.view.console.ConsoleViewStateEnum;
 
 /**
  * @author Daniel Brun

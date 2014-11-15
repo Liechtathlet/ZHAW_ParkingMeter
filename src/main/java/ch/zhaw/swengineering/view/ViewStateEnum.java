@@ -1,11 +1,11 @@
-package ch.zhaw.swengineering.view.console;
+package ch.zhaw.swengineering.view;
 
 /**
  * @author Daniel Brun
  * 
  *         Enum which represents the current state of the console view.
  */
-public enum ConsoleViewStateEnum {
+public enum ViewStateEnum {
 
 	/**
 	 * State during initialization or if no other state is set.
