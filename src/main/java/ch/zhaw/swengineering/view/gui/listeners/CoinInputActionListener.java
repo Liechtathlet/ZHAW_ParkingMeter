@@ -2,7 +2,7 @@ package ch.zhaw.swengineering.view.gui.listeners;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigInteger;
+import java.math.BigDecimal;
 
 import javax.swing.JButton;
 
@@ -11,11 +11,11 @@ import ch.zhaw.swengineering.view.gui.DisplayTextAppenderInterface;
 /**
  * @author Daniel Brun
  * 
- * Action listener for all number buttons.
+ * Action listener for all coin input buttons.
  */
-public class NumberInputActionListener implements ActionListener {
+public class CoinInputActionListener implements ActionListener {
 
-    private BigInteger integerInput;
+    private BigDecimal coinInput;
 
     private DisplayTextAppenderInterface displayer;
 
@@ -23,10 +23,10 @@ public class NumberInputActionListener implements ActionListener {
      * Creates a new instance of this class.
      * 
      * @param aDisplayer
-     *            The displayer to output the integer.
+     *            The displayer to output the coin value.
      */
-    public NumberInputActionListener(DisplayTextAppenderInterface aDisplayer) {
-        integerInput = null;
+    public CoinInputActionListener(DisplayTextAppenderInterface aDisplayer) {
+        coinInput = null;
         displayer = aDisplayer;
     }
 
@@ -40,34 +40,35 @@ public class NumberInputActionListener implements ActionListener {
     public void actionPerformed(ActionEvent anEvent) {
         if (anEvent.getSource() instanceof JButton) {
             JButton button = (JButton) anEvent.getSource();
-            BigInteger enteredInt = new BigInteger(button.getText());
 
-            if (integerInput == null) {
-                integerInput = enteredInt;
+            BigDecimal enteredCoin = new BigDecimal(button.getText());
+            enteredCoin = enteredCoin.setScale(2);
+
+            if (coinInput == null) {
+                coinInput = enteredCoin;
             } else {
-                integerInput = integerInput.multiply(BigInteger.TEN);
-                integerInput = integerInput.add(enteredInt);
+                coinInput = coinInput.add(enteredCoin);
             }
-            displayer.appendTextToDisplay(integerInput.toString());
+            displayer.appendTextToDisplay(coinInput.toString());
         }
     }
 
     /**
-     * Resets the integer input.
+     * Resets the coin input.
      */
     public void reset() {
-        integerInput = null;
+        coinInput = null;
         displayer.appendTextToDisplay("");
     }
 
     /**
-     * @return the integerInput
+     * @return the coinInput
      */
-    public BigInteger getIntegerInput() {
-        if (integerInput == null) {
-            return BigInteger.ZERO;
+    public BigDecimal getCoinInput() {
+        if (coinInput == null) {
+            return BigDecimal.ZERO;
         } else {
-            return integerInput;
+            return coinInput;
         }
     }
 }

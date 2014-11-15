@@ -16,9 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -27,6 +24,7 @@ import javax.swing.JTextArea;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import ch.zhaw.swengineering.view.gui.listeners.CoinInputActionListener;
 import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
 
 /**
@@ -76,9 +74,10 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JTextArea display;
 
     private List<JButton> coinButtonList;
-
+    private CoinInputActionListener coinInputListener;
+    
     private List<JButton> numberBlockList;
-    private NumberInputActionListener numberBlockListener;
+    private NumberInputActionListener numberInputListener;
 
     private JButton buttonCancel = new JButton("C");
     private JButton buttonOk = new JButton("OK");
@@ -118,8 +117,9 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         coinButtonList = new ArrayList<JButton>();
         numberBlockList = new ArrayList<JButton>();
 
-        numberBlockListener = new NumberInputActionListener(this);
-
+        numberInputListener = new NumberInputActionListener(this);
+        coinInputListener = new CoinInputActionListener(this);
+        
         parkingMeterPane = new JPanel();
         parkingBorderPane1 = new JPanel();
         parkingMeterMMI = new JPanel();
@@ -238,7 +238,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         for (BigDecimal coinValue : someAvailableCoins) {
             JButton coinBtn = new JButton(coinValue.toString());
             // TODO: evtl. hash map with mapping.
-            // coinBtn.addActionListener(this);
+            coinBtn.addActionListener(coinInputListener);
             coinButtonList.add(coinBtn);
             coinsButtonPane.add(coinBtn);
         }
@@ -246,7 +246,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         // Create number buttons from 1 to 9
         for (int i = 1; i <= 9; i++) {
             JButton numberButton = new JButton(i + "");
-            numberButton.addActionListener(numberBlockListener);
+            numberButton.addActionListener(numberInputListener);
             numberBlockList.add(numberButton);
 
             buttonPane.add(numberButton);
@@ -254,7 +254,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         // Crate zero button
         JButton numberButtonZero = new JButton("0");
-        numberButtonZero.addActionListener(numberBlockListener);
+        numberButtonZero.addActionListener(numberInputListener);
         numberBlockList.add(numberButtonZero);
 
         buttonCancel.setBackground(BG_CANCEL);
@@ -279,7 +279,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                numberBlockListener.reset();
+                numberInputListener.reset();
                 //TODO: abort all event
             }
         });
@@ -316,7 +316,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         if (prompt) {
             promptText = aMessage;
             promptMode = true;
-            numberBlockListener.reset();
+            numberInputListener.reset();
         }
 
         display.setText(aMessage);
@@ -351,7 +351,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     public final Integer readInteger() {
         waitForRead();
 
-        BigInteger returnInt = numberBlockListener.getIntegerInput();
+        BigInteger returnInt = numberInputListener.getIntegerInput();
         return Integer.valueOf(returnInt.intValue());
     }
 
@@ -370,6 +370,8 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
     @Override
     public void appendTextToDisplay(String aText) {
+        
+        //TODO: prompt mode unterscheiden -> coin insert / number insert...
         if (promptMode) {
             display.setText(promptText + aText);
         }
