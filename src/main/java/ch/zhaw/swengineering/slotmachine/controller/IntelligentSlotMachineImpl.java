@@ -304,4 +304,9 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         coinBoxesWriter.write(coinBoxes);
     }
 
+    @Override
+    public List<BigDecimal> getAvailableCoins() {
+        return new ArrayList<BigDecimal>(availableCoinList);
+    }
+
 }

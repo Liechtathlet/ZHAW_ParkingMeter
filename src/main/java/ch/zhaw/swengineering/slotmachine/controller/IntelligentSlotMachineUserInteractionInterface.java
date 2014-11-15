@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
@@ -37,12 +38,19 @@ public interface IntelligentSlotMachineUserInteractionInterface {
      * @return the map with the coins to output.
      */
     Map<BigDecimal, Integer> rolebackTransaction();
-    
+
     /**
-     * Gets the drawback of the current transaction.
-     * The transaction must be finished to deliver the drawback.
+     * Gets the drawback of the current transaction. The transaction must be
+     * finished to deliver the drawback.
      * 
      * @return the current drawback.
      */
-    Map<BigDecimal, Integer>  getDrawback();
+    Map<BigDecimal, Integer> getDrawback();
+
+    /**
+     * Gets a list with all available coins.
+     * 
+     * @return the coin list.
+     */
+    List<BigDecimal> getAvailableCoins();
 }

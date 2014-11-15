@@ -10,8 +10,6 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
-import junit.framework.Assert;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -357,6 +355,34 @@ public class IntelligentSlotMachineImplTest {
         }
 
         slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevels);
+    }
+
+    /**
+     * Method: getAvailableCoins(...)
+     * 
+     * Scenario: Gets the available coins.
+     * 
+     * Expected: The correct coins are returned.
+     */
+    @Test
+    public final void testGetAvailableCoins() {
+        List<BigDecimal> coinList = slotMachine.getAvailableCoins();
+
+        List<CoinBox> coinBoxList = getMockedCoinBoxes().getCoinBoxes();
+
+        assertEquals(coinBoxList.size(), coinList.size());
+
+        int remaining = coinList.size();
+
+        for (BigDecimal coin : coinList) {
+            for (CoinBox box : coinBoxList) {
+                if (box.getCoinValue().setScale(2).equals(coin)) {
+                    remaining--;
+                }
+            }
+        }
+        
+        assertEquals(0,remaining);
     }
 
     /**

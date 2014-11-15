@@ -62,20 +62,14 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JPanel feetPane;
     private JPanel parkingBorderPane1;
     private JPanel parkingMeterMMI;
-    private JPanel displayCoinsPane;
     private JPanel buttonSlotPane;
     private JPanel ticketPane;
     private JPanel displayPane;
-    private JPanel coinsButtonPane;
     private JPanel buttonPane;
-    private JPanel slotPane;
     private JPanel ticketfieldPane;
 
     private JTextArea errorAndInfoDisplay;
     private JTextArea display;
-
-    private List<JButton> coinButtonList;
-    private CoinInputActionListener coinInputListener;
 
     private List<JButton> numberBlockList;
     private NumberInputActionListener numberInputListener;
@@ -87,8 +81,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JTextArea ticketfield = new JTextArea();
 
     private CyclicBarrier barrier;
-
-    private BigInteger integerInput;
 
     private boolean okButtonPressed;
     private boolean promptMode;
@@ -108,126 +100,97 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         barrier = new CyclicBarrier(2);
 
         // Init helper objects
-        integerInput = BigInteger.ZERO;
         okButtonPressed = false;
         promptMode = false;
 
         initialHeight = 300;
-        initialWidth = 100;
+        initialWidth = 75;
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
 
-        coinButtonList = new ArrayList<JButton>();
         numberBlockList = new ArrayList<JButton>();
 
         numberInputListener = new NumberInputActionListener(this);
-        coinInputListener = new CoinInputActionListener(this);
 
         parkingMeterPane = new JPanel();
         parkingBorderPane1 = new JPanel();
         parkingMeterMMI = new JPanel();
         feetPane = new JPanel();
-        displayCoinsPane = new JPanel();
         buttonSlotPane = new JPanel();
         ticketPane = new JPanel();
         displayPane = new JPanel();
-        coinsButtonPane = new JPanel();
         buttonPane = new JPanel();
-        slotPane = new JPanel();
         ticketfieldPane = new JPanel();
 
         BorderLayout borderLayoutParkingMeterPane = new BorderLayout();
         FlowLayout flowLayoutParkingBorderPane1 = new FlowLayout();
         FlowLayout flowLayoutParkingMeterMMI = new FlowLayout(
                 FlowLayout.CENTER, 10, 10);
-        FlowLayout flowLayoutParkingDisplayCoinsPane = new FlowLayout(
-                FlowLayout.CENTER, 10, 10);
         FlowLayout flowLayoutParkingButtonSlotPane = new FlowLayout(
                 FlowLayout.CENTER, 10, 20);
         BorderLayout borderLayoutParkingTicketPane = new BorderLayout();
         FlowLayout flowLayoutParkingDisplayPane = new FlowLayout(
                 FlowLayout.CENTER, 5, 3);
-        FlowLayout flowLayoutParkingCoinsButtonPane = new FlowLayout(
-                FlowLayout.CENTER, 5, 10);
-        FlowLayout flowLayoutParkingSlotPane = new FlowLayout();
         FlowLayout flowLayoutParkingTicketfieldPane = new FlowLayout(
                 FlowLayout.CENTER, 5, 10);
 
         parkingMeterPane.setLayout(borderLayoutParkingMeterPane);
         parkingBorderPane1.setLayout(flowLayoutParkingBorderPane1);
         parkingMeterMMI.setLayout(flowLayoutParkingMeterMMI);
-        displayCoinsPane.setLayout(flowLayoutParkingDisplayCoinsPane);
         buttonSlotPane.setLayout(flowLayoutParkingButtonSlotPane);
         ticketPane.setLayout(borderLayoutParkingTicketPane);
         displayPane.setLayout(flowLayoutParkingDisplayPane);
-        coinsButtonPane.setLayout(flowLayoutParkingCoinsButtonPane);
         buttonPane.setLayout(new GridLayout(4, 1, 5, 5));
-        slotPane.setLayout(flowLayoutParkingSlotPane);
         ticketfieldPane.setLayout(flowLayoutParkingTicketfieldPane);
 
         parkingMeterPane.setPreferredSize(new Dimension(
                 (int) (initialWidth * factor), (int) (initialHeight * factor)));
         parkingMeterMMI.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 10) * factor),
+                (int) ((initialWidth - 5) * factor),
                 (int) ((initialHeight - 150) * factor)));
         feetPane.setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) ((initialHeight - 180) * factor)));
-        displayCoinsPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 10) * factor),
-                (int) ((initialHeight - 245) * factor)));
         buttonSlotPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 10) * factor),
+                (int) ((initialWidth - 5) * factor),
                 (int) ((initialHeight - 240) * factor)));
         ticketPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 10) * factor),
+                (int) ((initialWidth - 5) * factor),
                 (int) ((initialHeight - 250) * factor)));
         displayPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 50) * factor),
-                (int) ((initialHeight - 250) * factor)));
-        coinsButtonPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 70) * factor),
+                (int) ((initialWidth - 25) * factor),
                 (int) ((initialHeight - 250) * factor)));
         buttonPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 45) * factor),
-                (int) ((initialHeight - 250) * factor)));
-        slotPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 75) * factor),
+                (int) ((initialWidth - 30) * factor),
                 (int) ((initialHeight - 250) * factor)));
         ticketfieldPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 10) * factor),
+                (int) ((initialWidth - 5) * factor),
                 (int) ((initialHeight - 250) * factor)));
 
         this.setBackground(BG);
         parkingMeterPane.setBackground(BG_INNER);
         parkingMeterMMI.setBackground(BG_INNER);
         feetPane.setBackground(BG);
-        displayCoinsPane.setBackground(BG_INNER);
         buttonSlotPane.setBackground(BG_INNER);
         ticketPane.setBackground(BG_INNER);
         displayPane.setBackground(BG_DISPLAY);
-        coinsButtonPane.setBackground(BG_INNER);
         buttonPane.setBackground(BG_INNER);
-        slotPane.setBackground(BG_INNER);
         ticketfieldPane.setBackground(BG_INNER);
 
         this.add(parkingMeterPane, BorderLayout.CENTER);
         parkingMeterPane.add(feetPane, BorderLayout.SOUTH);
         parkingMeterPane.add(parkingMeterMMI, BorderLayout.CENTER);
-        parkingMeterMMI.add(displayCoinsPane);
+        parkingMeterMMI.add(displayPane);
         parkingMeterMMI.add(buttonSlotPane);
         parkingMeterMMI.add(ticketPane);
 
-        displayCoinsPane.add(displayPane);
-        displayCoinsPane.add(coinsButtonPane);
 
         buttonSlotPane.add(buttonPane);
-        buttonSlotPane.add(slotPane);
 
         ticketPane.add(ticketfieldPane, BorderLayout.WEST);
 
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 50) * factor),
+                (int) ((initialWidth - 25) * factor),
                 (int) ((initialHeight - 250 - 12) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
@@ -239,7 +202,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         errorAndInfoDisplay = new JTextArea();
         Dimension dimensionErrorDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 50) * factor), (int) (10 * factor)));
+                (int) ((initialWidth - 25) * factor), (int) (10 * factor)));
         errorAndInfoDisplay.setPreferredSize(dimensionErrorDisplay);
         errorAndInfoDisplay.setEditable(false);
         errorAndInfoDisplay.setWrapStyleWord(true);
@@ -247,15 +210,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         errorAndInfoDisplay.setBackground(BG_DISPLAY);
 
         displayPane.add(errorAndInfoDisplay);
-
-        // Create coin buttons
-        for (BigDecimal coinValue : someAvailableCoins) {
-            JButton coinBtn = new JButton(coinValue.toString());
-            // TODO: evtl. hash map with mapping.
-            coinBtn.addActionListener(coinInputListener);
-            coinButtonList.add(coinBtn);
-            coinsButtonPane.add(coinBtn);
-        }
 
         // Create number buttons from 1 to 9
         for (int i = 1; i <= 9; i++) {
@@ -276,13 +230,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         buttonPane.add(numberButtonZero);
         buttonOk.setBackground(BG_OK);
         buttonPane.add(buttonOk);
-
-        coinSlut.setSize(10, 40);
-        coinSlut.setColumns(1);
-        coinSlut.setRows(4);
-        coinSlut.setEditable(false);
-        coinSlut.setBackground(BG_SLUT);
-        slotPane.add(coinSlut);
 
         ticketfield.setSize(10, 10);
         ticketfield.setColumns(7);

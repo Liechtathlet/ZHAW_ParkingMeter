@@ -6,7 +6,6 @@ import java.awt.event.WindowListener;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 
 /**
@@ -35,9 +35,12 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Autowired
     private MessageProvider messageProvider;
 
+    @Autowired
+    private IntelligentSlotMachineUserInteractionInterface slotMachine;
+    
     private JFrame frame;
     private ParkingMeterPanel parkingMeterPanel;
-
+    private SlotMachinePanel slotMachinePanel;
     /*
      * (non-Javadoc)
      * 
@@ -50,11 +53,13 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
         // TODO: Change list
         parkingMeterPanel = new ParkingMeterPanel(new ArrayList<BigDecimal>());
-
+        slotMachinePanel = new SlotMachinePanel(slotMachine);
+        
         frame.addWindowListener(this);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
         frame.getContentPane().add(parkingMeterPanel, BorderLayout.CENTER);
+        frame.getContentPane().add(slotMachinePanel, BorderLayout.EAST);
         frame.pack();
         frame.setVisible(true);
         LOG.debug("Frame initialized...");
