@@ -115,7 +115,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
         }
 
         coinSlot.setSize(10, 40);
-        coinSlot.setColumns(1);
+        coinSlot.setColumns(3);
         coinSlot.setRows(4);
         coinSlot.setEditable(false);
         coinSlot.setBackground(BG_SLUT);

@@ -153,10 +153,10 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
                 (int) ((initialWidth - 5) * factor),
                 (int) ((initialHeight - 250) * factor)));
         displayPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 25) * factor),
+                (int) ((initialWidth - 20) * factor),
                 (int) ((initialHeight - 250) * factor)));
         buttonPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 30) * factor),
+                (int) ((initialWidth - 20) * factor),
                 (int) ((initialHeight - 250) * factor)));
         ticketfieldPane.setPreferredSize(new Dimension(
                 (int) ((initialWidth - 5) * factor),
@@ -185,8 +185,8 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 25) * factor),
-                (int) ((initialHeight - 250 - 12) * factor)));
+                (int) ((initialWidth - 20) * factor),
+                (int) ((initialHeight - 250 - 17) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
         display.setWrapStyleWord(true);
@@ -197,7 +197,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         errorAndInfoDisplay = new JTextArea();
         Dimension dimensionErrorDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 25) * factor), (int) (10 * factor)));
+                (int) ((initialWidth - 20) * factor), (int) (15 * factor)));
         errorAndInfoDisplay.setPreferredSize(dimensionErrorDisplay);
         errorAndInfoDisplay.setEditable(false);
         errorAndInfoDisplay.setWrapStyleWord(true);
@@ -265,7 +265,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     /**
      * Waits for the ok button to be pressed.
      */
-    private final void waitForRead() {
+    public final void waitForOK() {
         // Set lock.
         try {
             do {
@@ -274,8 +274,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         } catch (InterruptedException e) {
             // Nothing to do here...didn't have monitor.
         } catch (BrokenBarrierException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Barrier broken...", e);
         } finally {
             // Unset lock.
             okButtonPressed = false;
@@ -289,29 +288,15 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
      * @return the integer which was read.
      */
     public final Integer readInteger() {
-        waitForRead();
+        waitForOK();
 
         BigInteger returnInt = numberInputListener.getIntegerInput();
         return Integer.valueOf(returnInt.intValue());
     }
 
-    /**
-     * Reads the current coin value from the input.
-     * 
-     * @return the coin value.
-     */
-    public final BigDecimal readCoinValue() {
-        waitForRead();
-
-        // TODO: implement
-
-        return null;
-    }
-
     @Override
     public void appendTextToDisplay(String aText) {
 
-        // TODO: prompt mode unterscheiden -> coin insert / number insert...
         if (promptMode) {
             display.setText(promptText + aText);
         }

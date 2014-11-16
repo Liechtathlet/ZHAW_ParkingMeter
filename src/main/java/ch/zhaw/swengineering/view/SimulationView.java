@@ -27,6 +27,7 @@ import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.data.ViewDataStore;
+import ch.zhaw.swengineering.view.helper.ViewOutputMode;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -211,29 +212,53 @@ public abstract class SimulationView implements Runnable,
                     LocaleContextHolder.getLocale());
         }
 
-        print("view.info.parkingTime", false, aParkingLotNumber, formattedDate);
+        print("view.info.parkingTime", ViewOutputMode.INFO, aParkingLotNumber,
+                formattedDate);
     }
 
     @Override
     public void displayErrorParkingLotNumberInvalid() {
-        print("view.enter.parkinglotnumber.invalid", false);
+        print("view.enter.parkinglotnumber.invalid", ViewOutputMode.ERROR);
     }
 
     @Override
     public void displayShutdownMessage() {
-        print("application.bye", false);
+        print("application.bye", ViewOutputMode.INFO);
     }
 
     @Override
     public void displayCoinCountTooHigh(BigDecimal aCoinValue) {
-        print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
+        print("view.slot.machine.coin.box.level.too.high",
+                ViewOutputMode.ERROR, aCoinValue);
     }
 
     @Override
     public void displayNotEnoughMoneyError() {
-        print("view.booking.not.enough.money", false);
+        print("view.booking.not.enough.money", ViewOutputMode.ERROR);
     }
-    
+
+    @Override
+    public void displayMessageForDrawback() {
+        StringBuilder sb = new StringBuilder();
+
+        Map<BigDecimal, Integer> drawbackMap = slotMachine.getDrawback();
+
+        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            sb.append(drawbackMap.get(key));
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
+        }
+
+        print("view.slot.machine.drawback", ViewOutputMode.INFO, sb.toString());
+    }
+
     /* ********** Methods for prompt, executions and notification ********** */
 
     @Override
@@ -245,7 +270,7 @@ public abstract class SimulationView implements Runnable,
      * Executes the action for the state 'EnteringParkingLotNumber'.
      */
     public final void executeActionsForStateEnteringParkingLotNumber() {
-        print("view.enter.parkinglotnumber", true);
+        print("view.enter.parkinglotnumber", ViewOutputMode.PROMPT);
         Integer enteredInteger = readInteger();
 
         if (enteredInteger != null) {
@@ -282,6 +307,61 @@ public abstract class SimulationView implements Runnable,
             final List<CoinBoxLevel> someCurrentCoinBoxLevels) {
         dataStore.setCurrentCoinBoxLevels(someCurrentCoinBoxLevels);
         setViewState(ViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
+    }
+
+    /**
+     * Executes the action for the state 'EnteringCoinBoxLevels'.
+     */
+    public final void executeActionsForStateEnteringCoinBoxLevels() {
+        boolean failure = false;
+        for (CoinBoxLevel cbl : dataStore.getCurrentCoinBoxLevels()) {
+
+            // TODO: Not optimal -> creating three displays in gui -> three
+            // output modes -> prompt, info, error
+            // TODO: Evtl. auslagern.
+            BigDecimal total = cbl.getCoinValue().multiply(
+                    new BigDecimal(cbl.getCurrentCoinCount()));
+            print("view.info.coin.box.content", ViewOutputMode.INFO,
+                    cbl.getCoinValue(), cbl.getCurrentCoinCount(), total);
+
+            print("view.info.coin.box.content.new", ViewOutputMode.PROMPT,
+                    cbl.getCoinValue());
+
+            Integer coinCount = readInteger();
+
+            if (coinCount != null) {
+                try {
+                    if (coinCount.intValue() >= 1
+                            && coinCount.intValue() <= 100) {
+                        cbl.setCurrentCoinCount(coinCount);
+                    } else {
+                        LOG.info("Coin count for coin box not in range!");
+                        failure = true;
+                        print("view.info.coin.box.content.limit",
+                                ViewOutputMode.ERROR);
+
+                        // Early return for quick failure
+                        return;
+                    }
+                } catch (NumberFormatException e) {
+                    LOG.info("Coin count is not a valid number!");
+                    failure = true;
+                    print("view.slot.machine.format.invalid",
+                            ViewOutputMode.ERROR);
+
+                    // Early return for quick failure
+                    return;
+                }
+            } else {
+                failure = true;
+                return;
+            }
+        }
+
+        if (!failure) {
+            setViewState(ViewStateEnum.INIT);
+            notifyForCoinBoxLevelEntered(dataStore.getCurrentCoinBoxLevels());
+        }
     }
 
     /**
@@ -336,7 +416,7 @@ public abstract class SimulationView implements Runnable,
             listener.coinBoxLevelEntered(event);
         }
     }
-    
+
     /* ********** Internal methods ********** */
     /**
      * @return the view state.
@@ -375,13 +455,13 @@ public abstract class SimulationView implements Runnable,
      * 
      * @param aKey
      *            the key of the message.
-     * @param prompt
-     *            True if the message is a prompt.
+     * @param aMode
+     *            The mode to display the message.
      * @param arguments
      *            The arguments for the message.
      */
-    protected abstract void print(final String aKey, final boolean prompt,
-            final Object... arguments);
+    protected abstract void print(final String aKey,
+            final ViewOutputMode aMode, final Object... arguments);
 
     /**
      * Initializes the implementation class.
@@ -403,11 +483,6 @@ public abstract class SimulationView implements Runnable,
      */
     protected abstract void executeActionsForStateDisplayBookedParkingLots();
 
-    /**
-     * Executes the action for the state 'EnteringCoinBoxLevels'.
-     */
-    protected abstract void executeActionsForStateEnteringCoinBoxLevels();
-
     /* ********** Impl of Slot Machine View ********* */
 
     @Override
@@ -417,11 +492,11 @@ public abstract class SimulationView implements Runnable,
                 + "from slot machine: coin box is full!", anException);
 
         if (anException.isAllCoinBoxesFull()) {
-            print("view.slot.machine.coin.box.full", false,
+            print("view.slot.machine.coin.box.full", ViewOutputMode.ERROR,
                     anException.getCoinValue());
         } else {
-            print("view.slot.machine.coin.box.single.full", false,
-                    anException.getCoinValue());
+            print("view.slot.machine.coin.box.single.full",
+                    ViewOutputMode.ERROR, anException.getCoinValue());
         }
 
         rolebackTransaction();
@@ -439,7 +514,8 @@ public abstract class SimulationView implements Runnable,
 
         LOG.error("Received exception " + "from slot machine: invalid coin!",
                 anException);
-        print("view.slot.machine.coin.invalid", false, coinString);
+        print("view.slot.machine.coin.invalid", ViewOutputMode.ERROR,
+                coinString);
 
         rolebackTransaction();
     }
@@ -456,7 +532,7 @@ public abstract class SimulationView implements Runnable,
     @Override
     public final void handleNumberFormatException(
             final NumberFormatException anException) {
-        print("view.slot.machine.format.invalid", false);
+        print("view.slot.machine.format.invalid", ViewOutputMode.ERROR);
     }
 
     @Override

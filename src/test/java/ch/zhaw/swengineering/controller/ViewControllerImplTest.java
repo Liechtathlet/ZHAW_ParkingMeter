@@ -370,7 +370,6 @@ public class ViewControllerImplTest {
         // Assert positive
         verify(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
         verify(view).displayCoinCountTooHigh(coin);
-        verify(view).promptForNewCoinBoxLevels(any(List.class));
     }
 
     /**

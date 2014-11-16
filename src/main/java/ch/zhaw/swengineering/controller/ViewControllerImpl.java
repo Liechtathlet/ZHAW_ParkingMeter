@@ -173,7 +173,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             view.promptForParkingLotNumber();
         } catch (CoinBoxFullException e) {
             view.displayCoinCountTooHigh(e.getCoinValue());
-            view.promptForNewCoinBoxLevels(slotMachine.getCurrentCoinBoxLevel());
         }
     }
 }

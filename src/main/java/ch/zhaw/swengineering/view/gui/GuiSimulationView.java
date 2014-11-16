@@ -17,6 +17,8 @@ import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
+import ch.zhaw.swengineering.view.ViewStateEnum;
+import ch.zhaw.swengineering.view.helper.ViewOutputMode;
 
 /**
  * @author Daniel Brun
@@ -88,12 +90,12 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     /* ******** View-Implementation Methods ******** */
 
     @Override
-    public final void print(final String aKey, final boolean prompt,
+    public final void print(final String aKey, final ViewOutputMode aMode,
             final Object... arguments) {
         String message = MessageFormat.format(messageProvider.get(aKey).trim(),
                 arguments);
 
-        if (prompt) {
+        if (aMode.equals(ViewOutputMode.PROMPT)) {
             message += messageProvider.get("view.prompt.separator");
             parkingMeterPanel.printPrompt(message);
         } else {
@@ -107,27 +109,15 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     }
 
     @Override
-    public void displayMessageForDrawback() {
-        // TODO: Print drawback wherever possible
+    protected void executeActionsForStateDroppingInMoney() {
+        print("view.enter.coins", ViewOutputMode.PROMPT, dataStore.getParkingLotNumber());
 
+        parkingMeterPanel.waitForOK();
+        
+        setViewState(ViewStateEnum.INIT);
+        notifyForMoneyInserted(dataStore.getParkingLotNumber());
     }
     
-    /* *** TODO: To CleanUp *** */
-    @Override
-    public void displayAllInformation() {
-        // TODO Auto-generated method stub
-
-    }
-
-   
-
-    @Override
-    public void promptForNewCoinBoxLevels(
-            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
-        // TODO Auto-generated method stub
-
-    }
-
     @Override
     public void shutdown() {
         super.shutdown();
@@ -152,30 +142,24 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
     @Override
     public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
-    protected void executeActionsForStateDroppingInMoney() {
+    public void displayAllInformation() {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
     protected void executeActionsForStateViewingAllInformation() {
         // TODO Auto-generated method stub
-
+        
     }
 
     @Override
     protected void executeActionsForStateDisplayBookedParkingLots() {
         // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void executeActionsForStateEnteringCoinBoxLevels() {
-        // TODO Auto-generated method stub
-
+        
     }
 }
