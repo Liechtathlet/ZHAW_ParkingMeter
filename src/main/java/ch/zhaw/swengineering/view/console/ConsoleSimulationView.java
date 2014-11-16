@@ -23,7 +23,6 @@ import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
@@ -66,9 +65,6 @@ public class ConsoleSimulationView extends SimulationView {
     private BufferedReader reader;
 
     @Autowired
-    private IntelligentSlotMachineUserInteractionInterface slotMachine;
-
-    @Autowired
     @Qualifier("parkingTimeDef")
     private ConfigurationProvider parkingTimeConfigurationProvider;
 
@@ -78,8 +74,6 @@ public class ConsoleSimulationView extends SimulationView {
     private PrintStream writer;
 
     private Date now = new Date();
-
-    private List<CoinBoxLevel> coinBoxLevels;
 
     /*
      * (non-Javadoc)
@@ -91,6 +85,7 @@ public class ConsoleSimulationView extends SimulationView {
         // Nothing to do here..
     }
 
+    /* ********* Refactor from here ********** */
     @Override
     public void displayAllInformation() {
         // TODO: Der View-State ist nicht notwendig -> Parameter -> Output
@@ -99,7 +94,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
-        // TODO Auto-generated method stub
         this.parkingLots = parkingLots;
         setViewState(ViewStateEnum.DISPLAY_BOOKED_PARKINGLOTS);
 
@@ -109,6 +103,7 @@ public class ConsoleSimulationView extends SimulationView {
         print("view.all.information.title.template", false, 2, messageProvider
                 .get("view.parking.time.def").trim());
 
+        // TODO: View sollte nicht direkt auf model zugreifen
         ParkingTimeDefinitions parkingTimes = (ParkingTimeDefinitions) parkingTimeConfigurationProvider
                 .get();
         int i = 1;
@@ -199,6 +194,8 @@ public class ConsoleSimulationView extends SimulationView {
         return df.format(price);
     }
 
+    /* ******** Refactoring bis hier notwendig ******/
+    
     /**
      * Executes all necessary actions, which are required in the state
      * 'DroppingInMoney'.
@@ -209,111 +206,27 @@ public class ConsoleSimulationView extends SimulationView {
 
         // if input == null: no input was provided or another event occurred.
         if (input != null) {
-            boolean error = false;
-            boolean drawback = false;
-
             try {
-                parseAndInsertCoins(input);
-            } catch (CoinBoxFullException e) {
-                error = true;
-                drawback = true;
-                LOG.error("Received exception "
-                        + "from slot machine: coin box is full!", e);
+                String[] split = input.split(COIN_SPLITTER);
 
-                if (e.isAllCoinBoxesFull()) {
-                    print("view.slot.machine.coin.box.full", false,
-                            e.getCoinValue());
-                } else {
-                    print("view.slot.machine.coin.box.single.full", false,
-                            e.getCoinValue());
+                for (String coin : split) {
+                    BigDecimal coinDec = new BigDecimal(coin.trim());
+
+                    slotMachine.insertCoin(coinDec);
                 }
 
-            } catch (NoTransactionException e) {
-                error = true;
-                drawback = true;
-
-                // This should not occur!
-                LOG.error("Received exception "
-                        + "from slot machine: no transaction!", e);
-            } catch (InvalidCoinException e) {
-                error = true;
-                drawback = true;
-
-                StringBuilder coinString = new StringBuilder();
-
-                for (BigDecimal validCoin : e.getValidCoins()) {
-                    coinString.append(validCoin);
-                    coinString.append(", ");
-                }
-
-                LOG.error("Received exception "
-                        + "from slot machine: invalid coin!", e);
-                print("view.slot.machine.coin.invalid", false, coinString);
-            } catch (NumberFormatException e) {
-                error = true;
-                print("view.slot.machine.format.invalid", false);
-            }
-
-            if (error) {
-                if (drawback) {
-                    roleBackTransaction();
-                }
-            } else {
-                // Reset view state if operation was successful.
                 setViewState(ViewStateEnum.INIT);
                 notifyForMoneyInserted(dataStore.getParkingLotNumber());
+            } catch (CoinBoxFullException e) {
+                handleCoinBoxFullException(e);
+            } catch (NoTransactionException e) {
+                handleNoTransactionException(e);
+            } catch (InvalidCoinException e) {
+                handleInvalidCoinException(e);
+            } catch (NumberFormatException e) {
+                handleNumberFormatException(e);
             }
         }
-    }
-
-    /**
-     * Parses the input string and inserts the coins into the slot machine.
-     * 
-     * @param anInput
-     *            the input string.
-     * @throws InvalidCoinException
-     *             thrown if an invalid coin was inserted.
-     * @throws NoTransactionException
-     *             thrown if no transaction was started.
-     * @throws CoinBoxFullException
-     *             thrown if one or alle coin boxes are full.
-     */
-    private void parseAndInsertCoins(String anInput)
-            throws CoinBoxFullException, NoTransactionException,
-            InvalidCoinException {
-        String split[] = anInput.split(COIN_SPLITTER);
-
-        for (String coin : split) {
-            BigDecimal coinDec = new BigDecimal(coin.trim());
-
-            slotMachine.insertCoin(coinDec);
-        }
-    }
-
-    /**
-     * Displays a message for the drawback.
-     * 
-     * @param drawbackMap
-     *            the drawback map
-     */
-    private void displayMessageForDrawback(Map<BigDecimal, Integer> drawbackMap) {
-        StringBuilder sb = new StringBuilder();
-
-        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
-        for (int i = 0; i < keyList.size(); i++) {
-            BigDecimal key = keyList.get(i);
-
-            sb.append(drawbackMap.get(key));
-            sb.append(" x ");
-            sb.append(key);
-
-            if (i < (keyList.size() - 1)) {
-                sb.append(", ");
-            }
-        }
-
-        print("view.slot.machine.drawback", false, sb.toString());
-
     }
 
     /**
@@ -339,12 +252,12 @@ public class ConsoleSimulationView extends SimulationView {
             if (line.toLowerCase().equals(ABORT_COMMAND)) {
                 line = null;
                 setViewState(ViewStateEnum.INIT);
-                roleBackTransaction();
+                rolebackTransaction();
                 notifyForActionAborted();
             } else if (line.toLowerCase().equals(EXIT_COMMAND)) {
                 line = null;
                 setViewState(ViewStateEnum.INIT);
-                roleBackTransaction();
+                rolebackTransaction();
                 notifyForShutdownRequested();
             }
         }
@@ -353,44 +266,12 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     /**
-     * Roles back the transaction.
-     */
-    private void roleBackTransaction() {
-        Map<BigDecimal, Integer> drawbackMap = slotMachine
-                .rolebackTransaction();
-        boolean displayMsg = false;
-
-        for (Integer count : drawbackMap.values()) {
-            if (count.intValue() > 0) {
-                displayMsg = true;
-                break;
-            }
-        }
-
-        if (displayMsg) {
-            displayMessageForDrawback(drawbackMap);
-        }
-    }
-
-    @Override
-    public void displayMessageForDrawback() {
-        displayMessageForDrawback(slotMachine.getDrawback());
-    }
-
-    @Override
-    public void promptForNewCoinBoxLevels(
-            List<CoinBoxLevel> someCurrentCoinBoxLevels) {
-        coinBoxLevels = someCurrentCoinBoxLevels;
-        setViewState(ViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
-    }
-
-    /**
      * Executes all necessary actions, which are required in the state
      * 'EnteringCoinBoxLevels'.
      */
     public void executeActionsForStateEnteringCoinBoxLevels() {
         boolean failure = false;
-        for (CoinBoxLevel cbl : coinBoxLevels) {
+        for (CoinBoxLevel cbl : dataStore.getCurrentCoinBoxLevels()) {
 
             // TODO: Evtl. auslagern.
             BigDecimal total = cbl.getCoinValue().multiply(
@@ -433,7 +314,7 @@ public class ConsoleSimulationView extends SimulationView {
 
             if (!failure) {
                 setViewState(ViewStateEnum.INIT);
-                notifyForCoinBoxLevelEntered(coinBoxLevels);
+                notifyForCoinBoxLevelEntered(dataStore.getCurrentCoinBoxLevels());
             }
         }
     }
@@ -467,5 +348,27 @@ public class ConsoleSimulationView extends SimulationView {
         }
 
         return enteredInteger;
+    }
+
+    @Override
+    public void displayMessageForDrawback() {
+        StringBuilder sb = new StringBuilder();
+
+        Map<BigDecimal, Integer> drawbackMap = slotMachine.getDrawback();
+
+        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            sb.append(drawbackMap.get(key));
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
+        }
+
+        print("view.slot.machine.drawback", false, sb.toString());
     }
 }

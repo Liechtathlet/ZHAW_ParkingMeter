@@ -24,7 +24,6 @@ import javax.swing.JTextArea;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-import ch.zhaw.swengineering.view.gui.listeners.CoinInputActionListener;
 import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
 
 /**
@@ -77,7 +76,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JButton buttonCancel = new JButton("C");
     private JButton buttonOk = new JButton("OK");
 
-    private JTextArea coinSlut = new JTextArea("");
     private JTextArea ticketfield = new JTextArea();
 
     private CyclicBarrier barrier;
@@ -91,10 +89,8 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     /**
      * Creates a new parking meter panel.
      * 
-     * @param someAvailableCoins
-     *            The coins which should be available in the parking meter.
      */
-    public ParkingMeterPanel(List<BigDecimal> someAvailableCoins) {
+    public ParkingMeterPanel() {
 
         // Init lock
         barrier = new CyclicBarrier(2);
@@ -182,7 +178,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         parkingMeterMMI.add(displayPane);
         parkingMeterMMI.add(buttonSlotPane);
         parkingMeterMMI.add(ticketPane);
-
 
         buttonSlotPane.add(buttonPane);
 
@@ -352,11 +347,11 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     public final void printErrorOrInfo(final String aMessage) {
         errorAndInfoDisplay.setText(aMessage);
     }
-    
+
     /**
      * Resets the error and info display.
      */
-    private void resetErrorAndInfoDisplay(){
+    private void resetErrorAndInfoDisplay() {
         errorAndInfoDisplay.setText("");
         lastErrorAndInfoText = null;
     }

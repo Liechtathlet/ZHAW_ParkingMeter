@@ -93,11 +93,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
                 List<ParkingLot> parkingLots = parkingMeter.getParkingLots();
                 view.displayBookedParkingLots(parkingLots);
-                // parkingMeter.callAllBookedParkingLots();
-                // 0: Modell für Ausgabe erstellen.
-                // 1: Controller aufrufen -> Parkplätze ermitteln und in Modell
-                // konvertieren
-                // 2: Rückgabe an View: view.display...
                 break;
             case VIEW_ALL_INFORMATION:
                 processed = true;

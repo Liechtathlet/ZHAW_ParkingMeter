@@ -18,7 +18,10 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
-import ch.zhaw.swengineering.view.gui.listeners.CoinInputActionListener;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.IntelligentSlotMachineViewInterface;
 
 /**
  * @author Daniel Brun
@@ -45,7 +48,6 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
     private static final Color BG_INNER = new Color(26, 51, 115);
     private static final Color BG_SLUT = new Color(119, 136, 153);
 
-    private int initialHeight;
     private int initialWidth;
 
     private JPanel slotMachineBorderPanel;
@@ -54,28 +56,33 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
     private JPanel slotPanel;
 
     private List<JButton> coinButtonList;
-    private CoinInputActionListener coinInputListener;
 
     private JTextArea coinSlot = new JTextArea("");
 
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
+    private IntelligentSlotMachineViewInterface slotMachineView;
+    private DisplayTextAppenderInterface displayer;
+    private BigDecimal totalCoinInput;
 
     /**
      * Creates a new parking meter panel.
      * 
+     * @param aDisplayAppender
+     *            The appender to display the current coin value.
      * @param aSlotMachine
      *            The slot machine.
      */
-    public SlotMachinePanel(
-            IntelligentSlotMachineUserInteractionInterface aSlotMachine) {
+    public SlotMachinePanel(DisplayTextAppenderInterface aDisplayAppender,
+            IntelligentSlotMachineUserInteractionInterface aSlotMachine,
+            IntelligentSlotMachineViewInterface aSlotMachineView) {
 
         this.slotMachine = aSlotMachine;
-        initialHeight = 300;
+        this.slotMachineView = aSlotMachineView;
+        this.displayer = aDisplayAppender;
+        
         initialWidth = 100;
 
         coinButtonList = new ArrayList<JButton>();
-
-        coinInputListener = new CoinInputActionListener(null);
 
         slotMachineBorderPanel = new JPanel();
         slotMachineInnerPanel = new JPanel();
@@ -88,8 +95,8 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
 
         slotMachineInnerPanel.setLayout(new BorderLayout());
         slotMachineInnerPanel.setBackground(BG_INNER);
-        slotMachineInnerPanel.setPreferredSize(new Dimension(initialWidth,
-                520));
+        slotMachineInnerPanel
+                .setPreferredSize(new Dimension(initialWidth, 520));
 
         coinButtonPanel.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 10));
         coinButtonPanel.setBackground(BG_INNER);
@@ -102,8 +109,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
         // Create coin buttons
         for (BigDecimal coinValue : slotMachine.getAvailableCoins()) {
             JButton coinBtn = new JButton(coinValue.toString());
-            // TODO: evtl. hash map with mapping.
-            coinBtn.addActionListener(coinInputListener);
+            coinBtn.addActionListener(this);
             coinButtonList.add(coinBtn);
             coinButtonPanel.add(coinBtn);
         }
@@ -124,9 +130,52 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
         this.add(slotMachineBorderPanel);
     }
 
-    @Override
-    public void actionPerformed(ActionEvent arg0) {
-        // TODO Auto-generated method stub
+    /* ********** Coin handling ********** */
 
+    /**
+     * Resets the coin input.
+     */
+    public void resetCoinInput() {
+        totalCoinInput = null;
+        displayer.appendTextToDisplay("");
+    }
+
+    /**
+     * @return the coinInput
+     */
+    public BigDecimal getTotalCoinInput() {
+        if (totalCoinInput == null) {
+            return BigDecimal.ZERO;
+        } else {
+            return totalCoinInput;
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent anEvent) {
+        if (anEvent.getSource() instanceof JButton) {
+            JButton button = (JButton) anEvent.getSource();
+
+            try {
+                BigDecimal enteredCoin = new BigDecimal(button.getText());
+                enteredCoin = enteredCoin.setScale(2);
+
+                slotMachine.insertCoin(enteredCoin);
+                if (totalCoinInput == null) {
+                    totalCoinInput = enteredCoin;
+                } else {
+                    totalCoinInput = totalCoinInput.add(enteredCoin);
+                }
+                displayer.appendTextToDisplay(totalCoinInput.toString());
+            } catch (CoinBoxFullException e) {
+                slotMachineView.handleCoinBoxFullException(e);
+            } catch (NoTransactionException e) {
+                slotMachineView.handleNoTransactionException(e);
+            } catch (InvalidCoinException e) {
+                slotMachineView.handleInvalidCoinException(e);
+            } catch (NumberFormatException e) {
+                slotMachineView.handleNumberFormatException(e);
+            }
+        }
     }
 }

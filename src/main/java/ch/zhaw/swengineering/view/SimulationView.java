@@ -4,12 +4,14 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.datetime.DateFormatter;
 
@@ -20,7 +22,10 @@ import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.data.ViewDataStore;
 
 /**
@@ -28,7 +33,7 @@ import ch.zhaw.swengineering.view.data.ViewDataStore;
  *         can invoke on the simulation view.
  */
 public abstract class SimulationView implements Runnable,
-        SimulationViewInterface {
+        SimulationViewInterface, IntelligentSlotMachineViewInterface {
 
     /**
      * Logger
@@ -40,7 +45,7 @@ public abstract class SimulationView implements Runnable,
      * Date-Format.
      */
     private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
-    
+
     private Thread thread;
 
     protected List<ViewEventListener> eventListeners;
@@ -54,7 +59,10 @@ public abstract class SimulationView implements Runnable,
 
     protected ViewDataStore dataStore;
     protected DateFormatter dateFormatter;
-    
+
+    @Autowired
+    protected IntelligentSlotMachineUserInteractionInterface slotMachine;
+
     /**
      * Creates a new instance of this class.
      */
@@ -63,7 +71,7 @@ public abstract class SimulationView implements Runnable,
         runLock = new ReentrantLock();
         dataStore = new ViewDataStore();
         dateFormatter = new DateFormatter(DATE_FORMAT);
-        
+
         waitCondition = runLock.newCondition();
 
         viewState = ViewStateEnum.INIT;
@@ -215,15 +223,19 @@ public abstract class SimulationView implements Runnable,
     public void displayShutdownMessage() {
         print("application.bye", false);
     }
+
+    @Override
+    public void displayCoinCountTooHigh(BigDecimal aCoinValue) {
+        print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
+    }
+
+    @Override
+    public void displayNotEnoughMoneyError() {
+        print("view.booking.not.enough.money", false);
+    }
     
     /* ********** Methods for prompt, executions and notification ********** */
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @seech.zhaw.swengineering.view.SimulationViewInterface
-     * #promptForParkingLotNumber()
-     */
     @Override
     public void promptForParkingLotNumber() {
         setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
@@ -258,95 +270,18 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
-    /* (non-Javadoc)
-     * @see ch.zhaw.swengineering.view.SimulationViewInterface#promptForMoney(java.lang.Integer)
-     */
     @Override
     public void promptForMoney(final Integer aParkingLotNumber) {
         setViewState(ViewStateEnum.DROPPING_IN_MONEY);
 
         dataStore.setParkingLotNumber(aParkingLotNumber);
     }
-    
-    /* ********** Internal methods ********** */
-    /**
-     * @return the view state.
-     */
-    public final synchronized ViewStateEnum getViewState() {
-        return viewState;
-    }
 
-    /**
-     * Sets the view state. This method is synchronized to ensure integrity
-     * trough the different threads.
-     * 
-     * @param aState
-     *            the view state to set.
-     */
-    protected final synchronized void setViewState(final ViewStateEnum aState) {
-        viewState = aState;
-        try {
-            waitCondition.signal();
-        } catch (Exception e) {
-            // Nothing to do here...
-        }
-    }
-
-    /* ********** Definition for implementation classes ********** */
-
-    /**
-     * Reads an integer from the input.
-     * 
-     * @return an integer or null if another action was executed.
-     */
-    public abstract Integer readInteger();
-
-    /**
-     * Prompts the user for the new coin box levels.
-     * 
-     * @param someCurrentCoinBoxLevels
-     *            The current coin box levels.
-     */
-    public abstract void promptForNewCoinBoxLevels(
-            List<CoinBoxLevel> someCurrentCoinBoxLevels);
-
-   
-
-    /**
-     * Displays the information about the current booking parking lots.
-     * 
-     * @param parkingLots
-     *            The List of all existing parking lots with all Information
-     *            about the ParkingLot.
-     */
-    public abstract void displayBookedParkingLots(List<ParkingLot> parkingLots);
-
-    /**
-     * Displays all available information. TODO: Anpassen.
-     */
-    public abstract void displayAllInformation();
-
-    /**
-     * Displays an error message, that not enough money was inserted.
-     */
-    public final void displayNotEnoughMoneyError() {
-        print("view.booking.not.enough.money", false);
-    }
-
-    /**
-     * Displays a message with the drawback.
-     */
-    public abstract void displayMessageForDrawback();
-
-    /**
-     * Displays a message with the error message, that the entered coin count
-     * was too high.
-     * 
-     * @param aCoinValue
-     *            The coin value of the coin box.
-     */
-    public final void displayCoinCountTooHigh(BigDecimal aCoinValue) {
-        print("view.slot.machine.coin.box.level.too.high", false, aCoinValue);
+    @Override
+    public void promptForNewCoinBoxLevels(
+            final List<CoinBoxLevel> someCurrentCoinBoxLevels) {
+        dataStore.setCurrentCoinBoxLevels(someCurrentCoinBoxLevels);
+        setViewState(ViewStateEnum.ENTERING_COIN_BOX_COIN_LEVEL);
     }
 
     /**
@@ -401,6 +336,39 @@ public abstract class SimulationView implements Runnable,
             listener.coinBoxLevelEntered(event);
         }
     }
+    
+    /* ********** Internal methods ********** */
+    /**
+     * @return the view state.
+     */
+    public final synchronized ViewStateEnum getViewState() {
+        return viewState;
+    }
+
+    /**
+     * Sets the view state. This method is synchronized to ensure integrity
+     * trough the different threads.
+     * 
+     * @param aState
+     *            the view state to set.
+     */
+    protected final synchronized void setViewState(final ViewStateEnum aState) {
+        viewState = aState;
+        try {
+            waitCondition.signal();
+        } catch (Exception e) {
+            // Nothing to do here...
+        }
+    }
+
+    /* ********** Definition for implementation classes ********** */
+
+    /**
+     * Reads an integer from the input.
+     * 
+     * @return an integer or null if another action was executed.
+     */
+    public abstract Integer readInteger();
 
     /**
      * Prints a message to the output.
@@ -414,7 +382,6 @@ public abstract class SimulationView implements Runnable,
      */
     protected abstract void print(final String aKey, final boolean prompt,
             final Object... arguments);
-    
 
     /**
      * Initializes the implementation class.
@@ -440,4 +407,74 @@ public abstract class SimulationView implements Runnable,
      * Executes the action for the state 'EnteringCoinBoxLevels'.
      */
     protected abstract void executeActionsForStateEnteringCoinBoxLevels();
+
+    /* ********** Impl of Slot Machine View ********* */
+
+    @Override
+    public final void handleCoinBoxFullException(
+            final CoinBoxFullException anException) {
+        LOG.error("Received exception "
+                + "from slot machine: coin box is full!", anException);
+
+        if (anException.isAllCoinBoxesFull()) {
+            print("view.slot.machine.coin.box.full", false,
+                    anException.getCoinValue());
+        } else {
+            print("view.slot.machine.coin.box.single.full", false,
+                    anException.getCoinValue());
+        }
+
+        rolebackTransaction();
+    }
+
+    @Override
+    public final void handleInvalidCoinException(
+            final InvalidCoinException anException) {
+        StringBuilder coinString = new StringBuilder();
+
+        for (BigDecimal validCoin : anException.getValidCoins()) {
+            coinString.append(validCoin);
+            coinString.append(", ");
+        }
+
+        LOG.error("Received exception " + "from slot machine: invalid coin!",
+                anException);
+        print("view.slot.machine.coin.invalid", false, coinString);
+
+        rolebackTransaction();
+    }
+
+    @Override
+    public final void handleNoTransactionException(
+            final NoTransactionException anException) {
+        LOG.error("Received exception " + "from slot machine: no transaction!",
+                anException);
+
+        rolebackTransaction();
+    }
+
+    @Override
+    public final void handleNumberFormatException(
+            final NumberFormatException anException) {
+        print("view.slot.machine.format.invalid", false);
+    }
+
+    @Override
+    public final void rolebackTransaction() {
+        Map<BigDecimal, Integer> drawbackMap = slotMachine
+                .rolebackTransaction();
+
+        boolean displayMsg = false;
+
+        for (Integer count : drawbackMap.values()) {
+            if (count.intValue() > 0) {
+                displayMsg = true;
+                break;
+            }
+        }
+
+        if (displayMsg) {
+            displayMessageForDrawback();
+        }
+    }
 }

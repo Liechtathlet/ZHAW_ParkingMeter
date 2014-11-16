@@ -3,9 +3,7 @@ package ch.zhaw.swengineering.view.gui;
 import java.awt.BorderLayout;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -37,10 +35,11 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
-    
+
     private JFrame frame;
     private ParkingMeterPanel parkingMeterPanel;
     private SlotMachinePanel slotMachinePanel;
+
     /*
      * (non-Javadoc)
      * 
@@ -51,10 +50,10 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
         LOG.debug("Initialize frame");
         frame = new JFrame("ParkingMeter");
 
-        // TODO: Change list
-        parkingMeterPanel = new ParkingMeterPanel(new ArrayList<BigDecimal>());
-        slotMachinePanel = new SlotMachinePanel(slotMachine);
-        
+        parkingMeterPanel = new ParkingMeterPanel();
+        slotMachinePanel = new SlotMachinePanel(parkingMeterPanel, slotMachine,
+                this);
+
         frame.addWindowListener(this);
         frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -107,6 +106,12 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
         return parkingMeterPanel.readInteger();
     }
 
+    @Override
+    public void displayMessageForDrawback() {
+        // TODO: Print drawback wherever possible
+
+    }
+    
     /* *** TODO: To CleanUp *** */
     @Override
     public void displayAllInformation() {
@@ -114,11 +119,7 @@ public class GuiSimulationView extends SimulationView implements WindowListener 
 
     }
 
-    @Override
-    public void displayMessageForDrawback() {
-        // TODO Auto-generated method stub
-
-    }
+   
 
     @Override
     public void promptForNewCoinBoxLevels(
