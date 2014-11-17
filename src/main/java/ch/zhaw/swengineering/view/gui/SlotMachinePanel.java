@@ -71,6 +71,8 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
      *            The appender to display the current coin value.
      * @param aSlotMachine
      *            The slot machine.
+     * @param aSlotMachineView
+     *            The slot machine view.
      */
     public SlotMachinePanel(DisplayTextAppenderInterface aDisplayAppender,
             IntelligentSlotMachineUserInteractionInterface aSlotMachine,
@@ -79,7 +81,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
         this.slotMachine = aSlotMachine;
         this.slotMachineView = aSlotMachineView;
         this.displayer = aDisplayAppender;
-        
+
         initialWidth = 100;
 
         coinButtonList = new ArrayList<JButton>();
@@ -137,18 +139,14 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
      */
     public void resetCoinInput() {
         totalCoinInput = null;
-        displayer.appendTextToDisplay("");
+        displayer.appendTextToPromptDisplay("");
     }
 
     /**
      * @return the coinInput
      */
     public BigDecimal getTotalCoinInput() {
-        if (totalCoinInput == null) {
-            return BigDecimal.ZERO;
-        } else {
-            return totalCoinInput;
-        }
+        return totalCoinInput;
     }
 
     @Override
@@ -166,7 +164,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
                 } else {
                     totalCoinInput = totalCoinInput.add(enteredCoin);
                 }
-                displayer.appendTextToDisplay(totalCoinInput.toString());
+                displayer.appendTextToPromptDisplay(totalCoinInput.toString());
             } catch (CoinBoxFullException e) {
                 slotMachineView.handleCoinBoxFullException(e);
             } catch (NoTransactionException e) {

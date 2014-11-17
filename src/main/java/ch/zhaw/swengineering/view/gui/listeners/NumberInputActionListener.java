@@ -11,13 +11,15 @@ import ch.zhaw.swengineering.view.gui.DisplayTextAppenderInterface;
 /**
  * @author Daniel Brun
  * 
- * Action listener for all number buttons.
+ *         Action listener for all number buttons.
  */
 public class NumberInputActionListener implements ActionListener {
 
     private BigInteger integerInput;
 
     private DisplayTextAppenderInterface displayer;
+
+    private boolean suspendEvent;
 
     /**
      * Creates a new instance of this class.
@@ -28,6 +30,7 @@ public class NumberInputActionListener implements ActionListener {
     public NumberInputActionListener(DisplayTextAppenderInterface aDisplayer) {
         integerInput = null;
         displayer = aDisplayer;
+        suspendEvent = false;
     }
 
     /*
@@ -38,17 +41,19 @@ public class NumberInputActionListener implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent anEvent) {
-        if (anEvent.getSource() instanceof JButton) {
-            JButton button = (JButton) anEvent.getSource();
-            BigInteger enteredInt = new BigInteger(button.getText());
+        if (!suspendEvent) {
+            if (anEvent.getSource() instanceof JButton) {
+                JButton button = (JButton) anEvent.getSource();
+                BigInteger enteredInt = new BigInteger(button.getText());
 
-            if (integerInput == null) {
-                integerInput = enteredInt;
-            } else {
-                integerInput = integerInput.multiply(BigInteger.TEN);
-                integerInput = integerInput.add(enteredInt);
+                if (integerInput == null) {
+                    integerInput = enteredInt;
+                } else {
+                    integerInput = integerInput.multiply(BigInteger.TEN);
+                    integerInput = integerInput.add(enteredInt);
+                }
+                displayer.appendTextToPromptDisplay(integerInput.toString());
             }
-            displayer.appendTextToDisplay(integerInput.toString());
         }
     }
 
@@ -57,17 +62,22 @@ public class NumberInputActionListener implements ActionListener {
      */
     public void reset() {
         integerInput = null;
-        displayer.appendTextToDisplay("");
+        displayer.appendTextToPromptDisplay("");
     }
 
     /**
      * @return the integerInput
      */
     public BigInteger getIntegerInput() {
-        if (integerInput == null) {
-            return BigInteger.ZERO;
-        } else {
-            return integerInput;
-        }
+        return integerInput;
     }
+
+    /**
+     * @param suspendEvent
+     *            the suspendEvent to set
+     */
+    public void setSuspendEvent(boolean suspendEvent) {
+        this.suspendEvent = suspendEvent;
+    }
+
 }

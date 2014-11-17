@@ -10,7 +10,6 @@ import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +23,7 @@ import javax.swing.JTextArea;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
+import ch.zhaw.swengineering.view.gui.listeners.ActionAbortListener;
 import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
 
 /**
@@ -31,7 +31,7 @@ import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
  * 
  *         Panel which displays a parking meter.
  */
-public class ParkingMeterPanel extends JPanel implements ActionListener,
+public class ParkingMeterPanel extends JPanel implements
         DisplayTextAppenderInterface {
 
     /**
@@ -50,7 +50,6 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private static final Color BG_DISPLAY = new Color(162, 205, 90);
     private static final Color BG_CANCEL = new Color(204, 0, 0);
     private static final Color BG_OK = new Color(0, 153, 0);
-    private static final Color BG_SLUT = new Color(119, 136, 153);
     private static final Color BG_TICKETFIELD = new Color(92, 172, 238);
 
     private double factor = 3.0;
@@ -67,7 +66,8 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
     private JPanel buttonPane;
     private JPanel ticketfieldPane;
 
-    private JTextArea errorAndInfoDisplay;
+    private JTextArea errorDisplay;
+    private JTextArea infoDisplay;
     private JTextArea display;
 
     private List<JButton> numberBlockList;
@@ -82,15 +82,23 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
     private boolean okButtonPressed;
     private boolean promptMode;
+    private boolean blockNumberInput;
 
     private String promptText;
-    private String lastErrorAndInfoText;
+    private String lastErrorText;
+    private String lastInfoText;
+
+    private ActionAbortListener actionAbortListener;
 
     /**
      * Creates a new parking meter panel.
      * 
+     * @param anActionAbortListener
+     *            The listener to execute when the cancel button was hit.
      */
-    public ParkingMeterPanel() {
+    public ParkingMeterPanel(ActionAbortListener anActionAbortListener) {
+
+        this.actionAbortListener = anActionAbortListener;
 
         // Init lock
         barrier = new CyclicBarrier(2);
@@ -98,6 +106,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         // Init helper objects
         okButtonPressed = false;
         promptMode = false;
+        blockNumberInput = false;
 
         initialHeight = 300;
         initialWidth = 75;
@@ -186,7 +195,7 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
                 (int) ((initialWidth - 20) * factor),
-                (int) ((initialHeight - 250 - 17) * factor)));
+                (int) ((initialHeight - 250 - 32) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
         display.setWrapStyleWord(true);
@@ -195,16 +204,27 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         displayPane.add(display);
 
-        errorAndInfoDisplay = new JTextArea();
+        infoDisplay = new JTextArea();
+        Dimension dimensionInfoDisplay = new Dimension(new Dimension(
+                (int) ((initialWidth - 20) * factor), (int) (15 * factor)));
+        infoDisplay.setPreferredSize(dimensionInfoDisplay);
+        infoDisplay.setEditable(false);
+        infoDisplay.setWrapStyleWord(true);
+        infoDisplay.setLineWrap(true);
+        infoDisplay.setBackground(BG_DISPLAY);
+
+        displayPane.add(infoDisplay);
+
+        errorDisplay = new JTextArea();
         Dimension dimensionErrorDisplay = new Dimension(new Dimension(
                 (int) ((initialWidth - 20) * factor), (int) (15 * factor)));
-        errorAndInfoDisplay.setPreferredSize(dimensionErrorDisplay);
-        errorAndInfoDisplay.setEditable(false);
-        errorAndInfoDisplay.setWrapStyleWord(true);
-        errorAndInfoDisplay.setLineWrap(true);
-        errorAndInfoDisplay.setBackground(BG_DISPLAY);
+        errorDisplay.setPreferredSize(dimensionErrorDisplay);
+        errorDisplay.setEditable(false);
+        errorDisplay.setWrapStyleWord(true);
+        errorDisplay.setLineWrap(true);
+        errorDisplay.setBackground(BG_DISPLAY);
 
-        displayPane.add(errorAndInfoDisplay);
+        displayPane.add(errorDisplay);
 
         // Create number buttons from 1 to 9
         for (int i = 1; i <= 9; i++) {
@@ -235,9 +255,23 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         buttonCancel.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae) {
-                resetErrorAndInfoDisplay();
+                resetPromptDisplay();
+                resetErrorDisplay();
+                resetInfoDisplay();
+
                 numberInputListener.reset();
-                // TODO: abort all event
+                actionAbortListener.calledAbort();
+
+                okButtonPressed = true;
+                try {
+                    barrier.await();
+                } catch (InterruptedException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                } catch (BrokenBarrierException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
             }
         });
         buttonOk.addActionListener(new ActionListener() {
@@ -252,14 +286,26 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
                     // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
-                resetErrorAndInfoDisplay();
+                resetErrorDisplay();
+                resetInfoDisplay();
             }
         });
     }
 
-    @Override
-    public void actionPerformed(ActionEvent anEvent) {
-
+    /**
+     * Interrupts the current wait.
+     */
+    public void interruptWait() {
+        okButtonPressed = true;
+        try {
+            barrier.await();
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        } catch (BrokenBarrierException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -291,11 +337,16 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
         waitForOK();
 
         BigInteger returnInt = numberInputListener.getIntegerInput();
-        return Integer.valueOf(returnInt.intValue());
+
+        if (returnInt != null) {
+            return Integer.valueOf(returnInt.intValue());
+        } else {
+            return null;
+        }
     }
 
     @Override
-    public void appendTextToDisplay(String aText) {
+    public void appendTextToPromptDisplay(String aText) {
 
         if (promptMode) {
             display.setText(promptText + aText);
@@ -315,11 +366,17 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
 
         display.setText(promptText);
 
-        if (lastErrorAndInfoText != null
-                && lastErrorAndInfoText.equals(errorAndInfoDisplay.getText())) {
-            resetErrorAndInfoDisplay();
-        } else if (errorAndInfoDisplay.getText().trim().length() > 0) {
-            lastErrorAndInfoText = errorAndInfoDisplay.getText();
+        if (lastErrorText != null
+                && lastErrorText.equals(errorDisplay.getText())) {
+            resetErrorDisplay();
+        } else if (errorDisplay.getText().trim().length() > 0) {
+            lastErrorText = errorDisplay.getText();
+        }
+
+        if (lastInfoText != null && lastInfoText.equals(infoDisplay.getText())) {
+            resetInfoDisplay();
+        } else if (infoDisplay.getText().trim().length() > 0) {
+            lastInfoText = infoDisplay.getText();
         }
     }
 
@@ -329,15 +386,52 @@ public class ParkingMeterPanel extends JPanel implements ActionListener,
      * @param aMessage
      *            the message to print.
      */
-    public final void printErrorOrInfo(final String aMessage) {
-        errorAndInfoDisplay.setText(aMessage);
+    public final void printError(final String aMessage) {
+        errorDisplay.setText(aMessage);
     }
 
     /**
-     * Resets the error and info display.
+     * Prints an info message to the display.
+     * 
+     * @param aMessage
+     *            the message to print.
      */
-    private void resetErrorAndInfoDisplay() {
-        errorAndInfoDisplay.setText("");
-        lastErrorAndInfoText = null;
+    public final void printInfo(final String aMessage) {
+        infoDisplay.setText(aMessage);
+    }
+
+    /**
+     * Resets the error display.
+     */
+    private void resetErrorDisplay() {
+        errorDisplay.setText("");
+        lastErrorText = null;
+    }
+
+    /**
+     * Resets the info display.
+     */
+    private void resetInfoDisplay() {
+        infoDisplay.setText("");
+        lastInfoText = null;
+    }
+
+    /**
+     * Resets the prompt display.
+     */
+    private void resetPromptDisplay() {
+        display.setText("");
+    }
+
+    /**
+     * Sets the boolean that indicates, if the number block should be blocked or
+     * not.
+     * 
+     * @param isBlocked
+     *            True if the number block should be blocked.
+     */
+    public void setNumberBlockBlocked(final boolean isBlocked) {
+        blockNumberInput = isBlocked;
+        numberInputListener.setSuspendEvent(blockNumberInput);
     }
 }

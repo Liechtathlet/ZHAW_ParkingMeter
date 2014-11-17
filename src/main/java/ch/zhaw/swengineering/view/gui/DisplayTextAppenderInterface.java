@@ -13,5 +13,5 @@ public interface DisplayTextAppenderInterface {
      * @param aText
      *            the text to append.
      */
-    void appendTextToDisplay(String aText);
+    void appendTextToPromptDisplay(String aText);
 }
