@@ -35,9 +35,6 @@ public class GuiSimulationView extends SimulationView implements
             .getLogger(GuiSimulationView.class);
 
     @Autowired
-    private MessageProvider messageProvider;
-
-    @Autowired
     private IntelligentSlotMachineUserInteractionInterface slotMachine;
 
     @Autowired
@@ -154,31 +151,13 @@ public class GuiSimulationView extends SimulationView implements
     }
 
     @Override
-    public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
-        // TODO Auto-generated method stub
-
+    public void calledAbort() {
+        notifyForActionAborted();
     }
 
     @Override
     public void displayAllInformation() {
         // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void executeActionsForStateViewingAllInformation() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    protected void executeActionsForStateDisplayBookedParkingLots() {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void calledAbort() {
-        notifyForActionAborted();
+        
     }
 }

@@ -87,14 +87,7 @@ public class ConsoleSimulationView extends SimulationView {
     @Override
     public void displayAllInformation() {
         // TODO: Der View-State ist nicht notwendig -> Parameter -> Output
-        setViewState(ViewStateEnum.DISPLAY_ALL_INFORMATION);
-    }
-
-    @Override
-    public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
-        this.parkingLots = parkingLots;
-        setViewState(ViewStateEnum.DISPLAY_BOOKED_PARKINGLOTS);
-
+        
     }
 
     public void executeActionsForStateViewingAllInformation() {
@@ -126,62 +119,7 @@ public class ConsoleSimulationView extends SimulationView {
         setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
     }
 
-    public void executeActionsForStateDisplayBookedParkingLots() {
-        SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd  HH:mm");
-        print("view.booked.parkinglots.title.template",
-                ViewOutputMode.LARGE_INFO, sdf.format(now));
-        for (ParkingLot parkingLot : parkingLots) {
-            print("view.booked.parkinglot", ViewOutputMode.LARGE_INFO,
-                    getParkingLotNumber(parkingLot),
-                    getParkingLotPaidUntil(parkingLot),
-                    getParkingLotDifferenceTime(parkingLot),
-                    getParkingLotOutOfPaidTime(parkingLot));
-        }
-
-        setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
-    }
-
-    private int getParkingLotNumber(ParkingLot parkingLot) {
-        return parkingLot.getNumber();
-    }
-
-    private String getParkingLotPaidUntil(ParkingLot parkingLot) {
-        if (parkingLot.getPaidUntil() == null) {
-            return "--";
-        } else {
-            SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd  HH:mm");
-            return sdf.format(parkingLot.getPaidUntil());
-        }
-    }
-
-    private String getParkingLotDifferenceTime(ParkingLot parkingLot) {
-
-        DecimalFormat df = new DecimalFormat("00");
-        int hh = 00;
-        int mm = 00;
-        int ss = 00;
-
-        if (parkingLot.getPaidUntil() == null) {
-            return "--";
-        } else {
-            hh = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) / 3600);
-            mm = (int) (((parkingLot.getRemainingTimeInMillisec() / 1000) % 3600) / 60);
-            ss = (int) ((parkingLot.getRemainingTimeInMillisec() / 1000) - ((mm * 60) + (hh * 3600)));
-
-            String diffTime = hh + ":" + df.format(mm) + ":" + df.format(ss);
-            return diffTime;
-        }
-    }
-
-    private String getParkingLotOutOfPaidTime(ParkingLot parkingLot) {
-        if (parkingLot.getPaidUntil() == null) {
-            return "** Parkzeit abgelaufen **";
-        } else if (parkingLot.getPaidUntil().getTime() <= now.getTime()) {
-            return "** Parkzeit abgelaufen **";
-        } else {
-            return "";
-        }
-    }
+  
 
     private String formatPrice(BigDecimal price) {
         // TODO: Auslagern in Helper

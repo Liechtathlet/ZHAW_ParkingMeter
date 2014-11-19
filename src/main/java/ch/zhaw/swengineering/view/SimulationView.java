@@ -21,7 +21,10 @@ import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.helper.DateHelper;
+import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
@@ -64,6 +67,9 @@ public abstract class SimulationView implements Runnable,
     @Autowired
     protected IntelligentSlotMachineUserInteractionInterface slotMachine;
 
+    @Autowired
+    protected MessageProvider messageProvider;
+
     /**
      * Creates a new instance of this class.
      */
@@ -100,12 +106,6 @@ public abstract class SimulationView implements Runnable,
                         break;
                     case DROPPING_IN_MONEY:
                         executeActionsForStateDroppingInMoney();
-                        break;
-                    case DISPLAY_ALL_INFORMATION:
-                        executeActionsForStateViewingAllInformation();
-                        break;
-                    case DISPLAY_BOOKED_PARKINGLOTS:
-                        executeActionsForStateDisplayBookedParkingLots();
                         break;
                     case EXIT:
                         run = false;
@@ -257,6 +257,44 @@ public abstract class SimulationView implements Runnable,
         }
 
         print("view.slot.machine.drawback", ViewOutputMode.INFO, sb.toString());
+    }
+
+    @Override
+    public void displayBookedParkingLots(List<ParkingLot> parkingLots) {
+        Date currentDate = new Date();
+
+        print("view.booked.parkinglots.title.template",
+                ViewOutputMode.LARGE_INFO,
+                dateFormatter.print(currentDate,
+                        LocaleContextHolder.getLocale()));
+
+        for (ParkingLot parkingLot : parkingLots) {
+            String paidUntilString = "--";
+            String timeDifferenceString = "--";
+            String parkingTimeExceededString = "...";
+
+            if (parkingLot.getPaidUntil() != null) {
+                paidUntilString = dateFormatter.print(
+                        parkingLot.getPaidUntil(),
+                        LocaleContextHolder.getLocale());
+
+                timeDifferenceString = DateHelper
+                        .calculateFormattedTimeDifference(currentDate,
+                                parkingLot.getPaidUntil());
+
+                if (parkingLot.getPaidUntil().before(currentDate)) {
+                    parkingTimeExceededString = messageProvider
+                            .get("parking.time.exceeded");
+                } else {
+                    parkingTimeExceededString = "";
+                }
+            }
+
+            print("view.booked.parkinglot", ViewOutputMode.LARGE_INFO,
+                    parkingLot.getNumber(), paidUntilString,
+                    timeDifferenceString, parkingTimeExceededString);
+        }
+
     }
 
     /* ********** Methods for prompt, executions and notification ********** */
@@ -472,16 +510,6 @@ public abstract class SimulationView implements Runnable,
      * Executes the action for the state 'DropppingInMoney'.
      */
     protected abstract void executeActionsForStateDroppingInMoney();
-
-    /**
-     * Executes the action for the state 'ViewingAllInformation'.
-     */
-    protected abstract void executeActionsForStateViewingAllInformation();
-
-    /**
-     * Executes the action for the state 'DisplayingBookedParkingLots'.
-     */
-    protected abstract void executeActionsForStateDisplayBookedParkingLots();
 
     /* ********** Impl of Slot Machine View ********* */
 

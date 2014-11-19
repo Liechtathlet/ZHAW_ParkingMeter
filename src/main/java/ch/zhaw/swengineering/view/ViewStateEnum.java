@@ -24,14 +24,6 @@ public enum ViewStateEnum {
 	 */
 	DROPPING_IN_MONEY,
 	/**
-	 * State if the view all information secret code is entered.
-	 */
-	DISPLAY_ALL_INFORMATION,
-	/**
-	 * State if the view booked parkingLots secret code is entered.
-	 */
-	DISPLAY_BOOKED_PARKINGLOTS,
-	/**
 	 * State if the view is stopped / shut down.
 	 */
 	EXIT

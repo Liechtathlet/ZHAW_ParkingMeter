@@ -17,8 +17,6 @@ public class ParkingLot {
 	@XmlAttribute
 	private Date paidUntil;
 
-	private long remainingMillisec;
-
 	/**
 	 * Empty constructor for serialization
 	 */
@@ -87,7 +85,7 @@ public class ParkingLot {
 		if (paidUntil == null) {
 			setPaidUntil(init);
 		}
-		this.remainingMillisec = (paidUntil.getTime() - now.getTime());
+		long remainingMillisec = (paidUntil.getTime() - now.getTime());
 		return Math.abs(remainingMillisec);
 	}
 
