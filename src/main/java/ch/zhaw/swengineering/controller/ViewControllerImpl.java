@@ -1,7 +1,6 @@
 package ch.zhaw.swengineering.controller;
 
 import java.math.BigDecimal;
-import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -17,6 +16,7 @@ import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
 import ch.zhaw.swengineering.event.ShowAllParkingCharge;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -47,6 +47,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Autowired
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
+
+    @Autowired()
+    private TransactionLogHandler transactionLog;
 
     @Override
     public final void start() {

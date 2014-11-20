@@ -1,63 +1,88 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.persistence.TransactionLog;
-import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+import java.util.Date;
+import java.util.List;
+
+import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
-import java.util.List;
+import ch.zhaw.swengineering.model.persistence.TransactionLog;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 
+/**
+ * @author Daniel Brun
+ * 
+ *         The transaction log handler.
+ */
 @Component
 public class TransactionLogHandler {
 
-	@Autowired
-	@Qualifier("transactionLog")
-	private ConfigurationProvider configurationProvider;
+    @Autowired
+    @Qualifier("transactionLog")
+    private ConfigurationProvider configurationProvider;
 
-	@Autowired
-	@Qualifier("transactionLog")
-	private ConfigurationWriter configurationWriter;
+    @Autowired
+    @Qualifier("transactionLog")
+    private ConfigurationWriter configurationWriter;
 
-	public List<TransactionLogEntry> getAll() {
-		if (configurationProvider == null || configurationProvider.get() == null) {
-			return null;
-		}
+    private TransactionLog transactionLog;
 
-		// TODO: Casting should be done only once. But it does not work in the
-		// constructor because the property will not be injected.
-		// TODO: db: Create init method with @PostContruct ;-)
-		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
-		return transactionLog.entries;
-	}
+    /**
+     * Initialize the class.
+     */
+    @PostConstruct
+    public void init() {
+        if (configurationProvider != null
+                && configurationProvider.get() != null) {
+            transactionLog = (TransactionLog) configurationProvider.get();
+        }
+    }
 
-	public List<TransactionLogEntry> get(int numberOfEntries) {
-		if (configurationProvider == null || configurationProvider.get() == null) {
-			return null;
-		}
+    /**
+     * Gets the transaction log entries.
+     * 
+     * @return the transaction log entries.
+     */
+    public List<TransactionLogEntry> getAll() {
 
-		// TODO: Casting should be done only once. But it does not work in the
-		// constructor because the property will not be injected.
-		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
-		int count = transactionLog.entries.size();
-		return transactionLog.entries.subList(count - numberOfEntries, count);
-	}
+        return transactionLog.entries;
+    }
 
-	public void write(String text) {
-		if (configurationProvider == null || configurationProvider.get() == null
-				|| configurationWriter == null) {
-			return;
-		}
+    /**
+     * Gets the given number of transaction log entries.
+     * 
+     * @param numberOfEntries
+     *            the number of entries to fetch.
+     * @return
+     */
+    public List<TransactionLogEntry> get(int numberOfEntries) {
+        int count = transactionLog.entries.size();
 
-		TransactionLogEntry entry = new TransactionLogEntry();
-		entry.text = text;
-		entry.creationTime = new Date();
+        return transactionLog.entries.subList(count - numberOfEntries, count);
+    }
 
-		TransactionLog transactionLog = (TransactionLog) configurationProvider.get();
-		transactionLog.entries.add(entry);
+    /**
+     * Writes the given text to the transaction log.
+     * 
+     * @param text
+     *            the text to write.
+     */
+    public void write(String text) {
+        if (configurationProvider == null
+                || configurationProvider.get() == null
+                || configurationWriter == null) {
+            return;
+        }
 
-		configurationWriter.write(transactionLog);
-	}
+        TransactionLogEntry entry = new TransactionLogEntry();
+        entry.text = text;
+        entry.creationTime = new Date();
+
+        transactionLog.entries.add(entry);
+
+        configurationWriter.write(transactionLog);
+    }
 }
