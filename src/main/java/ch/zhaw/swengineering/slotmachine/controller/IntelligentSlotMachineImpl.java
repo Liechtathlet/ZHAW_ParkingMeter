@@ -32,8 +32,7 @@ import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedExce
 /**
  * @author Daniel Brun
  * 
- *         Implementation of the {@link IntelligentSlotMachine}. TODO: Refactor
- *         & Review
+ *         Implementation of the {@link IntelligentSlotMachine}. 
  */
 @Controller
 public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
@@ -109,8 +108,6 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         if (transactionStarted) {
             BigDecimal currDrawback = drawback.setScale(2);
 
-            // TODO: Request for Review: Is there a case, when this doesn't
-            // work?
             for (BigDecimal coinVal : reverseAvailableCoinList) {
                 CoinBox cb = coinBoxes.getCoinBox(coinVal);
                 int count = currDrawback

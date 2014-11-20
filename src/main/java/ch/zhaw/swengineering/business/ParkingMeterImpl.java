@@ -100,7 +100,6 @@ public class ParkingMeterImpl implements ParkingMeter {
     public ParkingLot getParkingLot(final int aNumber) {
         ParkingLot parkingLot = null;
 
-        // TODO: Not efficient...
         for (ParkingLot pl : parkingMeter.parkingLots) {
             if (pl.getNumber() == aNumber) {
                 parkingLot = pl;
@@ -130,7 +129,6 @@ public class ParkingMeterImpl implements ParkingMeter {
     public SecretActionEnum getSecretAction(int secretKey) throws Exception {
 
         if (secretCodes == null) {
-            // /TODO: Please change...no proper error
             throw new Exception();
         }
 

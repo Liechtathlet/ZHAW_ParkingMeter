@@ -216,7 +216,6 @@ public class ViewControllerImplTest {
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         // verify(view).displayAllInformation();
 
-        // TODO: Further asserts
     }
 
     /**
@@ -396,8 +395,5 @@ public class ViewControllerImplTest {
         verify(view).displayShutdownMessage();
         verify(view).shutdown();
         verify(appContext).close();
-
-        // Assert negative
-        // TODO: Implement
     }
 }

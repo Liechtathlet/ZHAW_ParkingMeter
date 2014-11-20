@@ -33,11 +33,6 @@ public class MessageProvider {
      */
     @PostConstruct
     public final void init() {
-        // TODO: Consider different implementation of messages!! e.g. Using
-        // hashMap or something else
-        // Perhaps the standard for message bundles in java and spring could be
-        // used!!
-
         messageMap = new HashMap<String, String>();
 
         if (configurationProvider != null

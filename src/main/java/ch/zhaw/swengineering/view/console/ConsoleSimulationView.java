@@ -131,7 +131,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public Integer readInteger() {
-        // TODO: Evtl. clean up.
         Integer enteredInteger = null;
         String input = readFromConsole();
 

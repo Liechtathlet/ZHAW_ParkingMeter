@@ -105,8 +105,6 @@ public class TransactionLogHandlerTest {
             throws Exception {
         String text = "New Item";
 
-        // TODO: Not nicely done. How to check parameter to
-        // configurationWriter.write(...)?
         final Object[] tempTransactionLog = new Object[1];
         doAnswer(new Answer() {
             @Override
