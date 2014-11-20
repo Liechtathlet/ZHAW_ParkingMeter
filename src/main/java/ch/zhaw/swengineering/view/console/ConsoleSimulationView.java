@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
-import java.text.DecimalFormat;
 import java.text.MessageFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -18,8 +16,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
@@ -82,56 +78,6 @@ public class ConsoleSimulationView extends SimulationView {
     protected void init() {
         // Nothing to do here..
     }
-
-    /* ********* Refactor from here ********** */
-    @Override
-    public void displayAllInformation() {
-        // TODO: Der View-State ist nicht notwendig -> Parameter -> Output
-        
-    }
-
-    public void executeActionsForStateViewingAllInformation() {
-        print("view.all.information.title.template", ViewOutputMode.LARGE_INFO,
-                2, messageProvider.get("view.parking.time.def").trim());
-
-        // TODO: View sollte nicht direkt auf model zugreifen
-        ParkingTimeDefinitions parkingTimes = (ParkingTimeDefinitions) parkingTimeConfigurationProvider
-                .get();
-        int i = 1;
-        int lastMinuteCount = 0;
-        BigDecimal lastPrice = new BigDecimal(0);
-        for (ParkingTimeDefinition parkingTime : parkingTimes
-                .getParkingTimeDefinitions()) {
-            for (int j = 0; j < parkingTime.getCountOfSuccessivePeriods(); j++) {
-                BigDecimal newPrice = lastPrice.add(parkingTime
-                        .getPricePerPeriod());
-                int newMinuteCount = lastMinuteCount
-                        + parkingTime.getDurationOfPeriodInMinutes();
-                print("view.all.information.parking.time",
-                        ViewOutputMode.LARGE_INFO, i, formatPrice(lastPrice),
-                        formatPrice(newPrice), newMinuteCount);
-                lastPrice = newPrice;
-                lastMinuteCount = newMinuteCount;
-                i++;
-            }
-        }
-
-        setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
-    }
-
-  
-
-    private String formatPrice(BigDecimal price) {
-        // TODO: Auslagern in Helper
-        price = price.setScale(2, BigDecimal.ROUND_DOWN);
-        DecimalFormat df = new DecimalFormat();
-        df.setMaximumFractionDigits(2);
-        df.setMinimumFractionDigits(2);
-        df.setGroupingUsed(false);
-        return df.format(price);
-    }
-
-    /* ******** Refactoring bis hier notwendig ***** */
 
     /**
      * Reads a string from the console and checks it for default actions.

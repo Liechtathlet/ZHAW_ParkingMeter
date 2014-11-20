@@ -90,13 +90,20 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             switch (actionEnum) {
             case VIEW_ALL_PARKING_CHARGE:
                 processed = true;
-
-                List<ParkingLot> parkingLots = parkingMeter.getParkingLots();
-                view.displayBookedParkingLots(parkingLots);
+                view.displayBookedParkingLots(parkingMeter.getParkingLots());
+                view.promptForParkingLotNumber();
                 break;
             case VIEW_ALL_INFORMATION:
                 processed = true;
-                view.displayAllInformation();
+                view.displayAllInformation(parkingMeter
+                        .getParkingTimeDefinitions());
+                view.promptForParkingLotNumber();
+                break;
+            case VIEW_CONTENT_OF_COIN_BOXES:
+                processed = true;
+                view.displayContentOfCoinBoxes(slotMachine
+                        .getCurrentCoinBoxLevel());
+                view.promptForParkingLotNumber();
                 break;
             case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
                 processed = true;
@@ -164,12 +171,12 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Override
     public void coinBoxLevelEntered(
-            CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
+            final CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
         LOG.info("Coin box level entered...");
         try {
             slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevelEnteredEvent
                     .getCoinBoxLevels());
-            // TODO: Ouput coin box levels (secret code method)
+            view.displayContentOfCoinBoxes(slotMachine.getCurrentCoinBoxLevel());
             view.promptForParkingLotNumber();
         } catch (CoinBoxFullException e) {
             view.displayCoinCountTooHigh(e.getCoinValue());

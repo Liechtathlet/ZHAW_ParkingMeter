@@ -274,6 +274,28 @@ public class ParkingMeterImplTest {
         verify(configWriterParkingMeter).write(any(ParkingMeter.class));
 
     }
+    
+    /**
+     * Argument: A valid booking.
+     * 
+     * Method: 'persistBooking'
+     * 
+     * Expected: All results are correct.
+     */
+    @Test
+    public final void testGetParkingLotDefinitions() {
+        // Setup
+        initStandard();
+
+        Date paidUntil = new Date();
+        ParkingLotBooking booking = new ParkingLotBooking(5,
+                new BigDecimal(5.0));
+        booking.setPaidTill(paidUntil);
+
+        List<ParkingTimeDefinition> defList = controller.getParkingTimeDefinitions();
+
+        assertEquals(defList, parkingTimeDefinitions.getParkingTimeDefinitions());
+    }
 
     /**
      * Creates a ParkingMeter mock object.

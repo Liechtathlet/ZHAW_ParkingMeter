@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.view;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -25,6 +26,7 @@ import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
@@ -271,7 +273,8 @@ public abstract class SimulationView implements Runnable,
         for (ParkingLot parkingLot : parkingLots) {
             String paidUntilString = "--";
             String timeDifferenceString = "--";
-            String parkingTimeExceededString = "...";
+            String parkingTimeExceededString = messageProvider
+                    .get("parking.time.exceeded");
 
             if (parkingLot.getPaidUntil() != null) {
                 paidUntilString = dateFormatter.print(
@@ -295,6 +298,59 @@ public abstract class SimulationView implements Runnable,
                     timeDifferenceString, parkingTimeExceededString);
         }
 
+    }
+
+    @Override
+    public void displayAllInformation(
+            List<ParkingTimeDefinition> someParkingTimeDefinitions) {
+        print("view.all.information.title.template", ViewOutputMode.LARGE_INFO,
+                2, messageProvider.get("view.parking.time.def").trim());
+
+        int i = 1;
+        int lastMinuteCount = 0;
+        BigDecimal lastPrice = new BigDecimal(0);
+        for (ParkingTimeDefinition parkingTimeDef : someParkingTimeDefinitions) {
+            for (int j = 0; j < parkingTimeDef.getCountOfSuccessivePeriods(); j++) {
+                BigDecimal newPrice = lastPrice.add(parkingTimeDef
+                        .getPricePerPeriod());
+
+                int newMinuteCount = lastMinuteCount
+                        + parkingTimeDef.getDurationOfPeriodInMinutes();
+
+                print("view.all.information.parking.time",
+                        ViewOutputMode.LARGE_INFO, i, formatPrice(lastPrice),
+                        formatPrice(newPrice), newMinuteCount);
+
+                lastPrice = newPrice;
+                lastMinuteCount = newMinuteCount;
+                i++;
+            }
+        }
+
+    }
+
+    @Override
+    public void displayContentOfCoinBoxes(
+            final List<CoinBoxLevel> someCoinBoxLevels) {
+        BigDecimal totalCoinBoxes = new BigDecimal(0);
+        totalCoinBoxes = totalCoinBoxes.setScale(2);
+
+        for (CoinBoxLevel level : someCoinBoxLevels) {
+            totalCoinBoxes = totalCoinBoxes.add(level.getCoinValue().multiply(
+                    new BigDecimal(level.getCurrentCoinCount())));
+        }
+
+        print("view.info.coin.box.content.total", ViewOutputMode.LARGE_INFO,
+                totalCoinBoxes);
+
+        for (CoinBoxLevel level : someCoinBoxLevels) {
+            print("view.info.coin.box.content",
+                    ViewOutputMode.LARGE_INFO,
+                    level.getCoinValue(),
+                    level.getCurrentCoinCount(),
+                    level.getCoinValue().multiply(
+                            new BigDecimal(level.getCurrentCoinCount())));
+        }
     }
 
     /* ********** Methods for prompt, executions and notification ********** */
@@ -354,9 +410,6 @@ public abstract class SimulationView implements Runnable,
         boolean failure = false;
         for (CoinBoxLevel cbl : dataStore.getCurrentCoinBoxLevels()) {
 
-            // TODO: Not optimal -> creating three displays in gui -> three
-            // output modes -> prompt, info, error
-            // TODO: Evtl. auslagern.
             BigDecimal total = cbl.getCoinValue().multiply(
                     new BigDecimal(cbl.getCurrentCoinCount()));
             print("view.info.coin.box.content", ViewOutputMode.INFO,
@@ -456,6 +509,20 @@ public abstract class SimulationView implements Runnable,
     }
 
     /* ********** Internal methods ********** */
+
+    /**
+     * @param price
+     * @return
+     */
+    private String formatPrice(BigDecimal price) {
+        price = price.setScale(2, BigDecimal.ROUND_DOWN);
+        DecimalFormat df = new DecimalFormat();
+        df.setMaximumFractionDigits(2);
+        df.setMinimumFractionDigits(2);
+        df.setGroupingUsed(false);
+        return df.format(price);
+    }
+
     /**
      * @return the view state.
      */

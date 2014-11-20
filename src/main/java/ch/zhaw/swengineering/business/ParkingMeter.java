@@ -5,6 +5,7 @@ import java.util.List;
 
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 
 /**
@@ -37,7 +38,7 @@ public interface ParkingMeter {
 	SecretActionEnum getSecretAction(int secretKey) throws Exception;
 
 	/**
-	 * Call Method for given existingParkingLots
+	 * Call Method for given existingParkingLots.
 	 */
 	List<ParkingLot> getParkingLots();
 
@@ -60,4 +61,12 @@ public interface ParkingMeter {
 	 *            the booking to persist.
 	 */
 	void persistBooking(ParkingLotBooking aBooking);
+	
+	
+	/**
+	 * Gets the current parking time definitions.
+	 * 
+	 * @return the list of parking time definitions.
+	 */
+	List<ParkingTimeDefinition> getParkingTimeDefinitions();
 }

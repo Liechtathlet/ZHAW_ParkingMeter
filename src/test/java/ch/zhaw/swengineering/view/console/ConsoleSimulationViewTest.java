@@ -117,7 +117,10 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_VIEW_CBL_COUNT_LIMIT = "view.info.coin.box.content.limit";
     private static final String MSG_VAL_VIEW_CBL_COUNT_LIMIT = "limitReached";
-    
+
+    private static final String MSG_KEY_VIEW_INFO_CB_TOTAL = "view.info.coin.box.content.total";
+    private static final String MSG_VAL_VIEW_INFO_CB_TOTAL = "total: {0}";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -218,7 +221,10 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_VIEW_CBL_COUNT_LIMIT)).thenReturn(
                 MSG_VAL_VIEW_CBL_COUNT_LIMIT);
-        
+
+        when(messageProvider.get(MSG_KEY_VIEW_INFO_CB_TOTAL)).thenReturn(
+                MSG_VAL_VIEW_INFO_CB_TOTAL);
+
         // Initialize view
         view.addViewEventListener(listener);
     }
@@ -280,8 +286,7 @@ public class ConsoleSimulationViewTest {
         view.promptForParkingLotNumber();
 
         // check state after prompt
-        assertEquals(ViewStateEnum.ENTERING_PARKING_LOT,
-                view.getViewState());
+        assertEquals(ViewStateEnum.ENTERING_PARKING_LOT, view.getViewState());
     }
 
     @Test
@@ -359,8 +364,7 @@ public class ConsoleSimulationViewTest {
         view.promptForMoney(5);
 
         // check state after prompt
-        assertEquals(ViewStateEnum.DROPPING_IN_MONEY,
-                view.getViewState());
+        assertEquals(ViewStateEnum.DROPPING_IN_MONEY, view.getViewState());
     }
 
     @Test
@@ -576,7 +580,7 @@ public class ConsoleSimulationViewTest {
         when(parkingTimeConfigurationProvider.get()).thenReturn(definitions);
 
         // Run
-        view.executeActionsForStateViewingAllInformation();
+        view.displayAllInformation(definitions.getParkingTimeDefinitions());
 
         // Assert
         assertEquals(
@@ -724,8 +728,8 @@ public class ConsoleSimulationViewTest {
                 MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
                 coin.multiply(new BigDecimal(4)))
                 + System.lineSeparator()
-                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": " 
-                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
+                + ": " + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("abc");
@@ -740,7 +744,6 @@ public class ConsoleSimulationViewTest {
         verify(listener, Mockito.times(0)).coinBoxLevelEntered(
                 any(CoinBoxLevelEnteredEvent.class));
     }
-    
 
     @Test
     public void testStateForEnteringCoinBoxLevelWidthToHighNumber()
@@ -754,8 +757,8 @@ public class ConsoleSimulationViewTest {
                 MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
                 coin.multiply(new BigDecimal(4)))
                 + System.lineSeparator()
-                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": " 
-                + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
+                + ": " + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("200");
@@ -770,10 +773,9 @@ public class ConsoleSimulationViewTest {
         verify(listener, Mockito.times(0)).coinBoxLevelEntered(
                 any(CoinBoxLevelEnteredEvent.class));
     }
-    
+
     @Test
-    public void testStateForEnteringCoinBoxLevel()
-            throws IOException {
+    public void testStateForEnteringCoinBoxLevel() throws IOException {
         List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
 
         BigDecimal coin = new BigDecimal(5);
@@ -783,7 +785,8 @@ public class ConsoleSimulationViewTest {
                 MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
                 coin.multiply(new BigDecimal(4)))
                 + System.lineSeparator()
-                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW + ": ";
+                + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
+                + ": ";
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("5");
@@ -797,5 +800,26 @@ public class ConsoleSimulationViewTest {
 
         verify(listener).coinBoxLevelEntered(
                 any(CoinBoxLevelEnteredEvent.class));
+    }
+
+    @Test
+    public void testDisplayContentOfCoinBoxes() throws IOException {
+        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+
+        BigDecimal coin = new BigDecimal(5);
+        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+
+        String exptectedMessage = MessageFormat.format(
+                MSG_VAL_VIEW_INFO_CB_TOTAL, coin.multiply(new BigDecimal(4)))
+                + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
+                        coin.multiply(new BigDecimal(4)))
+                + System.lineSeparator();
+
+        // Run
+        view.displayContentOfCoinBoxes(cbLevels);
+
+        // Assert
+        assertEquals(exptectedMessage, outContent.toString());
     }
 }

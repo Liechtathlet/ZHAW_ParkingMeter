@@ -26,4 +26,5 @@
     <message key="view.booked.parkinglots.title.template">ParkingMeter Info vom: {0} </message>
     <message key="view.booked.parkinglot">Parkuhr {0}  | bezahlt bis {1}  | Differenz {2}  | {3} </message>
     <message key="parking.time.exceeded">** Parkzeit abgelaufen **</message>
+    <message key="view.info.coin.box.content.total">Inhalt der Münzeinheiten TOTAL:  {0} €</message>
 </messages>

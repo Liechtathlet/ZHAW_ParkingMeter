@@ -184,7 +184,8 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
-        verify(view).displayAllInformation();
+        verify(view).displayAllInformation(
+                parkingMeter.getParkingTimeDefinitions());
     }
 
     /**

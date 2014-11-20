@@ -154,10 +154,4 @@ public class GuiSimulationView extends SimulationView implements
     public void calledAbort() {
         notifyForActionAborted();
     }
-
-    @Override
-    public void displayAllInformation() {
-        // TODO Auto-generated method stub
-        
-    }
 }

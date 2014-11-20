@@ -10,6 +10,7 @@ import java.util.List;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 
 /**
  * @author Daniel Brun
@@ -110,12 +111,23 @@ public interface SimulationViewInterface {
     void displayBookedParkingLots(List<ParkingLot> parkingLots);
 
     /**
-     * Displays all available information. TODO: Anpassen.
+     * Displays all available information.
+     * 
+     * @param someParkingTimeDefinitions
+     *            The parking time definitions.
      */
-    void displayAllInformation();
+    void displayAllInformation(
+            List<ParkingTimeDefinition> someParkingTimeDefinitions);
 
     /**
      * Displays a message with the drawback.
      */
     void displayMessageForDrawback();
+    
+    /**
+     * Displays the coin box levels.
+     * 
+     * @param someCoinBoxLevels the coin box levels to display.
+     */
+    void displayContentOfCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
 }
