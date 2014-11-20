@@ -371,6 +371,13 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
+    public void displayLast24HoursOfTransactionLog() {
+        List<TransactionLogEntry> entries = transactionLogHandler.getLast24Hours();
+        for (TransactionLogEntry entry : entries) {
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+        }
+    }
+
     /* ********** Methods for prompt, executions and notification ********** */
 
     @Override

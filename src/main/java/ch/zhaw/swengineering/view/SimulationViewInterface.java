@@ -140,4 +140,9 @@ public interface SimulationViewInterface {
      * Displays the transaction log.
      */
     void displayAllTransactionLogs();
+
+    /**
+     * Displays the last 24 hours of the transaction log.
+     */
+    void displayLast24HoursOfTransactionLog();
 }

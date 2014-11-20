@@ -220,6 +220,36 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: Valid secret code for viewing transaction logs of the last 24 hours has been entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewLast24HoursOfTransactionLogSecretNumber()
+            throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG);
+
+        // Setup
+        controller.start();
+
+        // Execute Test
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeter).getSecretAction(parkingLotNumber);
+        verify(view).displayLast24HoursOfTransactionLog();
+        verify(view, times(2)).promptForParkingLotNumber();
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
      * 
      * Scenario: A valid secret code is entered.
      * 

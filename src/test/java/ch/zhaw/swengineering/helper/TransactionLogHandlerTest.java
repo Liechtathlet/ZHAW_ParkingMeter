@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -44,6 +46,10 @@ public class TransactionLogHandlerTest {
     @Before
     public void setUp() throws ParseException {
         MockitoAnnotations.initMocks(this);
+    }
+
+    @Test
+    public void gettingAllItemsReturnsAllItems() throws Exception {
 
         // Mock
         transactionLog = getMock();
@@ -51,10 +57,6 @@ public class TransactionLogHandlerTest {
         when(configurationProvider.get()).thenReturn(transactionLog);
 
         transactionLogHandler.init();
-    }
-
-    @Test
-    public void gettingAllItemsReturnsAllItems() throws Exception {
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
@@ -64,7 +66,58 @@ public class TransactionLogHandlerTest {
     }
 
     @Test
+    public void aksingForTheEntriesOfTheLast24HoursReturnsOnlyEntriesOfTheLast24Hours() {
+
+        // Mock
+        Calendar withingRangeCalendar = Calendar.getInstance();
+        withingRangeCalendar.add(Calendar.HOUR, -1);
+        String text1 = "today log message";
+        Date withingRangeDate = withingRangeCalendar.getTime();
+
+        final TransactionLogEntry entry1 = new TransactionLogEntry();
+        entry1.creationTime = withingRangeDate;
+        entry1.text = text1;
+
+        Calendar outOfRangeCalendar = Calendar.getInstance();
+        outOfRangeCalendar.add(Calendar.DATE, -1);
+        outOfRangeCalendar.add(Calendar.HOUR, -1);
+        Date outOfRangeDate = outOfRangeCalendar.getTime();
+        String text2 = "yesterday log message";
+
+        final TransactionLogEntry entry2 = new TransactionLogEntry();
+        entry2.creationTime = outOfRangeDate;
+        entry2.text = text2;
+
+        TransactionLog transactionLog = new TransactionLog();
+        transactionLog.entries = new ArrayList<TransactionLogEntry>() {
+            {
+                add(entry1);
+                add(entry2);
+            }
+        };
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
+
+        // Run
+        List<TransactionLogEntry> result = transactionLogHandler.getLast24Hours();
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(withingRangeDate, result.get(0).creationTime);
+        assertEquals(text1, result.get(0).text);
+    }
+
+    @Test
     public void checkIfMessagesAreInCorrectOrder() throws Exception {
+
+        // Mock
+        transactionLog = getMock();
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
@@ -79,6 +132,13 @@ public class TransactionLogHandlerTest {
     public void askingFor2EntriesReturns2Entries() throws Exception {
         int numberOfEntries = 2;
 
+        // Mock
+        transactionLog = getMock();
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
+
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
                 .get(numberOfEntries);
@@ -90,6 +150,13 @@ public class TransactionLogHandlerTest {
     @Test
     public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
         int numberOfEntries = 2;
+
+        // Mock
+        transactionLog = getMock();
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
@@ -103,6 +170,14 @@ public class TransactionLogHandlerTest {
     @Test
     public void addingAnEntryToTheTransactionLogPassesCorrectObjectToConfigurationWriter()
             throws Exception {
+
+        // Mock
+        transactionLog = getMock();
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
+
         String text = "New Item";
 
         final Object[] tempTransactionLog = new Object[1];

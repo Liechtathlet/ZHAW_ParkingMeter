@@ -111,6 +111,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 view.displayAllTransactionLogs();
                 view.promptForParkingLotNumber();
                 break;
+            case VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG:
+                processed = true;
+                view.displayLast24HoursOfTransactionLog();
+                view.promptForParkingLotNumber();
+                break;
             case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
                 processed = true;
                 view.promptForNewCoinBoxLevels(slotMachine

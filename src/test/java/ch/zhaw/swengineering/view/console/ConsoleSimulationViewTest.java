@@ -660,7 +660,7 @@ public class ConsoleSimulationViewTest {
         logEntries.add(transactionLogEntry1);
         logEntries.add(transactionLogEntry2);
 
-        when(transactionLogHandler.getAll()).thenReturn(logEntries);
+        when(transactionLogHandler.getLast24Hours()).thenReturn(logEntries);
 
         // Run
         view.displayAllTransactionLogs();
@@ -671,6 +671,51 @@ public class ConsoleSimulationViewTest {
                 + System.lineSeparator()
                 + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
                 + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public void testDisplayLast24HoursOfTransactionLogOutputsText() {
+        // Mock
+
+        // Looks silly, because the two dates here are not within the last 24 hours.
+        // But that is ok. Because they are mock data. The actual implementation
+        // of the getLast24Hours method does indeed check for the date which is
+        // covered by another unit test.
+
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12); //Year, month, day of month, hours, minutes and seconds
+        Date date1 = cal1.getTime();
+        String text1 = "text1";
+
+        TransactionLogEntry transactionLogEntry1 = new TransactionLogEntry();
+        transactionLogEntry1.creationTime = date1;
+        transactionLogEntry1.text = text1;
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13); //Year, month, day of month, hours, minutes and seconds
+        Date date2 = cal2.getTime();
+        String text2 = "text2";
+
+        TransactionLogEntry transactionLogEntry2 = new TransactionLogEntry();
+        transactionLogEntry2.creationTime = date2;
+        transactionLogEntry2.text = text2;
+
+        List<TransactionLogEntry> logEntries = new ArrayList<>();
+        logEntries.add(transactionLogEntry1);
+        logEntries.add(transactionLogEntry2);
+
+        when(transactionLogHandler.getLast24Hours()).thenReturn(logEntries);
+
+        // Run
+        view.displayLast24HoursOfTransactionLog();
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
+                        + System.lineSeparator(),
                 outContent.toString());
     }
 
