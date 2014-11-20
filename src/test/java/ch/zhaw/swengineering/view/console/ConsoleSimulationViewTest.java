@@ -660,7 +660,7 @@ public class ConsoleSimulationViewTest {
         logEntries.add(transactionLogEntry1);
         logEntries.add(transactionLogEntry2);
 
-        when(transactionLogHandler.getLast24Hours()).thenReturn(logEntries);
+        when(transactionLogHandler.getAll()).thenReturn(logEntries);
 
         // Run
         view.displayAllTransactionLogs();
