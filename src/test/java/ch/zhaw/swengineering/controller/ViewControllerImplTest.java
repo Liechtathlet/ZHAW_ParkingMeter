@@ -1,29 +1,5 @@
 package ch.zhaw.swengineering.controller;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
 import ch.zhaw.swengineering.business.ParkingMeterImpl;
 import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
@@ -37,6 +13,26 @@ import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 /**
  * @author Daniel Brun
@@ -121,7 +117,7 @@ public class ViewControllerImplTest {
         verify(view).promptForParkingLotNumber();
 
         // Assert negative
-        verify(view, Mockito.times(0)).displayErrorParkingLotNumberInvalid();
+        verify(view, times(0)).displayErrorParkingLotNumberInvalid();
     }
 
     /**
@@ -150,18 +146,18 @@ public class ViewControllerImplTest {
         // Assert positive
         verify(parkingMeter).getParkingLot(parkingLotNumber);
         verify(view).displayErrorParkingLotNumberInvalid();
-        verify(view, Mockito.times(2)).promptForParkingLotNumber();
+        verify(view, times(2)).promptForParkingLotNumber();
 
         // Assert negative
-        verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(
+        verify(view, times(0)).displayParkingLotNumberAndParkingTime(
                 eq(parkingLotNumber), any(Date.class));
-        verify(view, Mockito.times(0)).promptForMoney(parkingLotNumber);
+        verify(view, times(0)).promptForMoney(parkingLotNumber);
     }
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
      * 
-     * Scenario: A valid parking lot number is entered.
+     * Scenario: Valid secret code for viewing all information has been entered.
      * 
      * Expectation: All methods are invoked correctly.
      */
@@ -184,8 +180,42 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
+        verify(view).displayParkingMeterInfo();
+        verify(view).displayContentOfCoinBoxes(
+                slotMachine.getCurrentCoinBoxLevel());
         verify(view).displayParkingTimeDefinitions(
                 parkingMeter.getParkingTimeDefinitions());
+        verify(view, times(2)).promptForParkingLotNumber();
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: Valid secret code for viewing all transaction logs has been entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewAllTransactionLogSecretNumber()
+            throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_ALL_TRANSACTION_LOGS);
+
+        // Setup
+        controller.start();
+
+        // Execute Test
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeter).getSecretAction(parkingLotNumber);
+        verify(view).displayAllTransactionLogs();
+        verify(view, times(2)).promptForParkingLotNumber();
     }
 
     /**
@@ -260,13 +290,13 @@ public class ViewControllerImplTest {
         // Assert positive
         verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
         verify(slotMachine).finishTransaction(drawback);
-        verify(view, Mockito.times(2)).promptForParkingLotNumber();
+        verify(view, times(2)).promptForParkingLotNumber();
         verify(view).displayParkingLotNumberAndParkingTime(5, end);
         verify(view).displayMessageForDrawback();
 
         // Assert negative
-        verify(view, Mockito.times(0)).displayNotEnoughMoneyError();
-        verify(view, Mockito.times(0)).promptForMoney(5);
+        verify(view, times(0)).displayNotEnoughMoneyError();
+        verify(view, times(0)).promptForMoney(5);
     }
 
     /**
@@ -317,8 +347,8 @@ public class ViewControllerImplTest {
         verify(view).promptForParkingLotNumber();
 
         // Assert negative
-        verify(slotMachine, Mockito.times(0)).finishTransaction(drawback);
-        verify(view, Mockito.times(0)).displayParkingLotNumberAndParkingTime(5,
+        verify(slotMachine, times(0)).finishTransaction(drawback);
+        verify(view, times(0)).displayParkingLotNumberAndParkingTime(5,
                 end);
     }
 
@@ -331,7 +361,7 @@ public class ViewControllerImplTest {
      */
     @Test
     public final void testCoinBoxLevelEntered() {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         cbLevels.add(new CoinBoxLevel(new BigDecimal(5), 4, 10));
 
@@ -354,7 +384,7 @@ public class ViewControllerImplTest {
      */
     @Test
     public final void testCoinBoxLevelEnteredWithLimitReached() {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
         cbLevels.add(new CoinBoxLevel(coin, 50, 10));

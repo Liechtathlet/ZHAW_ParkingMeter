@@ -135,4 +135,9 @@ public interface SimulationViewInterface {
      * Displays a parking meter info text.
      */
     void displayParkingMeterInfo();
+
+    /**
+     * Displays the transaction log.
+     */
+    void displayAllTransactionLogs();
 }

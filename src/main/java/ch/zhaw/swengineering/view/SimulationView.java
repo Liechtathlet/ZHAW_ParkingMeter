@@ -10,6 +10,8 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,6 +73,9 @@ public abstract class SimulationView implements Runnable,
 
     @Autowired
     protected MessageProvider messageProvider;
+
+    @Autowired
+    protected TransactionLogHandler transactionLogHandler;
 
     /**
      * Creates a new instance of this class.
@@ -359,6 +364,13 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
+    public void displayAllTransactionLogs() {
+        List<TransactionLogEntry> entries = transactionLogHandler.getAll();
+        for (TransactionLogEntry entry : entries) {
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+        }
+    }
+
     /* ********** Methods for prompt, executions and notification ********** */
 
     @Override
@@ -381,7 +393,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered parking lot.
-     * 
+     *
      * @param parkingLotNumber
      *            The parking lot number.
      */
@@ -428,8 +440,7 @@ public abstract class SimulationView implements Runnable,
 
             if (coinCount != null) {
                 try {
-                    if (coinCount.intValue() >= 1
-                            && coinCount.intValue() <= 100) {
+                    if (coinCount >= 1 && coinCount <= 100) {
                         cbl.setCurrentCoinCount(coinCount);
                     } else {
                         LOG.info("Coin count for coin box not in range!");
@@ -485,7 +496,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered money.
-     * 
+     *
      * @param aParkingLotNumber
      *            The parking lot number.
      */
@@ -500,7 +511,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered coin box level.
-     * 
+     *
      * @param someCoinBoxLevels
      *            The coin box levels.
      */
@@ -539,7 +550,7 @@ public abstract class SimulationView implements Runnable,
     /**
      * Sets the view state. This method is synchronized to ensure integrity
      * trough the different threads.
-     * 
+     *
      * @param aState
      *            the view state to set.
      */
@@ -556,14 +567,14 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Reads an integer from the input.
-     * 
+     *
      * @return an integer or null if another action was executed.
      */
     public abstract Integer readInteger();
 
     /**
      * Prints a message to the output.
-     * 
+     *
      * @param aKey
      *            the key of the message.
      * @param aMode
@@ -644,7 +655,7 @@ public abstract class SimulationView implements Runnable,
         boolean displayMsg = false;
 
         for (Integer count : drawbackMap.values()) {
-            if (count.intValue() > 0) {
+            if (count > 0) {
                 displayMsg = true;
                 break;
             }

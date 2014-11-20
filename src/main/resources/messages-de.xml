@@ -28,4 +28,5 @@
     <message key="parking.time.exceeded">** Parkzeit abgelaufen **</message>
     <message key="view.info.coin.box.content.total">Inhalt der Münzeinheiten TOTAL:  {0} €</message>
     <message key="view.parking.time.info">Parking Meter Info vom: {0}</message>
+    <message key="view.transaction.log.entry">[{0}] {1}</message>
 </messages>

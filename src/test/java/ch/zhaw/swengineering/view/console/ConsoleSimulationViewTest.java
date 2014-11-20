@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -106,6 +108,9 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "view.all.information.parking.time";
     private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "timerange [{0}] | from {1} € | to {2} € | time: {3} min |";
 
+    private static final String MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY = "view.transaction.log.entry";
+    private static final String MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY = "[{0}] {1}";
+
     private static final String MSG_KEY_ALL_COIN_LEVEL_TOO_HIGH = "view.slot.machine.coin.box.level.too.high";
     private static final String MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH = "too high: {0}";
 
@@ -144,6 +149,9 @@ public class ConsoleSimulationViewTest {
 
     @Mock
     private ConfigurationProvider parkingTimeConfigurationProvider;
+
+    @Mock
+    private TransactionLogHandler transactionLogHandler;
 
     private DateFormatter dateFormatter;
     private ViewEventListener listener;
@@ -230,6 +238,9 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_PARKING_TIME_INFO)).thenReturn(
                 MSG_VAL_PARKING_TIME_INFO);
+
+        when(messageProvider.get(MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY)).thenReturn(
+                MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -562,7 +573,7 @@ public class ConsoleSimulationViewTest {
     }
 
     @Test
-    public void testWhenDisplayAllInformationIsCalledItShouldOutputTest() {
+    public void testWhenDisplayAllInformationIsCalledItShouldOutputsText() {
         // Mock
         ParkingTimeDefinition definition1 = new ParkingTimeDefinition();
         definition1.setPricePerPeriod(new BigDecimal(0.5));
@@ -609,7 +620,8 @@ public class ConsoleSimulationViewTest {
                         + MessageFormat.format(
                                 MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
                                 "3", "1.00", "2.00", "70")
-                        + System.lineSeparator(), outContent.toString());
+                        + System.lineSeparator(),
+                outContent.toString());
     }
 
     @Test
@@ -620,6 +632,45 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(MSG_VAL_PARKING_TIME_INFO + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public void testDisplayAllTransactionLogsOutputsText() {
+        // Mock
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12); //Year, month, day of month, hours, minutes and seconds
+        Date date1 = cal1.getTime();
+        String text1 = "text1";
+
+        TransactionLogEntry transactionLogEntry1 = new TransactionLogEntry();
+        transactionLogEntry1.creationTime = date1;
+        transactionLogEntry1.text = text1;
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13); //Year, month, day of month, hours, minutes and seconds
+        Date date2 = cal2.getTime();
+        String text2 = "text2";
+
+        TransactionLogEntry transactionLogEntry2 = new TransactionLogEntry();
+        transactionLogEntry2.creationTime = date2;
+        transactionLogEntry2.text = text2;
+
+        List<TransactionLogEntry> logEntries = new ArrayList<>();
+        logEntries.add(transactionLogEntry1);
+        logEntries.add(transactionLogEntry2);
+
+        when(transactionLogHandler.getAll()).thenReturn(logEntries);
+
+        // Run
+        view.displayAllTransactionLogs();
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
+                + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
+                + System.lineSeparator(),
                 outContent.toString());
     }
 
@@ -731,7 +782,7 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testStateForEnteringCoinBoxLevelWidthInvalidNumber()
             throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
         cbLevels.add(new CoinBoxLevel(coin, 4, 10));
@@ -760,7 +811,7 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testStateForEnteringCoinBoxLevelWidthToHighNumber()
             throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
         cbLevels.add(new CoinBoxLevel(coin, 4, 10));
@@ -788,7 +839,7 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testStateForEnteringCoinBoxLevel() throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
         cbLevels.add(new CoinBoxLevel(coin, 4, 10));
@@ -816,7 +867,7 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testDisplayContentOfCoinBoxes() throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<CoinBoxLevel>();
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
         cbLevels.add(new CoinBoxLevel(coin, 4, 10));
