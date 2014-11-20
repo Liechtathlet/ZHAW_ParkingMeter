@@ -266,11 +266,9 @@ public class ParkingMeterPanel extends JPanel implements
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warn("Barrier failed...", e);
                 } catch (BrokenBarrierException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warn("Barrier failed...", e);
                 }
             }
         });
@@ -280,11 +278,9 @@ public class ParkingMeterPanel extends JPanel implements
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warn("Barrier failed...", e);
                 } catch (BrokenBarrierException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
+                    LOG.warn("Barrier failed...", e);
                 }
                 resetErrorDisplay();
                 resetInfoDisplay();
@@ -300,11 +296,9 @@ public class ParkingMeterPanel extends JPanel implements
         try {
             barrier.await();
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Barrier failed...", e);
         } catch (BrokenBarrierException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOG.warn("Barrier failed...", e);
         }
     }
 

@@ -13,7 +13,6 @@ import ch.zhaw.swengineering.event.ActionAbortedEvent;
 import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
 import ch.zhaw.swengineering.event.MoneyInsertedEvent;
 import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShowAllParkingCharge;
 import ch.zhaw.swengineering.event.ShutdownEvent;
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
@@ -173,13 +172,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Shutdown complete...exit");
         appContext.close();
     }
-
-    @Override
-    public void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge) {
-        // TODO Auto-generated method stub
-
-    }
-
+    
     @Override
     public void coinBoxLevelEntered(
             final CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {

@@ -39,7 +39,6 @@ public class CalculateRemainingTimeTest {
 			endBookingDate4 = simpleDateFormat.parse(inputEndBookingDate4);
 			nowDate = simpleDateFormat.parse(inputNowDate);
 		} catch (ParseException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 

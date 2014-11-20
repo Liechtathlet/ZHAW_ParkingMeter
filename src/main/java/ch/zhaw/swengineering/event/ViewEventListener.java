@@ -34,14 +34,6 @@ public interface ViewEventListener extends EventListener {
 	void moneyInserted(MoneyInsertedEvent moneyInsertedEvent);
 
 	/**
-	 * Request to show all ParkingMeter charge.
-	 * 
-	 * @param showAllParkingCharge
-	 *            the event data.
-	 */
-	void showAllParkingCharge(ShowAllParkingCharge showAllParkingCharge);
-
-	/**
 	 * Request to shut down the parking meter.
 	 * 
 	 * @param shutdownEvent
