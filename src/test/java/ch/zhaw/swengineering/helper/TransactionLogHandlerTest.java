@@ -1,8 +1,14 @@
 package ch.zhaw.swengineering.helper;
 
-import ch.zhaw.swengineering.model.persistence.TransactionLog;
-import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,13 +22,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import ch.zhaw.swengineering.model.persistence.TransactionLog;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -37,17 +39,22 @@ public class TransactionLogHandlerTest {
     @Mock
     private ConfigurationWriter configurationWriter;
 
+    private TransactionLog transactionLog;
+
     @Before
-    public void setUp() {
+    public void setUp() throws ParseException {
+        MockitoAnnotations.initMocks(this);
+
+        // Mock
+        transactionLog = getMock();
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
         transactionLogHandler.init();
     }
 
     @Test
     public void gettingAllItemsReturnsAllItems() throws Exception {
-        // Mock
-        TransactionLog transactionLog = getMock();
-        MockitoAnnotations.initMocks(this);
-        when(configurationProvider.get()).thenReturn(transactionLog);
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
@@ -58,10 +65,6 @@ public class TransactionLogHandlerTest {
 
     @Test
     public void checkIfMessagesAreInCorrectOrder() throws Exception {
-        // Mock
-        TransactionLog transactionLog = getMock();
-        MockitoAnnotations.initMocks(this);
-        when(configurationProvider.get()).thenReturn(transactionLog);
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
@@ -76,11 +79,6 @@ public class TransactionLogHandlerTest {
     public void askingFor2EntriesReturns2Entries() throws Exception {
         int numberOfEntries = 2;
 
-        // Mock
-        TransactionLog transactionLog = getMock();
-        MockitoAnnotations.initMocks(this);
-        when(configurationProvider.get()).thenReturn(transactionLog);
-
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
                 .get(numberOfEntries);
@@ -92,11 +90,6 @@ public class TransactionLogHandlerTest {
     @Test
     public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
         int numberOfEntries = 2;
-
-        // Mock
-        TransactionLog transactionLog = getMock();
-        MockitoAnnotations.initMocks(this);
-        when(configurationProvider.get()).thenReturn(transactionLog);
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
@@ -111,12 +104,6 @@ public class TransactionLogHandlerTest {
     public void addingAnEntryToTheTransactionLogPassesCorrectObjectToConfigurationWriter()
             throws Exception {
         String text = "New Item";
-
-        // Mock
-        TransactionLog transactionLog = getMock();
-        MockitoAnnotations.initMocks(this);
-
-        when(configurationProvider.get()).thenReturn(transactionLog);
 
         // TODO: Not nicely done. How to check parameter to
         // configurationWriter.write(...)?
@@ -139,7 +126,7 @@ public class TransactionLogHandlerTest {
         assertEquals(newTransactionLog.entries.get(3).text, text);
     }
 
-    private TransactionLog getMock() throws ParseException {
+    private static TransactionLog getMock() throws ParseException {
         final TransactionLogEntry entry1 = new TransactionLogEntry();
         entry1.creationTime = new SimpleDateFormat("dd/MM/yyyy")
                 .parse("21/12/2012");
