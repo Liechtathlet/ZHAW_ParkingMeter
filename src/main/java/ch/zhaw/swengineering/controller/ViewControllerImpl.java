@@ -95,8 +95,16 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 break;
             case VIEW_ALL_INFORMATION:
                 processed = true;
-                view.displayAllInformation(parkingMeter
+
+                view.displayParkingMeterInfo();
+                view.displayContentOfCoinBoxes(slotMachine
+                        .getCurrentCoinBoxLevel());
+                view.displayParkingTimeDefinitions(parkingMeter
                         .getParkingTimeDefinitions());
+
+                // Output: test für Zeitberechnung
+                // Output: Display Transaction log
+
                 view.promptForParkingLotNumber();
                 break;
             case VIEW_CONTENT_OF_COIN_BOXES:

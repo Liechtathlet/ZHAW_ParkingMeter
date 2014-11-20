@@ -121,6 +121,9 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_VIEW_INFO_CB_TOTAL = "view.info.coin.box.content.total";
     private static final String MSG_VAL_VIEW_INFO_CB_TOTAL = "total: {0}";
 
+    private static final String MSG_KEY_PARKING_TIME_INFO = "view.parking.time.info";
+    private static final String MSG_VAL_PARKING_TIME_INFO = "info";
+
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
 
@@ -224,6 +227,9 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_VIEW_INFO_CB_TOTAL)).thenReturn(
                 MSG_VAL_VIEW_INFO_CB_TOTAL);
+
+        when(messageProvider.get(MSG_KEY_PARKING_TIME_INFO)).thenReturn(
+                MSG_VAL_PARKING_TIME_INFO);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -580,12 +586,17 @@ public class ConsoleSimulationViewTest {
         when(parkingTimeConfigurationProvider.get()).thenReturn(definitions);
 
         // Run
-        view.displayAllInformation(definitions.getParkingTimeDefinitions());
+        view.displayParkingTimeDefinitions(definitions
+                .getParkingTimeDefinitions());
 
         // Assert
         assertEquals(
-                MessageFormat.format(MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE,
-                        "2", MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)
+                MessageFormat.format(MessageFormat.format(
+                        MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE, "2",
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE),
+                        outContent.toString() + System.lineSeparator()
+                                + MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE, "2",
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)
                         + System.lineSeparator()
                         + MessageFormat.format(
                                 MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
@@ -601,15 +612,16 @@ public class ConsoleSimulationViewTest {
                         + System.lineSeparator(), outContent.toString());
     }
 
-    // ************** Tests for Entering Secret Codes **************
+    @Test
+    public void testWhenDisplayP() {
 
-    /*
-     * @Test public void testDisplaySecretCodeInvalid() throws IOException { //
-     * Run view.displaySecretCodeInvalid();
-     * 
-     * // Assert assertEquals( MSG_VAL_ENTER_SECRET_CODE_INVALID +
-     * System.lineSeparator(), outContent.toString()); }
-     */
+        // Run
+        view.displayParkingMeterInfo();
+
+        // Assert
+        assertEquals(MSG_VAL_PARKING_TIME_INFO + System.lineSeparator(),
+                outContent.toString());
+    }
 
     // ************** Tests for Shutting down **************
 

@@ -301,11 +301,17 @@ public abstract class SimulationView implements Runnable,
     }
 
     @Override
-    public void displayAllInformation(
+    public void displayParkingMeterInfo() {
+        print("view.parking.time.info",
+                ViewOutputMode.LARGE_INFO,
+                dateFormatter.print(new Date(), LocaleContextHolder.getLocale()));
+    }
+
+    @Override
+    public void displayParkingTimeDefinitions(
             List<ParkingTimeDefinition> someParkingTimeDefinitions) {
         print("view.all.information.title.template", ViewOutputMode.LARGE_INFO,
                 2, messageProvider.get("view.parking.time.def").trim());
-
         int i = 1;
         int lastMinuteCount = 0;
         BigDecimal lastPrice = new BigDecimal(0);

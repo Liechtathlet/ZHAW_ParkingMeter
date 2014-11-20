@@ -116,7 +116,7 @@ public interface SimulationViewInterface {
      * @param someParkingTimeDefinitions
      *            The parking time definitions.
      */
-    void displayAllInformation(
+    void displayParkingTimeDefinitions(
             List<ParkingTimeDefinition> someParkingTimeDefinitions);
 
     /**
@@ -130,4 +130,9 @@ public interface SimulationViewInterface {
      * @param someCoinBoxLevels the coin box levels to display.
      */
     void displayContentOfCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
+    
+    /**
+     * Displays a parking meter info text.
+     */
+    void displayParkingMeterInfo();
 }
