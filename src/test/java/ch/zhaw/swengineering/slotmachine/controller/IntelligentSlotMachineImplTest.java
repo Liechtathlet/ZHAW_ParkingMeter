@@ -7,6 +7,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -216,8 +217,18 @@ public class IntelligentSlotMachineImplTest {
     public final void testFinishTransactionWithDrawback()
             throws NoTransactionException, InvalidCoinException,
             CoinBoxFullException {
+        Map<BigDecimal, Integer> drawbackMap = new HashMap<BigDecimal,Integer>();
+        
         BigDecimal insertedCoin = new BigDecimal(0.5);
         BigDecimal drawBack = new BigDecimal(2.0);
+        
+        insertedCoin = insertedCoin.setScale(2);
+        drawBack = drawBack.setScale(2);
+        
+        drawbackMap.put(insertedCoin, Integer.valueOf(0));
+        drawbackMap.put(new BigDecimal(1.0).setScale(2), Integer.valueOf(0));
+        drawbackMap.put(drawBack, Integer.valueOf(1));
+        
         slotMachine.startTransaction();
 
         slotMachine.insertCoin(insertedCoin);
@@ -230,6 +241,8 @@ public class IntelligentSlotMachineImplTest {
 
         assertEquals(0, BigDecimal.ZERO.compareTo(slotMachine
                 .getAmountOfCurrentlyInsertedMoney()));
+
+        assertEquals(drawbackMap, slotMachine.getDrawback());
 
         verify(configWriterCoinBoxes).write(any(Object.class));
     }
@@ -351,7 +364,7 @@ public class IntelligentSlotMachineImplTest {
         List<CoinBoxLevel> coinBoxLevels = slotMachine.getCurrentCoinBoxLevel();
 
         for (CoinBoxLevel cbLevel : coinBoxLevels) {
-            cbLevel.setCurrentCoinCount(cbLevel.getCurrentCoinCount() + 15);
+            cbLevel.setCurrentCoinCount(cbLevel.getMaxCoinCount() + 1);
         }
 
         slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevels);
@@ -381,8 +394,8 @@ public class IntelligentSlotMachineImplTest {
                 }
             }
         }
-        
-        assertEquals(0,remaining);
+
+        assertEquals(0, remaining);
     }
 
     /**

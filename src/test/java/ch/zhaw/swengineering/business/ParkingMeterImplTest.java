@@ -119,6 +119,20 @@ public class ParkingMeterImplTest {
         }
     }
 
+    /**
+     * 
+     * Method: 'getParkingLots'
+     * 
+     * Expected: A list with all parking lots.
+     */
+    @Test
+    public final void getParkingLots() {
+        // Setup
+        initStandard();
+
+        assertEquals(parkingMeter.parkingLots, controller.getParkingLots());
+    }
+
     // ************** Tests secret code validation ***************
 
     /**
@@ -274,7 +288,7 @@ public class ParkingMeterImplTest {
         verify(configWriterParkingMeter).write(any(ParkingMeter.class));
 
     }
-    
+
     /**
      * Argument: A valid booking.
      * 
@@ -292,9 +306,11 @@ public class ParkingMeterImplTest {
                 new BigDecimal(5.0));
         booking.setPaidTill(paidUntil);
 
-        List<ParkingTimeDefinition> defList = controller.getParkingTimeDefinitions();
+        List<ParkingTimeDefinition> defList = controller
+                .getParkingTimeDefinitions();
 
-        assertEquals(defList, parkingTimeDefinitions.getParkingTimeDefinitions());
+        assertEquals(defList,
+                parkingTimeDefinitions.getParkingTimeDefinitions());
     }
 
     /**
