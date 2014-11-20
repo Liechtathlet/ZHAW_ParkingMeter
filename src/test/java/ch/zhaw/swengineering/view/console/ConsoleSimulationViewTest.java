@@ -834,4 +834,5 @@ public class ConsoleSimulationViewTest {
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
     }
+    
 }

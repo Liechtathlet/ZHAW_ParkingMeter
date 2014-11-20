@@ -80,10 +80,10 @@ public class ParkingMeterPanel extends JPanel implements
 
     private CyclicBarrier barrier;
 
-    private boolean okButtonPressed;
+    private boolean actionExecuted;
     private boolean promptMode;
     private boolean blockNumberInput;
-
+    private boolean cancelPressed;
     private String promptText;
     private String lastErrorText;
     private String lastInfoText;
@@ -104,12 +104,13 @@ public class ParkingMeterPanel extends JPanel implements
         barrier = new CyclicBarrier(2);
 
         // Init helper objects
-        okButtonPressed = false;
+        actionExecuted = false;
         promptMode = false;
         blockNumberInput = false;
-
+        cancelPressed = false;
+        
         initialHeight = 300;
-        initialWidth = 75;
+        initialWidth = 120;
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
 
@@ -165,7 +166,7 @@ public class ParkingMeterPanel extends JPanel implements
                 (int) ((initialWidth - 20) * factor),
                 (int) ((initialHeight - 250) * factor)));
         buttonPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 20) * factor),
+                (int) ((initialWidth - 50) * factor),
                 (int) ((initialHeight - 250) * factor)));
         ticketfieldPane.setPreferredSize(new Dimension(
                 (int) ((initialWidth - 5) * factor),
@@ -262,7 +263,8 @@ public class ParkingMeterPanel extends JPanel implements
                 numberInputListener.reset();
                 actionAbortListener.calledAbort();
 
-                okButtonPressed = true;
+                cancelPressed = true;
+                actionExecuted = true;
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -274,7 +276,7 @@ public class ParkingMeterPanel extends JPanel implements
         });
         buttonOk.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae1) {
-                okButtonPressed = true;
+                actionExecuted = true;
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -292,7 +294,7 @@ public class ParkingMeterPanel extends JPanel implements
      * Interrupts the current waiting.
      */
     public void interruptWait() {
-        okButtonPressed = true;
+        actionExecuted = true;
         try {
             barrier.await();
         } catch (InterruptedException e) {
@@ -305,21 +307,29 @@ public class ParkingMeterPanel extends JPanel implements
     /**
      * Waits for the ok button to be pressed.
      */
-    public final void waitForOK() {
+    public final boolean waitForOK() {
+        boolean resultOK = true;
         // Set lock.
         try {
             do {
                 barrier.await();
-            } while (!okButtonPressed);
+            } while (!actionExecuted);
+            if(cancelPressed){
+                
+                cancelPressed = false;
+                resultOK = false;
+            }
         } catch (InterruptedException e) {
             // Nothing to do here...didn't have monitor.
         } catch (BrokenBarrierException e) {
             LOG.warn("Barrier broken...", e);
         } finally {
             // Unset lock.
-            okButtonPressed = false;
+            actionExecuted = false;
             promptMode = false;
         }
+        
+        return resultOK;
     }
 
     /**
@@ -427,5 +437,14 @@ public class ParkingMeterPanel extends JPanel implements
     public void setNumberBlockBlocked(final boolean isBlocked) {
         blockNumberInput = isBlocked;
         numberInputListener.setSuspendEvent(blockNumberInput);
+    }
+
+    /**
+     * Clears all outputs.
+     */
+    public void clearOutput() {
+        infoDisplay.setText("");
+        errorDisplay.setText("");
+        display.setText("");
     }
 }

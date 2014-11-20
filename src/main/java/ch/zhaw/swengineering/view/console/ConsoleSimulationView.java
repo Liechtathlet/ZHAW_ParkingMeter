@@ -175,4 +175,9 @@ public class ConsoleSimulationView extends SimulationView {
             }
         }
     }
+
+    @Override
+    protected void clearOutput() {
+        //Nothing to do here...
+    }
 }

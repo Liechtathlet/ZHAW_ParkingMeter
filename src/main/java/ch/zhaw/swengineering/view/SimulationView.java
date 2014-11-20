@@ -101,7 +101,6 @@ public abstract class SimulationView implements Runnable,
             while (run) {
                 try {
                     runLock.lock();
-
                     switch (viewState) {
                     case ENTERING_PARKING_LOT:
                         executeActionsForStateEnteringParkingLotNumber();
@@ -241,6 +240,8 @@ public abstract class SimulationView implements Runnable,
 
     @Override
     public void displayMessageForDrawback() {
+        boolean display = false;
+
         StringBuilder sb = new StringBuilder();
 
         Map<BigDecimal, Integer> drawbackMap = slotMachine.getDrawback();
@@ -249,7 +250,13 @@ public abstract class SimulationView implements Runnable,
         for (int i = 0; i < keyList.size(); i++) {
             BigDecimal key = keyList.get(i);
 
-            sb.append(drawbackMap.get(key));
+            Integer count = drawbackMap.get(key);
+
+            if (count >= 0) {
+                display = true;
+            }
+
+            sb.append(count);
             sb.append(" x ");
             sb.append(key);
 
@@ -258,7 +265,10 @@ public abstract class SimulationView implements Runnable,
             }
         }
 
-        print("view.slot.machine.drawback", ViewOutputMode.INFO, sb.toString());
+        if (display) {
+            print("view.slot.machine.drawback", ViewOutputMode.INFO,
+                    sb.toString());
+        }
     }
 
     @Override
@@ -583,6 +593,11 @@ public abstract class SimulationView implements Runnable,
      * Executes the action for the state 'DropppingInMoney'.
      */
     protected abstract void executeActionsForStateDroppingInMoney();
+    
+    /**
+     * Clears the ouput.
+     */
+    protected abstract void clearOutput();
 
     /* ********** Impl of Slot Machine View ********* */
 
