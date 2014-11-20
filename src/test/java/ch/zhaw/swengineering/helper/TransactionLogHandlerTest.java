@@ -45,11 +45,8 @@ public class TransactionLogHandlerTest {
 
     @Before
     public void setUp() throws ParseException {
-        MockitoAnnotations.initMocks(this);
-    }
 
-    @Test
-    public void gettingAllItemsReturnsAllItems() throws Exception {
+        MockitoAnnotations.initMocks(this);
 
         // Mock
         transactionLog = getMock();
@@ -57,6 +54,10 @@ public class TransactionLogHandlerTest {
         when(configurationProvider.get()).thenReturn(transactionLog);
 
         transactionLogHandler.init();
+    }
+
+    @Test
+    public void gettingAllItemsReturnsAllItems() throws Exception {
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
@@ -112,13 +113,6 @@ public class TransactionLogHandlerTest {
     @Test
     public void checkIfMessagesAreInCorrectOrder() throws Exception {
 
-        // Mock
-        transactionLog = getMock();
-
-        when(configurationProvider.get()).thenReturn(transactionLog);
-
-        transactionLogHandler.init();
-
         // Run
         List<TransactionLogEntry> result = transactionLogHandler.getAll();
 
@@ -132,13 +126,6 @@ public class TransactionLogHandlerTest {
     public void askingFor2EntriesReturns2Entries() throws Exception {
         int numberOfEntries = 2;
 
-        // Mock
-        transactionLog = getMock();
-
-        when(configurationProvider.get()).thenReturn(transactionLog);
-
-        transactionLogHandler.init();
-
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
                 .get(numberOfEntries);
@@ -150,13 +137,6 @@ public class TransactionLogHandlerTest {
     @Test
     public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
         int numberOfEntries = 2;
-
-        // Mock
-        transactionLog = getMock();
-
-        when(configurationProvider.get()).thenReturn(transactionLog);
-
-        transactionLogHandler.init();
 
         // Run
         List<TransactionLogEntry> result = transactionLogHandler
@@ -170,13 +150,6 @@ public class TransactionLogHandlerTest {
     @Test
     public void addingAnEntryToTheTransactionLogPassesCorrectObjectToConfigurationWriter()
             throws Exception {
-
-        // Mock
-        transactionLog = getMock();
-
-        when(configurationProvider.get()).thenReturn(transactionLog);
-
-        transactionLogHandler.init();
 
         String text = "New Item";
 
@@ -204,14 +177,18 @@ public class TransactionLogHandlerTest {
         entry1.creationTime = new SimpleDateFormat("dd/MM/yyyy")
                 .parse("21/12/2012");
         entry1.text = "m1";
+
         final TransactionLogEntry entry2 = new TransactionLogEntry();
         entry2.creationTime = new SimpleDateFormat("dd/MM/yyyy")
                 .parse("22/12/2012");
         entry2.text = "m2";
+
+        // Within the last 24 hours
         final TransactionLogEntry entry3 = new TransactionLogEntry();
-        entry3.creationTime = new SimpleDateFormat("dd/MM/yyyy")
-                .parse("23/12/2012");
         entry3.text = "m3";
+        Calendar withingRangeCalendar = Calendar.getInstance();
+        withingRangeCalendar.add(Calendar.HOUR, -1);
+        entry3.creationTime = withingRangeCalendar.getTime();
 
         TransactionLog transactionLog = new TransactionLog();
         transactionLog.entries = new ArrayList<TransactionLogEntry>() {
