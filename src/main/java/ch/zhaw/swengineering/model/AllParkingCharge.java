@@ -11,8 +11,8 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
 /**
  * @author Roland Hofer
  * 
- *         Class which get all actually booked ParkingLots with. the time when
- *         Booking is finished and the actually remaining time.
+ *         Class which gets all currently booked parking lots including the time when
+ *         booking is finished and the actually remaining time.
  */
 public class AllParkingCharge {
 	/**
@@ -27,7 +27,7 @@ public class AllParkingCharge {
 	 * Creates a new instance of this class.
 	 * 
 	 * @param aParkingLotNumber
-	 *            The parkingLotNumber which was choosen by the user.
+	 *            The parkingLotNumber which was chosen by the user.
 	 * @param aInsertedMoney
 	 *            The amount of money which was inserted by the user.
 	 */

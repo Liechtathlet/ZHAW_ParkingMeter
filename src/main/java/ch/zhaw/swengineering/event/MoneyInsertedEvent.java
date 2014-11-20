@@ -6,7 +6,7 @@ import java.util.EventObject;
  * @author Daniel Brun
  * 
  *         Event which is thrown if the action was aborted by the user. TODO:
- *         Evtl. ReName Event
+ *         Evtl. Rename Event
  */
 public class MoneyInsertedEvent extends EventObject {
 

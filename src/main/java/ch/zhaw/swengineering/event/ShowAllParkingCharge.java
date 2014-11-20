@@ -5,7 +5,7 @@ import java.util.EventObject;
 /**
  * @author Roland Hofer
  * 
- *         Event which is thrown if the user will show all ParkingMeter Charge.
+ *         Event which is thrown if the user will show all ParkingMeter charges.
  */
 public class ShowAllParkingCharge extends EventObject {
 

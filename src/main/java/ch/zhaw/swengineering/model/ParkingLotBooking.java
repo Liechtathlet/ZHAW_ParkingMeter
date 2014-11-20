@@ -26,7 +26,7 @@ public class ParkingLotBooking {
      * Creates a new instance of this class.
      * 
      * @param aParkingLotNumber
-     *            The parkingLotNumber which was choosen by the user.
+     *            The parkingLotNumber which was chosen by the user.
      * @param aInsertedMoney
      *            The amount of money which was inserted by the user.
      */

@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlAccessorType;
 /**
  * @author Daniel Brun
  * 
- *         Cointains the details of one coinbox and the number of coins which
+ *         Contains the details of one coin box and the number of coins which
  *         are currently in the box.
  */
 @XmlAccessorType(XmlAccessType.FIELD)

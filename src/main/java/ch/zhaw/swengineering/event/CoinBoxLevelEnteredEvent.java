@@ -26,7 +26,7 @@ public class CoinBoxLevelEnteredEvent extends EventObject {
      * @param source
      *            the source object.
      * @param someCoinBoxLevels
-     *            The coin boxe levels.
+     *            The coin box levels.
      */
     public CoinBoxLevelEnteredEvent(final Object source,
             List<CoinBoxLevel> someCoinBoxLevels) {

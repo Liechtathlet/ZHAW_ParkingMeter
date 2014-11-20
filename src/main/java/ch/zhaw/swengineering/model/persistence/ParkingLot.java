@@ -70,7 +70,7 @@ public class ParkingLot {
 	/**
 	 * Calculates Difference between paidUntil and now
 	 * 
-	 * @return the positive numbers of millisec.
+	 * @return the positive numbers of milliseconds
 	 */
 	public long getRemainingTimeInMillisec() {
 		Date now = new Date();

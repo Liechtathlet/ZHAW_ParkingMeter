@@ -11,14 +11,14 @@ import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 /**
  * @author Daniel Brun
  * 
- *         Interfaces which defines all methods for the interaction betwenn the
+ *         Interfaces which defines all methods for the interaction between the
  *         intelligent slot machine and the user.
  */
 public interface IntelligentSlotMachineUserInteractionInterface {
 
     /**
      * Inserts a coin into the slot machine. Before a coin can be inserted, a
-     * transaction must be started from the backend.
+     * transaction must be started from the back-end.
      * 
      * @param aCoinValue
      *            the coin value (e.g. 1.0).

@@ -293,7 +293,7 @@ public class ParkingMeterPanel extends JPanel implements
     }
 
     /**
-     * Interrupts the current wait.
+     * Interrupts the current waiting.
      */
     public void interruptWait() {
         okButtonPressed = true;

@@ -9,8 +9,8 @@ import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedExce
 /**
  * @author Daniel Brun
  * 
- *         Interfaces which defines all methods for the interaction betwenn the
- *         intelligent slot machine and the backend.
+ *         Interfaces which defines all methods for the interaction between the
+ *         intelligent slot machine and the back-end.
  */
 public interface IntelligentSlotMachineBackendInteractionInterface {
 
@@ -43,7 +43,7 @@ public interface IntelligentSlotMachineBackendInteractionInterface {
     /**
      * Gets the current coin boxes.
      * 
-     * @return the coin boxe levels.
+     * @return the coin box levels.
      */
     List<CoinBoxLevel> getCurrentCoinBoxLevel();
 

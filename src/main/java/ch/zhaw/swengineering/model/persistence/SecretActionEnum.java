@@ -29,7 +29,7 @@ public enum SecretActionEnum {
     VIEW_CONTENT_OF_COIN_BOXES,
 
     /**
-     * Action for entering a new level for the coin box.
+     * Action for entering a new level for a coin box.
      */
     ENTER_NEW_LEVEL_FOR_COIN_BOXES;
 }

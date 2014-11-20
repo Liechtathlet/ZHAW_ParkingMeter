@@ -16,7 +16,7 @@ public enum ViewOutputMode {
     PROMPT,
     
     /**
-     * For a info message.
+     * For an info message.
      */
     INFO,
     

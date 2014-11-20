@@ -24,7 +24,7 @@ public enum ViewStateEnum {
 	 */
 	DROPPING_IN_MONEY,
 	/**
-	 * State if the view is stopped / shut down.
+	 * State if the view is stopped/shut down.
 	 */
 	EXIT
 }

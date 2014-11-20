@@ -28,7 +28,7 @@ public class CoinBoxes {
     }
 
     /**
-     * Gets a spcedific coin box.
+     * Gets a specific coin box.
      * @param aValue
      *            the coin value.
      * @return the coin box or null if no corresponding coin box could be found.
@@ -47,7 +47,7 @@ public class CoinBoxes {
     }
 
     /**
-     * @return the coinBoxes
+     * @return the coin boxes
      */
     public final List<CoinBox> getCoinBoxes() {
         return coinBoxes;
