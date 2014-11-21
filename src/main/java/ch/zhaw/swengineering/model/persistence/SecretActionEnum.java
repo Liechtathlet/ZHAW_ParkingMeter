@@ -19,11 +19,6 @@ public enum SecretActionEnum {
     VIEW_ALL_PARKING_CHARGE,
 
     /**
-     * Action for viewing the transaction log.
-     */
-    VIEW_TRANSACTION_LOG,
-
-    /**
      * Action for viewing the content of the coin boxes.
      */
     VIEW_CONTENT_OF_COIN_BOXES,
@@ -31,5 +26,20 @@ public enum SecretActionEnum {
     /**
      * Action for entering a new level for a coin box.
      */
-    ENTER_NEW_LEVEL_FOR_COIN_BOXES;
+    ENTER_NEW_LEVEL_FOR_COIN_BOXES,
+
+    /**
+     * Action for viewing all transaction logs.
+     */
+    VIEW_ALL_TRANSACTION_LOGS,
+
+    /**
+     * Action for viewing the last 24 hours of the transaction log.
+     */
+    VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG,
+
+    /**
+     * Action for viewing the last n transaction log entries.
+     */
+    VIEW_N_TRANSACTION_LOG_ENTRIES
 }

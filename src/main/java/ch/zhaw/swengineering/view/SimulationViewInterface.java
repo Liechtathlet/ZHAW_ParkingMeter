@@ -123,23 +123,49 @@ public interface SimulationViewInterface {
      * Displays a message with the drawback.
      */
     void displayMessageForDrawback();
-    
+
     /**
      * Displays the coin box levels.
      * 
-     * @param someCoinBoxLevels the coin box levels to display.
+     * @param someCoinBoxLevels
+     *            the coin box levels to display.
      */
     void displayContentOfCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
-    
+
     /**
      * Displays a parking meter info text.
      */
     void displayParkingMeterInfo();
-    
+
     /**
-     * Increases the message buffer size temporarily to the given number.
-     * After the number is reached, it will be reseted to one.
-     * @param aCount the number to increase.
+     * Increases the message buffer size temporarily to the given number. After
+     * the number is reached, it will be reseted to one.
+     * 
+     * @param aCount
+     *            the number to increase.
      */
     void increaseInfoBufferSizeTemporarily(int aCount);
+
+    /**
+     * Displays the transaction log.
+     */
+    void displayAllTransactionLogs();
+
+    /**
+     * Displays the last 24 hours of the transaction log.
+     */
+    void displayLast24HoursOfTransactionLog();
+
+    /**
+     * Shows a prompt asking for the number of transaction log entries to show.
+     */
+    void promptForNumberOfTransactionLogEntriesToShow();
+
+    /**
+     * Displays the last n transaction log entries.
+     * 
+     * @param n
+     *            Number of transaction log entries to show.
+     */
+    void displayNTransactionLogEntries(int n);
 }

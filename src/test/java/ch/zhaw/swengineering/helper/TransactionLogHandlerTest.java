@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.Before;
@@ -43,6 +45,7 @@ public class TransactionLogHandlerTest {
 
     @Before
     public void setUp() throws ParseException {
+
         MockitoAnnotations.initMocks(this);
 
         // Mock
@@ -61,6 +64,50 @@ public class TransactionLogHandlerTest {
 
         // Assert
         assertEquals(result.size(), transactionLog.entries.size());
+    }
+
+    @Test
+    public void aksingForTheEntriesOfTheLast24HoursReturnsOnlyEntriesOfTheLast24Hours() {
+
+        // Mock
+        Calendar withingRangeCalendar = Calendar.getInstance();
+        withingRangeCalendar.add(Calendar.HOUR, -1);
+        String text1 = "today log message";
+        Date withingRangeDate = withingRangeCalendar.getTime();
+
+        final TransactionLogEntry entry1 = new TransactionLogEntry();
+        entry1.creationTime = withingRangeDate;
+        entry1.text = text1;
+
+        Calendar outOfRangeCalendar = Calendar.getInstance();
+        outOfRangeCalendar.add(Calendar.DATE, -1);
+        outOfRangeCalendar.add(Calendar.HOUR, -1);
+        Date outOfRangeDate = outOfRangeCalendar.getTime();
+        String text2 = "yesterday log message";
+
+        final TransactionLogEntry entry2 = new TransactionLogEntry();
+        entry2.creationTime = outOfRangeDate;
+        entry2.text = text2;
+
+        TransactionLog transactionLog = new TransactionLog();
+        transactionLog.entries = new ArrayList<TransactionLogEntry>() {
+            {
+                add(entry1);
+                add(entry2);
+            }
+        };
+
+        when(configurationProvider.get()).thenReturn(transactionLog);
+
+        transactionLogHandler.init();
+
+        // Run
+        List<TransactionLogEntry> result = transactionLogHandler.getLast24Hours();
+
+        // Assert
+        assertEquals(1, result.size());
+        assertEquals(withingRangeDate, result.get(0).creationTime);
+        assertEquals(text1, result.get(0).text);
     }
 
     @Test
@@ -88,6 +135,18 @@ public class TransactionLogHandlerTest {
     }
 
     @Test
+    public void askingFor4EntriesWhenThereAreOnly3ItReturns3Entries() throws Exception {
+        int numberOfEntries = 4;
+
+        // Run
+        List<TransactionLogEntry> result = transactionLogHandler
+                .get(numberOfEntries);
+
+        // Assert
+        assertEquals(result.size(), 3);
+    }
+
+    @Test
     public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
         int numberOfEntries = 2;
 
@@ -103,6 +162,7 @@ public class TransactionLogHandlerTest {
     @Test
     public void addingAnEntryToTheTransactionLogPassesCorrectObjectToConfigurationWriter()
             throws Exception {
+
         String text = "New Item";
 
         final Object[] tempTransactionLog = new Object[1];
@@ -129,14 +189,18 @@ public class TransactionLogHandlerTest {
         entry1.creationTime = new SimpleDateFormat("dd/MM/yyyy")
                 .parse("21/12/2012");
         entry1.text = "m1";
+
         final TransactionLogEntry entry2 = new TransactionLogEntry();
         entry2.creationTime = new SimpleDateFormat("dd/MM/yyyy")
                 .parse("22/12/2012");
         entry2.text = "m2";
+
+        // Within the last 24 hours
         final TransactionLogEntry entry3 = new TransactionLogEntry();
-        entry3.creationTime = new SimpleDateFormat("dd/MM/yyyy")
-                .parse("23/12/2012");
         entry3.text = "m3";
+        Calendar withingRangeCalendar = Calendar.getInstance();
+        withingRangeCalendar.add(Calendar.HOUR, -1);
+        entry3.creationTime = withingRangeCalendar.getTime();
 
         TransactionLog transactionLog = new TransactionLog();
         transactionLog.entries = new ArrayList<TransactionLogEntry>() {

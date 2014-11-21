@@ -1,5 +1,7 @@
 package ch.zhaw.swengineering.helper;
 
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -47,8 +49,27 @@ public class TransactionLogHandler {
      * @return the transaction log entries.
      */
     public List<TransactionLogEntry> getAll() {
-
         return transactionLog.entries;
+    }
+
+    /**
+     * Gets the transaction log entries of the last 24 hours.
+     *
+     * @return the transaction log entries.
+     */
+    public List<TransactionLogEntry> getLast24Hours() {
+        Calendar yesterdaySameTimeCalendar = Calendar.getInstance();
+        yesterdaySameTimeCalendar.add(Calendar.DATE, -1);
+        Date yesterdaySameTimeDate = yesterdaySameTimeCalendar.getTime();
+
+        List<TransactionLogEntry> last24HoursEntries = new ArrayList<>();
+        for (TransactionLogEntry entry : transactionLog.entries) {
+            if (entry.creationTime.after(yesterdaySameTimeDate)) {
+                last24HoursEntries.add(entry);
+            }
+        }
+
+        return last24HoursEntries;
     }
 
     /**
@@ -56,12 +77,20 @@ public class TransactionLogHandler {
      * 
      * @param numberOfEntries
      *            the number of entries to fetch.
-     * @return
+     * @return Requested amount of transaction log entries.
      */
     public List<TransactionLogEntry> get(int numberOfEntries) {
         int count = transactionLog.entries.size();
 
-        return transactionLog.entries.subList(count - numberOfEntries, count);
+        int requestedCount = count - numberOfEntries;
+
+        // If there are requested less then there really are. E.g. in the list are 5, user requested 3.
+        if (requestedCount > 0) {
+            return transactionLog.entries.subList(requestedCount, count);
+        // If there are more requested then there really are. E.g. in the list are 3, user requested 5.
+        } else {
+            return transactionLog.entries;
+        }
     }
 
     /**

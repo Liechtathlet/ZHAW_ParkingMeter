@@ -1,27 +1,20 @@
 package ch.zhaw.swengineering.controller;
 
-import java.math.BigDecimal;
-
+import ch.zhaw.swengineering.business.ParkingMeter;
+import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.view.SimulationViewInterface;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import ch.zhaw.swengineering.business.ParkingMeter;
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
-import ch.zhaw.swengineering.helper.TransactionLogHandler;
-import ch.zhaw.swengineering.model.ParkingLotBooking;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.view.SimulationView;
+import java.math.BigDecimal;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -36,7 +29,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             .getLogger(ViewControllerImpl.class);
 
     @Autowired
-    private SimulationView view;
+    private SimulationViewInterface view;
 
     @Autowired
     private ParkingMeter parkingMeter;
@@ -46,9 +39,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Autowired
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
-
-    @Autowired()
-    private TransactionLogHandler transactionLog;
 
     @Override
     public final void start() {
@@ -114,6 +104,20 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 view.displayContentOfCoinBoxes(slotMachine
                         .getCurrentCoinBoxLevel());
                 view.promptForParkingLotNumber();
+                break;
+            case VIEW_ALL_TRANSACTION_LOGS:
+                processed = true;
+                view.displayAllTransactionLogs();
+                view.promptForParkingLotNumber();
+                break;
+            case VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG:
+                processed = true;
+                view.displayLast24HoursOfTransactionLog();
+                view.promptForParkingLotNumber();
+                break;
+            case VIEW_N_TRANSACTION_LOG_ENTRIES:
+                processed = true;
+                view.promptForNumberOfTransactionLogEntriesToShow();
                 break;
             case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
                 processed = true;
@@ -189,5 +193,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         } catch (CoinBoxFullException e) {
             view.displayCoinCountTooHigh(e.getCoinValue());
         }
+    }
+
+    @Override
+    public void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event) {
+        view.displayNTransactionLogEntries(event.getNumber());
+        view.promptForParkingLotNumber();
     }
 }
