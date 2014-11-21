@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import org.junit.After;
@@ -39,11 +40,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
@@ -70,7 +66,6 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_ENTER_PARKING_LOT_INVALID = "view.enter.parkinglotnumber.invalid";
     private static final String MSG_VAL_ENTER_PARKING_LOT_INVALID = "EnterParkingLotNumberInvalid";
-    private static final String MSG_VAL_ENTER_SECRET_CODE_INVALID = "EnterSecretCodeInvalid";
 
     private static final String MSG_KEY_ENTER_COINS = "view.enter.coins";
     private static final String MSG_VAL_ENTER_COINS = "Coins: {0}";
@@ -110,6 +105,12 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY = "view.transaction.log.entry";
     private static final String MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY = "[{0}] {1}";
+
+    private static final String MSG_KEY_VIEW_N_TRANSACTION_LOG_ENTRIES = "view.n.transaction.log.entries";
+    private static final String MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES = "number of transaction log entries to show";
+
+    private static final String MSG_KEY_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW = "view.invalid.number.of.transaction.log.entries.to.show";
+    private static final String MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW = "invalid number";
 
     private static final String MSG_KEY_ALL_COIN_LEVEL_TOO_HIGH = "view.slot.machine.coin.box.level.too.high";
     private static final String MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH = "too high: {0}";
@@ -210,9 +211,8 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_PROMPT_SEPARATOR)).thenReturn(
                 MSG_VAL_PROMPT_SEPARATOR);
 
-        when(
-                messageProvider
-                        .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
+        when(messageProvider
+                .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
 
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE))
@@ -241,6 +241,12 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY)).thenReturn(
                 MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY);
+
+        when(messageProvider.get(MSG_KEY_VIEW_N_TRANSACTION_LOG_ENTRIES)).thenReturn(
+                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES);
+
+        when(messageProvider.get(MSG_KEY_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW)).thenReturn(
+                MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -332,7 +338,7 @@ public class ConsoleSimulationViewTest {
         view.executeActionsForStateEnteringParkingLotNumber();
 
         // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
+        assertEquals(MSG_VAL_ENTER_PARKING_LOT + MSG_VAL_PROMPT_SEPARATOR, outContent.toString());
     }
 
     @Test
@@ -639,7 +645,7 @@ public class ConsoleSimulationViewTest {
     public void testDisplayAllTransactionLogsOutputsText() {
         // Mock
         Calendar cal1 = Calendar.getInstance();
-        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12); //Year, month, day of month, hours, minutes and seconds
+        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12);
         Date date1 = cal1.getTime();
         String text1 = "text1";
 
@@ -648,7 +654,7 @@ public class ConsoleSimulationViewTest {
         transactionLogEntry1.text = text1;
 
         Calendar cal2 = Calendar.getInstance();
-        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13); //Year, month, day of month, hours, minutes and seconds
+        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13);
         Date date2 = cal2.getTime();
         String text2 = "text2";
 
@@ -684,7 +690,7 @@ public class ConsoleSimulationViewTest {
         // covered by another unit test.
 
         Calendar cal1 = Calendar.getInstance();
-        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12); //Year, month, day of month, hours, minutes and seconds
+        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12);
         Date date1 = cal1.getTime();
         String text1 = "text1";
 
@@ -693,7 +699,7 @@ public class ConsoleSimulationViewTest {
         transactionLogEntry1.text = text1;
 
         Calendar cal2 = Calendar.getInstance();
-        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13); //Year, month, day of month, hours, minutes and seconds
+        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13);
         Date date2 = cal2.getTime();
         String text2 = "text2";
 
@@ -716,6 +722,90 @@ public class ConsoleSimulationViewTest {
                         + System.lineSeparator()
                         + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
                         + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public void testValidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow() throws IOException {
+        String numberOfTransactionLogEntriesToShow = "2";
+        int numberOfTransactionLogEntriesToShowInteger =
+                Integer.valueOf(numberOfTransactionLogEntriesToShow);
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShow);
+
+        // Run
+        view.executeActionsForStateEnteringTransactionLogEntriesToShow();
+
+        // Assert
+        ArgumentCaptor<NumberOfTransactionLogEntriesToShowEvent> argument = ArgumentCaptor
+                .forClass(NumberOfTransactionLogEntriesToShowEvent.class);
+        verify(listener).numberOfTransactionLogEntriesToShowEntered(argument.capture());
+        assertEquals(numberOfTransactionLogEntriesToShowInteger, argument.getValue().getNumber());
+
+        assertEquals(
+                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES +
+                MSG_VAL_PROMPT_SEPARATOR,
+                outContent.toString());
+    }
+
+    @Test
+    public void testInvalidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow() throws IOException {
+        String numberOfTransactionLogEntriesToShow = "x";
+
+        // Mock
+        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShow);
+
+        // Run
+        view.executeActionsForStateEnteringTransactionLogEntriesToShow();
+
+        // Assert
+        assertEquals(
+                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES
+                + MSG_VAL_PROMPT_SEPARATOR
+                + MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW
+                + System.lineSeparator(),
+                outContent.toString());
+    }
+
+    @Test
+    public void testDisplayNTransactionLogEntriesShowText() throws IOException {
+        int numberOfTransactionLogEntriesToShow = 2;
+
+        // Mock
+        Calendar cal1 = Calendar.getInstance();
+        cal1.set(2013, Calendar.JANUARY, 9, 10, 11, 12);
+        Date date1 = cal1.getTime();
+        String text1 = "text1";
+
+        TransactionLogEntry transactionLogEntry1 = new TransactionLogEntry();
+        transactionLogEntry1.creationTime = date1;
+        transactionLogEntry1.text = text1;
+
+        Calendar cal2 = Calendar.getInstance();
+        cal2.set(2013, Calendar.JANUARY, 9, 11, 12, 13);
+        Date date2 = cal2.getTime();
+        String text2 = "text2";
+
+        TransactionLogEntry transactionLogEntry2 = new TransactionLogEntry();
+        transactionLogEntry2.creationTime = date2;
+        transactionLogEntry2.text = text2;
+
+        List<TransactionLogEntry> logEntries = new ArrayList<>();
+        logEntries.add(transactionLogEntry1);
+        logEntries.add(transactionLogEntry2);
+
+        when(transactionLogHandler.get(numberOfTransactionLogEntriesToShow)).thenReturn(logEntries);
+
+        // Run
+        view.displayNTransactionLogEntries(numberOfTransactionLogEntriesToShow);
+
+        // Assert
+        assertEquals(
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
+                + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
+                + System.lineSeparator(),
                 outContent.toString());
     }
 

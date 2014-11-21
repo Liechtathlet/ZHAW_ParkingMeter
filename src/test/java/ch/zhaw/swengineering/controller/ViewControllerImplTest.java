@@ -1,10 +1,7 @@
 package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.business.ParkingMeterImpl;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
@@ -103,10 +100,7 @@ public class ViewControllerImplTest {
         when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(
                 parkingLot);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -114,10 +108,10 @@ public class ViewControllerImplTest {
         verify(view).displayParkingLotNumberAndParkingTime(parkingLotNumber,
                 paidUntil);
         verify(view).promptForMoney(parkingLotNumber);
-        verify(view).promptForParkingLotNumber();
 
         // Assert negative
         verify(view, times(0)).displayErrorParkingLotNumberInvalid();
+        verify(view, times(0)).promptForParkingLotNumber();
     }
 
     /**
@@ -137,16 +131,13 @@ public class ViewControllerImplTest {
         // Mock
         when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(null);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
         verify(parkingMeter).getParkingLot(parkingLotNumber);
         verify(view).displayErrorParkingLotNumberInvalid();
-        verify(view, times(2)).promptForParkingLotNumber();
+        verify(view).promptForParkingLotNumber();
 
         // Assert negative
         verify(view, times(0)).displayParkingLotNumberAndParkingTime(
@@ -172,10 +163,7 @@ public class ViewControllerImplTest {
         when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
                 SecretActionEnum.VIEW_ALL_INFORMATION);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
@@ -185,7 +173,7 @@ public class ViewControllerImplTest {
                 slotMachine.getCurrentCoinBoxLevel());
         verify(view).displayParkingTimeDefinitions(
                 parkingMeter.getParkingTimeDefinitions());
-        verify(view, times(2)).promptForParkingLotNumber();
+        verify(view).promptForParkingLotNumber();
     }
 
     /**
@@ -206,16 +194,13 @@ public class ViewControllerImplTest {
         when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
                 SecretActionEnum.VIEW_ALL_TRANSACTION_LOGS);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         verify(view).displayAllTransactionLogs();
-        verify(view, times(2)).promptForParkingLotNumber();
+        verify(view).promptForParkingLotNumber();
     }
 
     /**
@@ -236,16 +221,60 @@ public class ViewControllerImplTest {
         when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
                 SecretActionEnum.VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         verify(view).displayLast24HoursOfTransactionLog();
-        verify(view, times(2)).promptForParkingLotNumber();
+        verify(view).promptForParkingLotNumber();
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: Valid secret code for viewing n transaction logs entries has been entered.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewNTransactionLogEntriesSecretNumber()
+            throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_N_TRANSACTION_LOG_ENTRIES);
+
+        // Run
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(parkingMeter).getSecretAction(parkingLotNumber);
+        verify(view).promptForNumberOfTransactionLogEntriesToShow();
+    }
+
+    /**
+     * Method-Under-Test: numberOfTransactionLogEntriesToShowEntered(...).
+     *
+     * Scenario: Valid amount of transaction log entries to show has been entered..
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testNumberOfTransactionLogEntriesToShowEnteredCallsCorrectViewMethod()
+            throws Exception {
+        int n = 2;
+        NumberOfTransactionLogEntriesToShowEvent event = new NumberOfTransactionLogEntriesToShowEvent(
+                view, n);
+
+        // Run
+        controller.numberOfTransactionLogEntriesToShowEntered(event);
+
+        // Assert positive
+        verify(view).displayNTransactionLogEntries(n);
     }
 
     /**
@@ -266,16 +295,12 @@ public class ViewControllerImplTest {
         when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
                 SecretActionEnum.ENTER_NEW_LEVEL_FOR_COIN_BOXES);
 
-        // Setup
-        controller.start();
-
-        // Execute Test
+        // Run
         controller.parkingLotEntered(plEnteredEvent);
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
         // verify(view).displayAllInformation();
-
     }
 
     /**
@@ -287,7 +312,7 @@ public class ViewControllerImplTest {
      * result.
      */
     @Test
-    public final void testMoneyEnsertedEventWithEnoughMoney() {
+    public final void testMoneyInsertedEventWithEnoughMoney() {
         int parkingLotNumber = 5;
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
 
@@ -311,16 +336,13 @@ public class ViewControllerImplTest {
         when(parkingMeter.calculateBookingForParkingLot(5, insertedMoney))
                 .thenReturn(booking);
 
-        // Setup
-        controller.start();
-
         // Run
         controller.moneyInserted(mInsertedEvent);
 
         // Assert positive
         verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
         verify(slotMachine).finishTransaction(drawback);
-        verify(view, times(2)).promptForParkingLotNumber();
+        verify(view).promptForParkingLotNumber();
         verify(view).displayParkingLotNumberAndParkingTime(5, end);
         verify(view).displayMessageForDrawback();
 
@@ -338,7 +360,7 @@ public class ViewControllerImplTest {
      * result.
      */
     @Test
-    public final void testMoneyEnsertedEventWithNotEnoughMoney() {
+    public final void testMoneyInsertedEventWithNotEnoughMoney() {
         int parkingLotNumber = 5;
 
         MoneyInsertedEvent mInsertedEvent = new MoneyInsertedEvent(view, 5);
@@ -363,9 +385,6 @@ public class ViewControllerImplTest {
         when(parkingMeter.calculateBookingForParkingLot(5, insertedMoney))
                 .thenReturn(booking);
 
-        // Setup
-        controller.start();
-
         // Run
         controller.moneyInserted(mInsertedEvent);
 
@@ -374,12 +393,12 @@ public class ViewControllerImplTest {
         verify(view).promptForMoney(5);
         verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
 
-        verify(view).promptForParkingLotNumber();
 
         // Assert negative
         verify(slotMachine, times(0)).finishTransaction(drawback);
         verify(view, times(0)).displayParkingLotNumberAndParkingTime(5,
                 end);
+        verify(view, times(0)).promptForParkingLotNumber();
     }
 
     /**

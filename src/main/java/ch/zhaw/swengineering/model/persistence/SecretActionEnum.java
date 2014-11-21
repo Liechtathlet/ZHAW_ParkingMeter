@@ -36,5 +36,10 @@ public enum SecretActionEnum {
     /**
      * Action for viewing the last 24 hours of the transaction log.
      */
-    VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG;
+    VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG,
+
+    /**
+     * Action for viewing the last n transaction log entries.
+     */
+    VIEW_N_TRANSACTION_LOG_ENTRIES
 }

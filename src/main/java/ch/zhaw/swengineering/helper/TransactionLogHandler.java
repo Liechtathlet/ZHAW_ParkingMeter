@@ -77,12 +77,20 @@ public class TransactionLogHandler {
      * 
      * @param numberOfEntries
      *            the number of entries to fetch.
-     * @return
+     * @return Requested amount of transaction log entries.
      */
     public List<TransactionLogEntry> get(int numberOfEntries) {
         int count = transactionLog.entries.size();
 
-        return transactionLog.entries.subList(count - numberOfEntries, count);
+        int requestedCount = count - numberOfEntries;
+
+        // If there are requested less then there really are. E.g. in the list are 5, user requested 3.
+        if (requestedCount > 0) {
+            return transactionLog.entries.subList(requestedCount, count);
+        // If there are more requested then there really are. E.g. in the list are 3, user requested 5.
+        } else {
+            return transactionLog.entries;
+        }
     }
 
     /**

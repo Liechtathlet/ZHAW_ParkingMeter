@@ -10,6 +10,7 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import org.apache.log4j.LogManager;
@@ -18,12 +19,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.datetime.DateFormatter;
 
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
@@ -119,6 +114,9 @@ public abstract class SimulationView implements Runnable,
                         break;
                     case ENTERING_COIN_BOX_COIN_LEVEL:
                         executeActionsForStateEnteringCoinBoxLevels();
+                        break;
+                    case ENTERING_TRANSACTION_LOG_ENTRIES_TO_SHOW:
+                        executeActionsForStateEnteringTransactionLogEntriesToShow();
                         break;
                     case INIT:
                     default:
@@ -378,12 +376,26 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
+    @Override
+    public void displayNTransactionLogEntries(int numberOfTransactionLogEntriesToShow) {
+        List<TransactionLogEntry> entries = transactionLogHandler.get(numberOfTransactionLogEntriesToShow);
+        for (TransactionLogEntry entry : entries) {
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+        }
+    }
+
     /* ********** Methods for prompt, executions and notification ********** */
 
     @Override
     public void promptForParkingLotNumber() {
         setViewState(ViewStateEnum.ENTERING_PARKING_LOT);
     }
+
+    @Override
+    public void promptForNumberOfTransactionLogEntriesToShow() {
+        setViewState(ViewStateEnum.ENTERING_TRANSACTION_LOG_ENTRIES_TO_SHOW);
+    }
+
 
     /**
      * Executes the action for the state 'EnteringParkingLotNumber'.
@@ -429,6 +441,20 @@ public abstract class SimulationView implements Runnable,
     }
 
     /**
+     * Executes the action for the state 'EnteringTransactionLogEntriesToShow".
+     */
+    public final void executeActionsForStateEnteringTransactionLogEntriesToShow() {
+        print("view.n.transaction.log.entries", ViewOutputMode.PROMPT);
+        Integer numberOfTransactionLogEntriesToShow = readInteger();
+
+        if (numberOfTransactionLogEntriesToShow != null) {
+            notifyNumberOfTransactionLogEntriesToShowInserted(numberOfTransactionLogEntriesToShow);
+        } else {
+            print("view.invalid.number.of.transaction.log.entries.to.show", ViewOutputMode.ERROR);
+        }
+    }
+
+    /**
      * Executes the action for the state 'EnteringCoinBoxLevels'.
      */
     public final void executeActionsForStateEnteringCoinBoxLevels() {
@@ -451,7 +477,6 @@ public abstract class SimulationView implements Runnable,
                         cbl.setCurrentCoinCount(coinCount);
                     } else {
                         LOG.info("Coin count for coin box not in range!");
-                        failure = true;
                         print("view.info.coin.box.content.limit",
                                 ViewOutputMode.ERROR);
 
@@ -460,7 +485,6 @@ public abstract class SimulationView implements Runnable,
                     }
                 } catch (NumberFormatException e) {
                     LOG.info("Coin count is not a valid number!");
-                    failure = true;
                     print("view.slot.machine.format.invalid",
                             ViewOutputMode.ERROR);
 
@@ -468,14 +492,8 @@ public abstract class SimulationView implements Runnable,
                     return;
                 }
             } else {
-                failure = true;
                 return;
             }
-        }
-
-        if (!failure) {
-            setViewState(ViewStateEnum.INIT);
-            notifyForCoinBoxLevelEntered(dataStore.getCurrentCoinBoxLevels());
         }
     }
 
@@ -517,6 +535,19 @@ public abstract class SimulationView implements Runnable,
     }
 
     /**
+     * Notifies attached listeners about the number of transaction log tnries to show
+     *
+     * @param number Number of entries to show.
+     */
+    protected void notifyNumberOfTransactionLogEntriesToShowInserted(final int number) {
+        NumberOfTransactionLogEntriesToShowEvent event = new NumberOfTransactionLogEntriesToShowEvent(this, number);
+
+        for (ViewEventListener listener : eventListeners) {
+            listener.numberOfTransactionLogEntriesToShowEntered(event);
+        }
+    }
+
+    /**
      * Notifies all attached listeners about the entered coin box level.
      *
      * @param someCoinBoxLevels
@@ -535,8 +566,10 @@ public abstract class SimulationView implements Runnable,
     /* ********** Internal methods ********** */
 
     /**
-     * @param price
-     * @return
+     * Formats a given price.
+     *
+     * @param price Price to format.
+     * @return Formatted price.
      */
     private String formatPrice(BigDecimal price) {
         price = price.setScale(2, BigDecimal.ROUND_DOWN);

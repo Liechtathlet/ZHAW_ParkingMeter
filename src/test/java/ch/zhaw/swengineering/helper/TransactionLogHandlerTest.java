@@ -135,6 +135,18 @@ public class TransactionLogHandlerTest {
     }
 
     @Test
+    public void askingFor4EntriesWhenThereAreOnly3ItReturns3Entries() throws Exception {
+        int numberOfEntries = 4;
+
+        // Run
+        List<TransactionLogEntry> result = transactionLogHandler
+                .get(numberOfEntries);
+
+        // Assert
+        assertEquals(result.size(), 3);
+    }
+
+    @Test
     public void askingFor2EntriesReturnsTheLast2Entries() throws Exception {
         int numberOfEntries = 2;
 

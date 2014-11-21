@@ -145,4 +145,16 @@ public interface SimulationViewInterface {
      * Displays the last 24 hours of the transaction log.
      */
     void displayLast24HoursOfTransactionLog();
+
+    /**
+     * Shows a prompt asking for the number of transaction log entries to show.
+     */
+    void promptForNumberOfTransactionLogEntriesToShow();
+
+    /**
+     * Displays the last n transaction log entries.
+     *
+     * @param n Number of transaction log entries to show.
+     */
+    void displayNTransactionLogEntries(int n);
 }

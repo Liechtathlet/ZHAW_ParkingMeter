@@ -2,7 +2,6 @@ package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.business.ParkingMeter;
 import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -116,6 +115,10 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 view.displayLast24HoursOfTransactionLog();
                 view.promptForParkingLotNumber();
                 break;
+            case VIEW_N_TRANSACTION_LOG_ENTRIES:
+                processed = true;
+                view.promptForNumberOfTransactionLogEntriesToShow();
+                break;
             case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
                 processed = true;
                 view.promptForNewCoinBoxLevels(slotMachine
@@ -186,5 +189,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         } catch (CoinBoxFullException e) {
             view.displayCoinCountTooHigh(e.getCoinValue());
         }
+    }
+
+    @Override
+    public void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event) {
+        view.displayNTransactionLogEntries(event.getNumber());
+        view.promptForParkingLotNumber();
     }
 }

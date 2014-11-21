@@ -23,7 +23,13 @@ public enum ViewStateEnum {
 	 * State if the user must drop in some money.
 	 */
 	DROPPING_IN_MONEY,
-	/**
+
+    /**
+     * State if the user must enter the number of transaction log entries to show.
+     */
+    ENTERING_TRANSACTION_LOG_ENTRIES_TO_SHOW,
+
+    /**
 	 * State if the view is stopped/shut down.
 	 */
 	EXIT

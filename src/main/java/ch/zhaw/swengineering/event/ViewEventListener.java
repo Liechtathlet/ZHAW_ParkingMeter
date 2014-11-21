@@ -49,4 +49,10 @@ public interface ViewEventListener extends EventListener {
 	 */
 	void coinBoxLevelEntered(CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent);
 
+    /**
+     * Called when the user entered the number of transaction log entries to show.
+     *
+     * @param event the event data.
+     */
+    void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event);
 }
