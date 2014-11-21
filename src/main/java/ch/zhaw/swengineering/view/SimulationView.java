@@ -477,6 +477,7 @@ public abstract class SimulationView implements Runnable,
                         cbl.setCurrentCoinCount(coinCount);
                     } else {
                         LOG.info("Coin count for coin box not in range!");
+                        failure = true;
                         print("view.info.coin.box.content.limit",
                                 ViewOutputMode.ERROR);
 
@@ -485,6 +486,7 @@ public abstract class SimulationView implements Runnable,
                     }
                 } catch (NumberFormatException e) {
                     LOG.info("Coin count is not a valid number!");
+                    failure = true;
                     print("view.slot.machine.format.invalid",
                             ViewOutputMode.ERROR);
 
@@ -494,6 +496,10 @@ public abstract class SimulationView implements Runnable,
             } else {
                 return;
             }
+        }
+        if (!failure) {
+            setViewState(ViewStateEnum.INIT);
+            notifyForCoinBoxLevelEntered(dataStore.getCurrentCoinBoxLevels());
         }
     }
 
