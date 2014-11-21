@@ -135,4 +135,11 @@ public interface SimulationViewInterface {
      * Displays a parking meter info text.
      */
     void displayParkingMeterInfo();
+    
+    /**
+     * Increases the message buffer size temporarily to the given number.
+     * After the number is reached, it will be reseted to one.
+     * @param aCount the number to increase.
+     */
+    void increaseInfoBufferSizeTemporarily(int aCount);
 }

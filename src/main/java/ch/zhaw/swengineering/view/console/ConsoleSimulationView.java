@@ -177,7 +177,7 @@ public class ConsoleSimulationView extends SimulationView {
     }
 
     @Override
-    protected void clearOutput() {
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
         //Nothing to do here...
     }
 }

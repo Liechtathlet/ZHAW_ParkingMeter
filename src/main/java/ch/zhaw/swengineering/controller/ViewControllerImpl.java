@@ -134,7 +134,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Override
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
-        slotMachine.finishTransaction(BigDecimal.ZERO);
+        slotMachine.finishTransaction(slotMachine
+                .getAmountOfCurrentlyInsertedMoney());
+        view.displayMessageForDrawback();
         view.promptForParkingLotNumber();
     }
 
@@ -153,6 +155,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
         } else {
             parkingMeter.persistBooking(booking);
+            view.increaseInfoBufferSizeTemporarily(2);
+
             view.displayParkingLotNumberAndParkingTime(
                     moneyInsertedEvent.getParkingLotNumber(),
                     booking.getPaidTill());
@@ -172,7 +176,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         LOG.info("Shutdown complete...exit");
         appContext.close();
     }
-    
+
     @Override
     public void coinBoxLevelEntered(
             final CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {

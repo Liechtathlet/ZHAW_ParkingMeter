@@ -252,7 +252,7 @@ public abstract class SimulationView implements Runnable,
 
             Integer count = drawbackMap.get(key);
 
-            if (count >= 0) {
+            if (count > 0) {
                 display = true;
             }
 
@@ -593,11 +593,6 @@ public abstract class SimulationView implements Runnable,
      * Executes the action for the state 'DropppingInMoney'.
      */
     protected abstract void executeActionsForStateDroppingInMoney();
-    
-    /**
-     * Clears the ouput.
-     */
-    protected abstract void clearOutput();
 
     /* ********** Impl of Slot Machine View ********* */
 
@@ -610,12 +605,15 @@ public abstract class SimulationView implements Runnable,
         if (anException.isAllCoinBoxesFull()) {
             print("view.slot.machine.coin.box.full", ViewOutputMode.ERROR,
                     anException.getCoinValue());
+
+            rolebackTransaction();
         } else {
             print("view.slot.machine.coin.box.single.full",
                     ViewOutputMode.ERROR, anException.getCoinValue());
-        }
 
-        rolebackTransaction();
+            print("view.slot.machine.drawback", ViewOutputMode.INFO, "1 x "
+                    + anException.getCoinValue());
+        }
     }
 
     @Override
@@ -656,17 +654,6 @@ public abstract class SimulationView implements Runnable,
         Map<BigDecimal, Integer> drawbackMap = slotMachine
                 .rolebackTransaction();
 
-        boolean displayMsg = false;
-
-        for (Integer count : drawbackMap.values()) {
-            if (count.intValue() > 0) {
-                displayMsg = true;
-                break;
-            }
-        }
-
-        if (displayMsg) {
-            displayMessageForDrawback();
-        }
+        displayMessageForDrawback();
     }
 }

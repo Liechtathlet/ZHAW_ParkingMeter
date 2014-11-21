@@ -491,6 +491,7 @@ public class ConsoleSimulationViewTest {
         doThrow(new CoinBoxFullException("coinboxfull")).when(slotMachine)
                 .insertCoin(coin);
         when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
+        when(slotMachine.getDrawback()).thenReturn(drawbackMap);
         when(bufferedReader.readLine()).thenReturn(coin.toPlainString());
 
         // Run
@@ -507,8 +508,7 @@ public class ConsoleSimulationViewTest {
         Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
-                + MSG_VAL_DRAWBACK + System.lineSeparator();
+                + ": ", 5);
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);

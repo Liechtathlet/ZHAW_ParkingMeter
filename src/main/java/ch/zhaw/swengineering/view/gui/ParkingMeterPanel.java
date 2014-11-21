@@ -52,6 +52,8 @@ public class ParkingMeterPanel extends JPanel implements
     private static final Color BG_OK = new Color(0, 153, 0);
     private static final Color BG_TICKETFIELD = new Color(92, 172, 238);
 
+    private static final int INITAL_BUFFER_SIZE = 1;
+
     private double factor = 3.0;
     private int initialHeight;
     private int initialWidth;
@@ -84,9 +86,12 @@ public class ParkingMeterPanel extends JPanel implements
     private boolean promptMode;
     private boolean blockNumberInput;
     private boolean cancelPressed;
+
     private String promptText;
     private String lastErrorText;
-    private String lastInfoText;
+
+    private int currentInfoBufferElements;
+    private int infoMsgBufferSize;
 
     private ActionAbortListener actionAbortListener;
 
@@ -108,9 +113,12 @@ public class ParkingMeterPanel extends JPanel implements
         promptMode = false;
         blockNumberInput = false;
         cancelPressed = false;
-        
+
+        infoMsgBufferSize = INITAL_BUFFER_SIZE;
+        currentInfoBufferElements = 0;
         initialHeight = 300;
         initialWidth = 120;
+
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
 
@@ -259,7 +267,7 @@ public class ParkingMeterPanel extends JPanel implements
                 resetPromptDisplay();
                 resetErrorDisplay();
                 resetInfoDisplay();
-
+                
                 numberInputListener.reset();
                 actionAbortListener.calledAbort();
 
@@ -314,8 +322,8 @@ public class ParkingMeterPanel extends JPanel implements
             do {
                 barrier.await();
             } while (!actionExecuted);
-            if(cancelPressed){
-                
+            if (cancelPressed) {
+
                 cancelPressed = false;
                 resultOK = false;
             }
@@ -328,7 +336,7 @@ public class ParkingMeterPanel extends JPanel implements
             actionExecuted = false;
             promptMode = false;
         }
-        
+
         return resultOK;
     }
 
@@ -376,12 +384,6 @@ public class ParkingMeterPanel extends JPanel implements
         } else if (errorDisplay.getText().trim().length() > 0) {
             lastErrorText = errorDisplay.getText();
         }
-
-        if (lastInfoText != null && lastInfoText.equals(infoDisplay.getText())) {
-            resetInfoDisplay();
-        } else if (infoDisplay.getText().trim().length() > 0) {
-            lastInfoText = infoDisplay.getText();
-        }
     }
 
     /**
@@ -401,7 +403,13 @@ public class ParkingMeterPanel extends JPanel implements
      *            the message to print.
      */
     public final void printInfo(final String aMessage) {
-        infoDisplay.setText(aMessage);
+        if (currentInfoBufferElements >= infoMsgBufferSize) {
+            resetInfoDisplay();
+        }
+
+        currentInfoBufferElements++;
+        infoDisplay.append(aMessage);
+        infoDisplay.append("\n");
     }
 
     /**
@@ -417,7 +425,8 @@ public class ParkingMeterPanel extends JPanel implements
      */
     private void resetInfoDisplay() {
         infoDisplay.setText("");
-        lastInfoText = null;
+        currentInfoBufferElements = 0;
+        infoMsgBufferSize = INITAL_BUFFER_SIZE;
     }
 
     /**
@@ -440,11 +449,12 @@ public class ParkingMeterPanel extends JPanel implements
     }
 
     /**
-     * Clears all outputs.
+     * Increases the info buffer size temporarily.
+     * 
+     * @param aCount
+     *            the count.
      */
-    public void clearOutput() {
-        infoDisplay.setText("");
-        errorDisplay.setText("");
-        display.setText("");
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
+        infoMsgBufferSize = aCount;
     }
 }

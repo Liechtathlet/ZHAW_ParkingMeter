@@ -150,11 +150,13 @@ public class GuiSimulationView extends SimulationView implements
 
     @Override
     public void calledAbort() {
+        slotMachinePanel.resetCoinInput();
         notifyForActionAborted();
     }
 
+
     @Override
-    protected void clearOutput() {
-        parkingMeterPanel.clearOutput();
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
+        parkingMeterPanel.increaseInfoBufferSizeTemporarily(aCount);
     }
 }
