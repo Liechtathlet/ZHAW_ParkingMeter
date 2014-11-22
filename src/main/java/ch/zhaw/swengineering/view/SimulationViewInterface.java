@@ -6,6 +6,7 @@ package ch.zhaw.swengineering.view;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
@@ -136,6 +137,15 @@ public interface SimulationViewInterface {
      * Displays a parking meter info text.
      */
     void displayParkingMeterInfo();
+
+    /**
+     * Displays a message with the inserted coin couns and the total.
+     * 
+     * @param aParkingLot the parking lot number.
+     * @param somePaymentMap
+     *            the payment map with the inserted count per coin.
+     */
+    void displayParkingLotPayment(int aParkingLot, Map<BigDecimal, Integer> somePaymentMap);
 
     /**
      * Increases the message buffer size temporarily to the given number. After

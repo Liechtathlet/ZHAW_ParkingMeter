@@ -204,7 +204,7 @@ public class ParkingMeterPanel extends JPanel implements
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
                 (int) ((initialWidth - 20) * factor),
-                (int) ((initialHeight - 250 - 32) * factor)));
+                (int) ((initialHeight - 250 - 42) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
         display.setWrapStyleWord(true);
@@ -215,7 +215,7 @@ public class ParkingMeterPanel extends JPanel implements
 
         infoDisplay = new JTextArea();
         Dimension dimensionInfoDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 20) * factor), (int) (15 * factor)));
+                (int) ((initialWidth - 20) * factor), (int) (25 * factor)));
         infoDisplay.setPreferredSize(dimensionInfoDisplay);
         infoDisplay.setEditable(false);
         infoDisplay.setWrapStyleWord(true);

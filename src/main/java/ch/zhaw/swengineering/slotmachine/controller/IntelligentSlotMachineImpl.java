@@ -310,4 +310,26 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         return new ArrayList<BigDecimal>(availableCoinList);
     }
 
+    @Override
+    public boolean hasDrawback() {
+        boolean hasDrawback = false;
+
+        List<BigDecimal> keyList = new ArrayList<>(drawBackCoinCache.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            Integer count = drawBackCoinCache.get(key);
+
+            if (count > 0) {
+                hasDrawback = true;
+            }
+        }
+
+        return hasDrawback;
+    }
+
+    @Override
+    public Map<BigDecimal, Integer> getInsertedCoins() {
+       return new HashMap<BigDecimal, Integer>(transactionCoinCache);
+    }
 }

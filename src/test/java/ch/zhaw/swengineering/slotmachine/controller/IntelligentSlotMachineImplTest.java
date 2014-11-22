@@ -1,6 +1,8 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
@@ -125,9 +127,13 @@ public class IntelligentSlotMachineImplTest {
         } catch (NoTransactionException | InvalidCoinException e) {
             fail("Unexpected exception received: " + e);
         }
+        Map<BigDecimal, Integer> slotMachineCoinMap = slotMachine
+                .getInsertedCoins();
 
         assertEquals(insertedCoin,
                 slotMachine.getAmountOfCurrentlyInsertedMoney());
+        assertNotNull(slotMachineCoinMap);
+        assertEquals(new Integer(1), slotMachineCoinMap.get(insertedCoin));
     }
 
     /**
@@ -210,25 +216,25 @@ public class IntelligentSlotMachineImplTest {
      * 
      * Scenario: End transaction with drawback
      * 
-     * Expected: an exception is thrown.
+     * Expected: the correct drawback will be returned.
      * 
      */
     @Test
     public final void testFinishTransactionWithDrawback()
             throws NoTransactionException, InvalidCoinException,
             CoinBoxFullException {
-        Map<BigDecimal, Integer> drawbackMap = new HashMap<BigDecimal,Integer>();
-        
+        Map<BigDecimal, Integer> drawbackMap = new HashMap<BigDecimal, Integer>();
+
         BigDecimal insertedCoin = new BigDecimal(0.5);
         BigDecimal drawBack = new BigDecimal(2.0);
-        
+
         insertedCoin = insertedCoin.setScale(2);
         drawBack = drawBack.setScale(2);
-        
+
         drawbackMap.put(insertedCoin, Integer.valueOf(0));
         drawbackMap.put(new BigDecimal(1.0).setScale(2), Integer.valueOf(0));
         drawbackMap.put(drawBack, Integer.valueOf(1));
-        
+
         slotMachine.startTransaction();
 
         slotMachine.insertCoin(insertedCoin);
@@ -242,6 +248,7 @@ public class IntelligentSlotMachineImplTest {
         assertEquals(0, BigDecimal.ZERO.compareTo(slotMachine
                 .getAmountOfCurrentlyInsertedMoney()));
 
+        assertTrue(slotMachine.hasDrawback());
         assertEquals(drawbackMap, slotMachine.getDrawback());
 
         verify(configWriterCoinBoxes).write(any(Object.class));

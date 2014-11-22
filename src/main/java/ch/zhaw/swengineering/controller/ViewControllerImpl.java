@@ -1,20 +1,28 @@
 package ch.zhaw.swengineering.controller;
 
-import ch.zhaw.swengineering.business.ParkingMeter;
-import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.model.ParkingLotBooking;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.view.SimulationViewInterface;
+import java.math.BigDecimal;
+import java.util.Map;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
-import java.math.BigDecimal;
+import ch.zhaw.swengineering.business.ParkingMeter;
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.view.SimulationViewInterface;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -148,6 +156,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         BigDecimal insertedMoney = slotMachine
                 .getAmountOfCurrentlyInsertedMoney();
+        Map<BigDecimal, Integer> insertedCoins = slotMachine.getInsertedCoins();
+
         LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
                 + insertedMoney);
 
@@ -159,13 +169,21 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
         } else {
             parkingMeter.persistBooking(booking);
-            view.increaseInfoBufferSizeTemporarily(2);
+            slotMachine.finishTransaction(booking.getDrawbackMoney());
+            
+            int bufferSize = 2;
 
+            if (slotMachine.hasDrawback()) {
+                bufferSize++;
+            }
+
+            view.increaseInfoBufferSizeTemporarily(bufferSize);
+            view.displayParkingLotPayment(
+                    moneyInsertedEvent.getParkingLotNumber(), insertedCoins);
+            view.displayMessageForDrawback();
             view.displayParkingLotNumberAndParkingTime(
                     moneyInsertedEvent.getParkingLotNumber(),
                     booking.getPaidTill());
-            slotMachine.finishTransaction(booking.getDrawbackMoney());
-            view.displayMessageForDrawback();
             view.promptForParkingLotNumber();
         }
     }
@@ -196,7 +214,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     }
 
     @Override
-    public void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event) {
+    public void numberOfTransactionLogEntriesToShowEntered(
+            NumberOfTransactionLogEntriesToShowEvent event) {
         view.displayNTransactionLogEntries(event.getNumber());
         view.promptForParkingLotNumber();
     }

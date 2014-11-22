@@ -220,6 +220,14 @@ public abstract class SimulationView implements Runnable,
         if (aPaidParkingTime != null) {
             formattedDate = dateFormatter.print(aPaidParkingTime,
                     LocaleContextHolder.getLocale());
+
+            String timeDifference = DateHelper
+                    .calculateFormattedTimeDifference(aPaidParkingTime,
+                            new Date());
+
+            if (timeDifference.startsWith("+")) {
+                formattedDate += " (" + timeDifference + ")";
+            }
         }
 
         print("view.info.parkingTime", ViewOutputMode.INFO, aParkingLotNumber,
@@ -249,34 +257,12 @@ public abstract class SimulationView implements Runnable,
 
     @Override
     public void displayMessageForDrawback() {
-        boolean display = false;
+        if (slotMachine.hasDrawback()) {
 
-        StringBuilder sb = new StringBuilder();
+            String output = formatCoinMaptoString(slotMachine.getDrawback(),
+                    false);
 
-        Map<BigDecimal, Integer> drawbackMap = slotMachine.getDrawback();
-
-        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
-        for (int i = 0; i < keyList.size(); i++) {
-            BigDecimal key = keyList.get(i);
-
-            Integer count = drawbackMap.get(key);
-
-            if (count > 0) {
-                display = true;
-            }
-
-            sb.append(count);
-            sb.append(" x ");
-            sb.append(key);
-
-            if (i < (keyList.size() - 1)) {
-                sb.append(", ");
-            }
-        }
-
-        if (display) {
-            print("view.slot.machine.drawback", ViewOutputMode.INFO,
-                    sb.toString());
+            print("view.slot.machine.drawback", ViewOutputMode.INFO, output);
         }
     }
 
@@ -324,6 +310,13 @@ public abstract class SimulationView implements Runnable,
         print("view.parking.time.info",
                 ViewOutputMode.LARGE_INFO,
                 dateFormatter.print(new Date(), LocaleContextHolder.getLocale()));
+    }
+
+    @Override
+    public void displayParkingLotPayment(int aParkingLot,
+            Map<BigDecimal, Integer> somePaymentMap) {
+        print("view.info.inserted.coins", ViewOutputMode.INFO, aParkingLot,
+                formatCoinMaptoString(somePaymentMap, true));
     }
 
     @Override
@@ -611,6 +604,45 @@ public abstract class SimulationView implements Runnable,
         df.setMinimumFractionDigits(2);
         df.setGroupingUsed(false);
         return df.format(price);
+    }
+
+    /**
+     * Formats the given coin map to a string.
+     * 
+     * @param someCoins
+     *            the coins and their count to format.
+     * @param isWithTotal
+     *            true if the total should be appended at the front.
+     * @return The formatted string.
+     */
+    protected String formatCoinMaptoString(Map<BigDecimal, Integer> someCoins,
+            boolean isWithTotal) {
+        StringBuilder sb = new StringBuilder();
+
+        BigDecimal total = new BigDecimal(0);
+
+        List<BigDecimal> keyList = new ArrayList<>(someCoins.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            Integer count = someCoins.get(key);
+
+            sb.append(count);
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
+
+            total = total.add((key.multiply(new BigDecimal(count.intValue()))));
+        }
+
+        if (isWithTotal) {
+            sb.insert(0, total + " = ");
+        }
+
+        return sb.toString();
     }
 
     /**
