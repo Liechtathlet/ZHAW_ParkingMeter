@@ -3,22 +3,4 @@
     <entry creationTime="2014-10-10T21:19:32+02:00">First log entry</entry>
     <entry creationTime="2014-10-10T21:20:32+02:00">Second log entry</entry>
     <entry creationTime="2014-10-10T21:21:32+02:00">And so on...</entry>
-    <entry creationTime="2014-11-23T15:37:52.642+01:00">Starting ParkingMeter App.</entry>
-    <entry creationTime="2014-11-23T15:38:00.617+01:00">Parking lot number 222222 entered.</entry>
-    <entry creationTime="2014-11-23T15:38:00.621+01:00">Recognized as valid secret code.</entry>
-    <entry creationTime="2014-11-23T15:38:49.107+01:00">Starting ParkingMeter App.</entry>
-    <entry creationTime="2014-11-23T15:38:54.831+01:00">Parking lot number 222222 entered.</entry>
-    <entry creationTime="2014-11-23T15:38:54.837+01:00">Recognized as valid secret code.</entry>
-    <entry creationTime="2014-11-23T15:39:00.370+01:00">Shutting app down.</entry>
-    <entry creationTime="2014-11-23T15:39:00.378+01:00">Shutdown complete. Exit app now.</entry>
-    <entry creationTime="2014-11-23T15:39:38.345+01:00">Starting ParkingMeter App.</entry>
-    <entry creationTime="2014-11-23T15:39:43.201+01:00">Parking lot number 222222 entered.</entry>
-    <entry creationTime="2014-11-23T15:39:43.209+01:00">Recognized as valid secret code.</entry>
-    <entry creationTime="2014-11-23T15:39:45.938+01:00">Shutting app down.</entry>
-    <entry creationTime="2014-11-23T15:39:45.945+01:00">Shutdown complete. Exit app now.</entry>
-    <entry creationTime="2014-11-23T15:40:45.401+01:00">Starting ParkingMeter App.</entry>
-    <entry creationTime="2014-11-23T15:40:57.903+01:00">Parking lot number 222222 entered.</entry>
-    <entry creationTime="2014-11-23T15:40:57.909+01:00">Recognized secret code VIEW_ALL_PARKING_CHARGE</entry>
-    <entry creationTime="2014-11-23T15:41:00.215+01:00">Shutting app down.</entry>
-    <entry creationTime="2014-11-23T15:41:00.226+01:00">Shutdown complete. Exit app now.</entry>
 </transactionLog>

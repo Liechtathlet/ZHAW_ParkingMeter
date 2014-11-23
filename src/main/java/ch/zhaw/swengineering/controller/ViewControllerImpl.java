@@ -1,22 +1,9 @@
 package ch.zhaw.swengineering.controller;
 
-import java.math.BigDecimal;
-import java.util.Map;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Controller;
-
 import ch.zhaw.swengineering.business.ParkingMeter;
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -28,6 +15,10 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
+
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -174,10 +165,6 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
         Map<BigDecimal, Integer> insertedCoins = slotMachine.getInsertedCoins();
 
-        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
-                + insertedMoney);
-        int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
-
         transactionLog.write(String.format("Money %s inserted for parking lot %s",
                 insertedMoney, parkingLotNumber));
 
@@ -207,7 +194,13 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             view.increaseInfoBufferSizeTemporarily(bufferSize);
             view.displayParkingLotPayment(
                     moneyInsertedEvent.getParkingLotNumber(), insertedCoins);
+
+            if (slotMachine.hasDrawback()) {
+                transactionLog.write("Disbursing drawback.");
+            }
+
             view.displayMessageForDrawback();
+
             view.displayParkingLotNumberAndParkingTime(
                     moneyInsertedEvent.getParkingLotNumber(),
                     booking.getPaidTill());
