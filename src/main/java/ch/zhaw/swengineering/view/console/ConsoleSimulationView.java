@@ -175,4 +175,9 @@ public class ConsoleSimulationView extends SimulationView {
             }
         }
     }
+
+    @Override
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
+        //Nothing to do here...
+    }
 }

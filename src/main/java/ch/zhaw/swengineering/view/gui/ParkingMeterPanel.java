@@ -52,6 +52,8 @@ public class ParkingMeterPanel extends JPanel implements
     private static final Color BG_OK = new Color(0, 153, 0);
     private static final Color BG_TICKETFIELD = new Color(92, 172, 238);
 
+    private static final int INITAL_BUFFER_SIZE = 1;
+
     private double factor = 3.0;
     private int initialHeight;
     private int initialWidth;
@@ -80,13 +82,16 @@ public class ParkingMeterPanel extends JPanel implements
 
     private CyclicBarrier barrier;
 
-    private boolean okButtonPressed;
+    private boolean actionExecuted;
     private boolean promptMode;
     private boolean blockNumberInput;
+    private boolean cancelPressed;
 
     private String promptText;
     private String lastErrorText;
-    private String lastInfoText;
+
+    private int currentInfoBufferElements;
+    private int infoMsgBufferSize;
 
     private ActionAbortListener actionAbortListener;
 
@@ -104,12 +109,16 @@ public class ParkingMeterPanel extends JPanel implements
         barrier = new CyclicBarrier(2);
 
         // Init helper objects
-        okButtonPressed = false;
+        actionExecuted = false;
         promptMode = false;
         blockNumberInput = false;
+        cancelPressed = false;
 
+        infoMsgBufferSize = INITAL_BUFFER_SIZE;
+        currentInfoBufferElements = 0;
         initialHeight = 300;
-        initialWidth = 75;
+        initialWidth = 120;
+
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
 
@@ -165,7 +174,7 @@ public class ParkingMeterPanel extends JPanel implements
                 (int) ((initialWidth - 20) * factor),
                 (int) ((initialHeight - 250) * factor)));
         buttonPane.setPreferredSize(new Dimension(
-                (int) ((initialWidth - 20) * factor),
+                (int) ((initialWidth - 50) * factor),
                 (int) ((initialHeight - 250) * factor)));
         ticketfieldPane.setPreferredSize(new Dimension(
                 (int) ((initialWidth - 5) * factor),
@@ -195,7 +204,7 @@ public class ParkingMeterPanel extends JPanel implements
         display = new JTextArea();
         Dimension dimensionDisplay = new Dimension(new Dimension(
                 (int) ((initialWidth - 20) * factor),
-                (int) ((initialHeight - 250 - 32) * factor)));
+                (int) ((initialHeight - 250 - 42) * factor)));
         display.setPreferredSize(dimensionDisplay);
         display.setEditable(false);
         display.setWrapStyleWord(true);
@@ -206,7 +215,7 @@ public class ParkingMeterPanel extends JPanel implements
 
         infoDisplay = new JTextArea();
         Dimension dimensionInfoDisplay = new Dimension(new Dimension(
-                (int) ((initialWidth - 20) * factor), (int) (15 * factor)));
+                (int) ((initialWidth - 20) * factor), (int) (25 * factor)));
         infoDisplay.setPreferredSize(dimensionInfoDisplay);
         infoDisplay.setEditable(false);
         infoDisplay.setWrapStyleWord(true);
@@ -258,11 +267,12 @@ public class ParkingMeterPanel extends JPanel implements
                 resetPromptDisplay();
                 resetErrorDisplay();
                 resetInfoDisplay();
-
+                
                 numberInputListener.reset();
                 actionAbortListener.calledAbort();
 
-                okButtonPressed = true;
+                cancelPressed = true;
+                actionExecuted = true;
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -274,7 +284,7 @@ public class ParkingMeterPanel extends JPanel implements
         });
         buttonOk.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent ae1) {
-                okButtonPressed = true;
+                actionExecuted = true;
                 try {
                     barrier.await();
                 } catch (InterruptedException e) {
@@ -292,7 +302,7 @@ public class ParkingMeterPanel extends JPanel implements
      * Interrupts the current waiting.
      */
     public void interruptWait() {
-        okButtonPressed = true;
+        actionExecuted = true;
         try {
             barrier.await();
         } catch (InterruptedException e) {
@@ -305,21 +315,29 @@ public class ParkingMeterPanel extends JPanel implements
     /**
      * Waits for the ok button to be pressed.
      */
-    public final void waitForOK() {
+    public final boolean waitForOK() {
+        boolean resultOK = true;
         // Set lock.
         try {
             do {
                 barrier.await();
-            } while (!okButtonPressed);
+            } while (!actionExecuted);
+            if (cancelPressed) {
+
+                cancelPressed = false;
+                resultOK = false;
+            }
         } catch (InterruptedException e) {
             // Nothing to do here...didn't have monitor.
         } catch (BrokenBarrierException e) {
             LOG.warn("Barrier broken...", e);
         } finally {
             // Unset lock.
-            okButtonPressed = false;
+            actionExecuted = false;
             promptMode = false;
         }
+
+        return resultOK;
     }
 
     /**
@@ -366,12 +384,6 @@ public class ParkingMeterPanel extends JPanel implements
         } else if (errorDisplay.getText().trim().length() > 0) {
             lastErrorText = errorDisplay.getText();
         }
-
-        if (lastInfoText != null && lastInfoText.equals(infoDisplay.getText())) {
-            resetInfoDisplay();
-        } else if (infoDisplay.getText().trim().length() > 0) {
-            lastInfoText = infoDisplay.getText();
-        }
     }
 
     /**
@@ -391,7 +403,13 @@ public class ParkingMeterPanel extends JPanel implements
      *            the message to print.
      */
     public final void printInfo(final String aMessage) {
-        infoDisplay.setText(aMessage);
+        if (currentInfoBufferElements >= infoMsgBufferSize) {
+            resetInfoDisplay();
+        }
+
+        currentInfoBufferElements++;
+        infoDisplay.append(aMessage);
+        infoDisplay.append("\n");
     }
 
     /**
@@ -407,7 +425,8 @@ public class ParkingMeterPanel extends JPanel implements
      */
     private void resetInfoDisplay() {
         infoDisplay.setText("");
-        lastInfoText = null;
+        currentInfoBufferElements = 0;
+        infoMsgBufferSize = INITAL_BUFFER_SIZE;
     }
 
     /**
@@ -427,5 +446,15 @@ public class ParkingMeterPanel extends JPanel implements
     public void setNumberBlockBlocked(final boolean isBlocked) {
         blockNumberInput = isBlocked;
         numberInputListener.setSuspendEvent(blockNumberInput);
+    }
+
+    /**
+     * Increases the info buffer size temporarily.
+     * 
+     * @param aCount
+     *            the count.
+     */
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
+        infoMsgBufferSize = aCount;
     }
 }

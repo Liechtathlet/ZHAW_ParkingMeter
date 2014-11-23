@@ -1,9 +1,22 @@
 package ch.zhaw.swengineering.controller;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Controller;
+
 import ch.zhaw.swengineering.business.ParkingMeter;
-import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.helper.TransactionLogHandler;
-import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -15,9 +28,6 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
-
-import java.math.BigDecimal;
-import java.util.Date;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -149,6 +159,10 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
         transactionLog.write("Action aborted.");
+        slotMachine.finishTransaction(slotMachine
+                .getAmountOfCurrentlyInsertedMoney());
+        view.displayMessageForDrawback();
+        transactionLog.write("Action aborted.");
         slotMachine.finishTransaction(BigDecimal.ZERO);
         view.promptForParkingLotNumber();
     }
@@ -157,6 +171,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         BigDecimal insertedMoney = slotMachine
                 .getAmountOfCurrentlyInsertedMoney();
+        int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
+        Map<BigDecimal, Integer> insertedCoins = slotMachine.getInsertedCoins();
+
+        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
+                + insertedMoney);
         int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
 
         transactionLog.write(String.format("Money %s inserted for parking lot %s",
@@ -175,14 +194,23 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             transactionLog.write(String.format(
                     "Amount is valid. Saving new booking of parking lot %d till %s",
                     parkingLotNumber, paidTill));
-
+            
             parkingMeter.persistBooking(booking);
-            view.displayParkingLotNumberAndParkingTime(
-                    parkingLotNumber,
-                    paidTill);
             slotMachine.finishTransaction(booking.getDrawbackMoney());
-            view.displayMessageForDrawback();
+            
+            int bufferSize = 2;
 
+            if (slotMachine.hasDrawback()) {
+                bufferSize++;
+            }
+
+            view.increaseInfoBufferSizeTemporarily(bufferSize);
+            view.displayParkingLotPayment(
+                    moneyInsertedEvent.getParkingLotNumber(), insertedCoins);
+            view.displayMessageForDrawback();
+            view.displayParkingLotNumberAndParkingTime(
+                    moneyInsertedEvent.getParkingLotNumber(),
+                    booking.getPaidTill());
             view.promptForParkingLotNumber();
         }
     }
@@ -198,7 +226,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         appContext.close();
     }
-    
+
     @Override
     public void coinBoxLevelEntered(
             final CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
@@ -227,7 +255,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     }
 
     @Override
-    public void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event) {
+    public void numberOfTransactionLogEntriesToShowEntered(
+            NumberOfTransactionLogEntriesToShowEvent event) {
         transactionLog.write(String.format("Showing %d of transaction log entries.", event.getNumber()));
 
         view.displayNTransactionLogEntries(event.getNumber());

@@ -6,6 +6,7 @@ package ch.zhaw.swengineering.view;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
@@ -123,18 +124,37 @@ public interface SimulationViewInterface {
      * Displays a message with the drawback.
      */
     void displayMessageForDrawback();
-    
+
     /**
      * Displays the coin box levels.
      * 
-     * @param someCoinBoxLevels the coin box levels to display.
+     * @param someCoinBoxLevels
+     *            the coin box levels to display.
      */
     void displayContentOfCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
-    
+
     /**
      * Displays a parking meter info text.
      */
     void displayParkingMeterInfo();
+
+    /**
+     * Displays a message with the inserted coin couns and the total.
+     * 
+     * @param aParkingLot the parking lot number.
+     * @param somePaymentMap
+     *            the payment map with the inserted count per coin.
+     */
+    void displayParkingLotPayment(int aParkingLot, Map<BigDecimal, Integer> somePaymentMap);
+
+    /**
+     * Increases the message buffer size temporarily to the given number. After
+     * the number is reached, it will be reseted to one.
+     * 
+     * @param aCount
+     *            the number to increase.
+     */
+    void increaseInfoBufferSizeTemporarily(int aCount);
 
     /**
      * Displays the transaction log.
@@ -153,8 +173,9 @@ public interface SimulationViewInterface {
 
     /**
      * Displays the last n transaction log entries.
-     *
-     * @param n Number of transaction log entries to show.
+     * 
+     * @param n
+     *            Number of transaction log entries to show.
      */
     void displayNTransactionLogEntries(int n);
 }

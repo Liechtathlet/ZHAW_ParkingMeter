@@ -53,4 +53,11 @@ public interface IntelligentSlotMachineUserInteractionInterface {
      * @return the coin list.
      */
     List<BigDecimal> getAvailableCoins();
+    
+    /**
+     * Checks if the current transaction has a drawback.
+     * 
+     * @return true if the current transaction has a drawback, false otherwise.
+     */
+    boolean hasDrawback();
 }

@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.slotmachine.controller;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedException;
@@ -54,5 +55,19 @@ public interface IntelligentSlotMachineBackendInteractionInterface {
      *            The coin box levels.
      */
     void updateCoinLevelInCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
+
+    /**
+     * Checks if the current transaction has a drawback.
+     * 
+     * @return true if the current transaction has a drawback, false otherwise.
+     */
+    boolean hasDrawback();
+
+    /**
+     * Gets a map with the inserted coins and their count.
+     * 
+     * @return the map with the coins and counts.
+     */
+    Map<BigDecimal, Integer> getInsertedCoins();
 
 }

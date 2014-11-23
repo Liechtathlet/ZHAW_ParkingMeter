@@ -10,20 +10,26 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.helper.TransactionLogHandler;
-import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.format.datetime.DateFormatter;
 
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
@@ -101,7 +107,6 @@ public abstract class SimulationView implements Runnable,
             while (run) {
                 try {
                     runLock.lock();
-
                     switch (viewState) {
                     case ENTERING_PARKING_LOT:
                         executeActionsForStateEnteringParkingLotNumber();
@@ -215,6 +220,14 @@ public abstract class SimulationView implements Runnable,
         if (aPaidParkingTime != null) {
             formattedDate = dateFormatter.print(aPaidParkingTime,
                     LocaleContextHolder.getLocale());
+
+            String timeDifference = DateHelper
+                    .calculateFormattedTimeDifference(aPaidParkingTime,
+                            new Date());
+
+            if (timeDifference.startsWith("+")) {
+                formattedDate += " (" + timeDifference + ")";
+            }
         }
 
         print("view.info.parkingTime", ViewOutputMode.INFO, aParkingLotNumber,
@@ -244,24 +257,13 @@ public abstract class SimulationView implements Runnable,
 
     @Override
     public void displayMessageForDrawback() {
-        StringBuilder sb = new StringBuilder();
+        if (slotMachine.hasDrawback()) {
 
-        Map<BigDecimal, Integer> drawbackMap = slotMachine.getDrawback();
+            String output = formatCoinMaptoString(slotMachine.getDrawback(),
+                    false);
 
-        List<BigDecimal> keyList = new ArrayList<>(drawbackMap.keySet());
-        for (int i = 0; i < keyList.size(); i++) {
-            BigDecimal key = keyList.get(i);
-
-            sb.append(drawbackMap.get(key));
-            sb.append(" x ");
-            sb.append(key);
-
-            if (i < (keyList.size() - 1)) {
-                sb.append(", ");
-            }
+            print("view.slot.machine.drawback", ViewOutputMode.INFO, output);
         }
-
-        print("view.slot.machine.drawback", ViewOutputMode.INFO, sb.toString());
     }
 
     @Override
@@ -308,6 +310,13 @@ public abstract class SimulationView implements Runnable,
         print("view.parking.time.info",
                 ViewOutputMode.LARGE_INFO,
                 dateFormatter.print(new Date(), LocaleContextHolder.getLocale()));
+    }
+
+    @Override
+    public void displayParkingLotPayment(int aParkingLot,
+            Map<BigDecimal, Integer> somePaymentMap) {
+        print("view.info.inserted.coins", ViewOutputMode.INFO, aParkingLot,
+                formatCoinMaptoString(somePaymentMap, true));
     }
 
     @Override
@@ -365,22 +374,28 @@ public abstract class SimulationView implements Runnable,
     public void displayAllTransactionLogs() {
         List<TransactionLogEntry> entries = transactionLogHandler.getAll();
         for (TransactionLogEntry entry : entries) {
-            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO,
+                    entry.creationTime, entry.text);
         }
     }
 
     public void displayLast24HoursOfTransactionLog() {
-        List<TransactionLogEntry> entries = transactionLogHandler.getLast24Hours();
+        List<TransactionLogEntry> entries = transactionLogHandler
+                .getLast24Hours();
         for (TransactionLogEntry entry : entries) {
-            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO,
+                    entry.creationTime, entry.text);
         }
     }
 
     @Override
-    public void displayNTransactionLogEntries(int numberOfTransactionLogEntriesToShow) {
-        List<TransactionLogEntry> entries = transactionLogHandler.get(numberOfTransactionLogEntriesToShow);
+    public void displayNTransactionLogEntries(
+            int numberOfTransactionLogEntriesToShow) {
+        List<TransactionLogEntry> entries = transactionLogHandler
+                .get(numberOfTransactionLogEntriesToShow);
         for (TransactionLogEntry entry : entries) {
-            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO, entry.creationTime, entry.text);
+            print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO,
+                    entry.creationTime, entry.text);
         }
     }
 
@@ -395,7 +410,6 @@ public abstract class SimulationView implements Runnable,
     public void promptForNumberOfTransactionLogEntriesToShow() {
         setViewState(ViewStateEnum.ENTERING_TRANSACTION_LOG_ENTRIES_TO_SHOW);
     }
-
 
     /**
      * Executes the action for the state 'EnteringParkingLotNumber'.
@@ -412,7 +426,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered parking lot.
-     *
+     * 
      * @param parkingLotNumber
      *            The parking lot number.
      */
@@ -450,7 +464,8 @@ public abstract class SimulationView implements Runnable,
         if (numberOfTransactionLogEntriesToShow != null) {
             notifyNumberOfTransactionLogEntriesToShowInserted(numberOfTransactionLogEntriesToShow);
         } else {
-            print("view.invalid.number.of.transaction.log.entries.to.show", ViewOutputMode.ERROR);
+            print("view.invalid.number.of.transaction.log.entries.to.show",
+                    ViewOutputMode.ERROR);
         }
     }
 
@@ -527,7 +542,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered money.
-     *
+     * 
      * @param aParkingLotNumber
      *            The parking lot number.
      */
@@ -541,12 +556,16 @@ public abstract class SimulationView implements Runnable,
     }
 
     /**
-     * Notifies attached listeners about the number of transaction log tnries to show
-     *
-     * @param number Number of entries to show.
+     * Notifies attached listeners about the number of transaction log tnries to
+     * show
+     * 
+     * @param number
+     *            Number of entries to show.
      */
-    protected void notifyNumberOfTransactionLogEntriesToShowInserted(final int number) {
-        NumberOfTransactionLogEntriesToShowEvent event = new NumberOfTransactionLogEntriesToShowEvent(this, number);
+    protected void notifyNumberOfTransactionLogEntriesToShowInserted(
+            final int number) {
+        NumberOfTransactionLogEntriesToShowEvent event = new NumberOfTransactionLogEntriesToShowEvent(
+                this, number);
 
         for (ViewEventListener listener : eventListeners) {
             listener.numberOfTransactionLogEntriesToShowEntered(event);
@@ -555,7 +574,7 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Notifies all attached listeners about the entered coin box level.
-     *
+     * 
      * @param someCoinBoxLevels
      *            The coin box levels.
      */
@@ -573,8 +592,9 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Formats a given price.
-     *
-     * @param price Price to format.
+     * 
+     * @param price
+     *            Price to format.
      * @return Formatted price.
      */
     private String formatPrice(BigDecimal price) {
@@ -587,6 +607,45 @@ public abstract class SimulationView implements Runnable,
     }
 
     /**
+     * Formats the given coin map to a string.
+     * 
+     * @param someCoins
+     *            the coins and their count to format.
+     * @param isWithTotal
+     *            true if the total should be appended at the front.
+     * @return The formatted string.
+     */
+    protected String formatCoinMaptoString(Map<BigDecimal, Integer> someCoins,
+            boolean isWithTotal) {
+        StringBuilder sb = new StringBuilder();
+
+        BigDecimal total = new BigDecimal(0);
+
+        List<BigDecimal> keyList = new ArrayList<>(someCoins.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            Integer count = someCoins.get(key);
+
+            sb.append(count);
+            sb.append(" x ");
+            sb.append(key);
+
+            if (i < (keyList.size() - 1)) {
+                sb.append(", ");
+            }
+
+            total = total.add((key.multiply(new BigDecimal(count.intValue()))));
+        }
+
+        if (isWithTotal) {
+            sb.insert(0, total + " = ");
+        }
+
+        return sb.toString();
+    }
+
+    /**
      * @return the view state.
      */
     public final synchronized ViewStateEnum getViewState() {
@@ -596,7 +655,7 @@ public abstract class SimulationView implements Runnable,
     /**
      * Sets the view state. This method is synchronized to ensure integrity
      * trough the different threads.
-     *
+     * 
      * @param aState
      *            the view state to set.
      */
@@ -613,14 +672,14 @@ public abstract class SimulationView implements Runnable,
 
     /**
      * Reads an integer from the input.
-     *
+     * 
      * @return an integer or null if another action was executed.
      */
     public abstract Integer readInteger();
 
     /**
      * Prints a message to the output.
-     *
+     * 
      * @param aKey
      *            the key of the message.
      * @param aMode
@@ -652,12 +711,15 @@ public abstract class SimulationView implements Runnable,
         if (anException.isAllCoinBoxesFull()) {
             print("view.slot.machine.coin.box.full", ViewOutputMode.ERROR,
                     anException.getCoinValue());
+
+            rolebackTransaction();
         } else {
             print("view.slot.machine.coin.box.single.full",
                     ViewOutputMode.ERROR, anException.getCoinValue());
-        }
 
-        rolebackTransaction();
+            print("view.slot.machine.drawback", ViewOutputMode.INFO, "1 x "
+                    + anException.getCoinValue());
+        }
     }
 
     @Override
@@ -698,17 +760,6 @@ public abstract class SimulationView implements Runnable,
         Map<BigDecimal, Integer> drawbackMap = slotMachine
                 .rolebackTransaction();
 
-        boolean displayMsg = false;
-
-        for (Integer count : drawbackMap.values()) {
-            if (count > 0) {
-                displayMsg = true;
-                break;
-            }
-        }
-
-        if (displayMsg) {
-            displayMessageForDrawback();
-        }
+        displayMessageForDrawback();
     }
 }

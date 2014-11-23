@@ -5,7 +5,6 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.PrintStream;
 import java.text.MessageFormat;
-import java.util.List;
 
 import javax.swing.JFrame;
 
@@ -13,8 +12,6 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineUserInteractionInterface;
 import ch.zhaw.swengineering.view.SimulationView;
 import ch.zhaw.swengineering.view.ViewStateEnum;
@@ -136,10 +133,11 @@ public class GuiSimulationView extends SimulationView implements
         print("view.enter.coins", ViewOutputMode.PROMPT,
                 dataStore.getParkingLotNumber());
 
-        parkingMeterPanel.waitForOK();
+        if (parkingMeterPanel.waitForOK()) {
 
-        setViewState(ViewStateEnum.INIT);
-        notifyForMoneyInserted(dataStore.getParkingLotNumber());
+            setViewState(ViewStateEnum.INIT);
+            notifyForMoneyInserted(dataStore.getParkingLotNumber());
+        }
         parkingMeterPanel.setNumberBlockBlocked(false);
     }
 
@@ -152,6 +150,13 @@ public class GuiSimulationView extends SimulationView implements
 
     @Override
     public void calledAbort() {
+        slotMachinePanel.resetCoinInput();
         notifyForActionAborted();
+    }
+
+
+    @Override
+    public void increaseInfoBufferSizeTemporarily(int aCount) {
+        parkingMeterPanel.increaseInfoBufferSizeTemporarily(aCount);
     }
 }

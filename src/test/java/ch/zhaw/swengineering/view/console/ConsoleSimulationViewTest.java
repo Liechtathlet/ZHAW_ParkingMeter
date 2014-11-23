@@ -1,6 +1,7 @@
 package ch.zhaw.swengineering.view.console;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doThrow;
@@ -25,6 +26,7 @@ import java.util.Map;
 import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -347,9 +349,7 @@ public class ConsoleSimulationViewTest {
 
         final int expectedParkingLotNumber = 44;
         final Date expectedParkingDate = cal.getTime();
-        String expectedOutput = expectedParkingLotNumber + ":"
-                + dateFormatter.print(expectedParkingDate, Locale.GERMAN)
-                + System.lineSeparator();
+        String expectedOutput = expectedParkingLotNumber + ":";
 
         // Mock
         when(messageProvider.get("view.info.parkingTime"))
@@ -360,7 +360,7 @@ public class ConsoleSimulationViewTest {
                 expectedParkingDate);
 
         // Assert
-        assertEquals(expectedOutput, outContent.toString());
+        assertTrue(outContent.toString().startsWith(expectedOutput));
     }
 
     // ************** Tests for Entering Parking Lot **************
@@ -508,6 +508,8 @@ public class ConsoleSimulationViewTest {
         doThrow(new CoinBoxFullException("coinboxfull")).when(slotMachine)
                 .insertCoin(coin);
         when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
+        when(slotMachine.getDrawback()).thenReturn(drawbackMap);
+        when(slotMachine.hasDrawback()).thenReturn(true);
         when(bufferedReader.readLine()).thenReturn(coin.toPlainString());
 
         // Run
@@ -524,8 +526,7 @@ public class ConsoleSimulationViewTest {
         Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
-                + MSG_VAL_DRAWBACK + System.lineSeparator();
+                + ": ", 5);
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
@@ -836,6 +837,7 @@ public class ConsoleSimulationViewTest {
         drawbackMap.put(coin, 2);
 
         when(slotMachine.getDrawback()).thenReturn(drawbackMap);
+        when(slotMachine.hasDrawback()).thenReturn(true);
 
         // Run
         view.displayMessageForDrawback();
@@ -1019,5 +1021,25 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
+    }
+    
+    @Test
+    public void testDisplayParkginLotPayment() throws IOException {
+        Map<BigDecimal, Integer> coinMap = new Hashtable<>();
+
+        BigDecimal coin = new BigDecimal(2.00);
+        coin = coin.setScale(2);
+        
+        coinMap.put(coin, 2);
+        
+        String expectedOutput = "5:4.00 = 2 x 2.00" + System.lineSeparator();
+
+        when(messageProvider.get("view.info.inserted.coins")).thenReturn("{0}:{1}");
+        
+        // Run
+        view.displayParkingLotPayment(5,coinMap);
+
+        // Assert
+        assertEquals(expectedOutput, outContent.toString());
     }
 }

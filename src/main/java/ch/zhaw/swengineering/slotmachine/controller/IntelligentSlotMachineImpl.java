@@ -3,6 +3,7 @@ package ch.zhaw.swengineering.slotmachine.controller;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +33,7 @@ import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedExce
 /**
  * @author Daniel Brun
  * 
- *         Implementation of the {@link IntelligentSlotMachine}. 
+ *         Implementation of the {@link IntelligentSlotMachine}.
  */
 @Controller
 public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
@@ -56,7 +57,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     private boolean transactionStarted;
 
     private Map<BigDecimal, Integer> transactionCoinCache;
-    private Map<BigDecimal, Integer> crawBackCoinCache;
+    private Map<BigDecimal, Integer> drawBackCoinCache;
     private SortedSet<BigDecimal> availableCoinList;
     private SortedSet<BigDecimal> reverseAvailableCoinList;
 
@@ -67,7 +68,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         transactionCoinCache = new Hashtable<>();
         availableCoinList = new TreeSet<>();
         reverseAvailableCoinList = new TreeSet<>(Collections.reverseOrder());
-        crawBackCoinCache = new Hashtable<>();
+        drawBackCoinCache = new Hashtable<>();
     }
 
     /**
@@ -121,7 +122,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
                 if (count > 0) {
                     // Put into drawback cache
-                    crawBackCoinCache.put(cb.getCoinValue(),
+                    drawBackCoinCache.put(cb.getCoinValue(),
                             Integer.valueOf(count));
                     cb.setCurrentCoinCount(cb.getCurrentCoinCount() - count);
 
@@ -149,18 +150,18 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
     @Override
     public Map<BigDecimal, Integer> rolebackTransaction() {
-        Map<BigDecimal, Integer> drawBackMap = new Hashtable<>(
-                transactionCoinCache);
+        drawBackCoinCache.putAll(transactionCoinCache);
 
         for (Entry<BigDecimal, Integer> entry : transactionCoinCache.entrySet()) {
             if (entry.getValue() > 0) {
                 CoinBox cb = coinBoxes.getCoinBox(entry.getKey());
                 cb.setCurrentCoinCount(cb.getCurrentCoinCount()
                         - entry.getValue().intValue());
+                transactionCoinCache.put(entry.getKey(), new Integer(0));
             }
         }
 
-        return drawBackMap;
+        return drawBackCoinCache;
     }
 
     @Override
@@ -248,7 +249,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         for (CoinBox cb : coinBoxes.getCoinBoxes()) {
             cb.setCoinValue(cb.getCoinValue().setScale(2));
             transactionCoinCache.put(cb.getCoinValue(), Integer.valueOf(0));
-            crawBackCoinCache.put(cb.getCoinValue(), Integer.valueOf(0));
+            drawBackCoinCache.put(cb.getCoinValue(), Integer.valueOf(0));
         }
     }
 
@@ -265,7 +266,10 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
     @Override
     public Map<BigDecimal, Integer> getDrawback() {
         if (!transactionStarted) {
-            return crawBackCoinCache;
+            Map<BigDecimal, Integer> returnCoinache = new HashMap<BigDecimal, Integer>(
+                    drawBackCoinCache);
+            drawBackCoinCache.clear();
+            return returnCoinache;
         } else {
             return null;
         }
@@ -293,11 +297,11 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                         "view.slot.machine.coin.box.level.too.high",
                         cbl.getCoinValue());
             } else {
-                //TODO: Write to transaction log.
+                // TODO: Write to transaction log.
                 cb.setCurrentCoinCount(cbl.getCurrentCoinCount());
             }
         }
-        
+
         coinBoxesWriter.write(coinBoxes);
     }
 
@@ -306,4 +310,26 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
         return new ArrayList<BigDecimal>(availableCoinList);
     }
 
+    @Override
+    public boolean hasDrawback() {
+        boolean hasDrawback = false;
+
+        List<BigDecimal> keyList = new ArrayList<>(drawBackCoinCache.keySet());
+        for (int i = 0; i < keyList.size(); i++) {
+            BigDecimal key = keyList.get(i);
+
+            Integer count = drawBackCoinCache.get(key);
+
+            if (count > 0) {
+                hasDrawback = true;
+            }
+        }
+
+        return hasDrawback;
+    }
+
+    @Override
+    public Map<BigDecimal, Integer> getInsertedCoins() {
+       return new HashMap<BigDecimal, Integer>(transactionCoinCache);
+    }
 }
