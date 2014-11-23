@@ -2,6 +2,8 @@ package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.business.ParkingMeter;
 import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -15,6 +17,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Controller;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 /**
  * @author Daniel Brun Controller for the view.
@@ -40,9 +43,12 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Autowired
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
+    @Autowired
+    private TransactionLogHandler transactionLog;
+
     @Override
     public final void start() {
-        LOG.info("Starting controller...");
+        transactionLog.write("Starting ParkingMeter App.");
 
         // Register event listener.
         view.addViewEventListener(this);
@@ -57,8 +63,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public final void parkingLotEntered(
             final ParkingLotEnteredEvent parkingLotEnteredEvent) {
-        LOG.debug("User entered parking lot number: "
-                + parkingLotEnteredEvent.getParkingLotNumber());
+        transactionLog.write(String.format("Parking lot number %d entered.",
+                parkingLotEnteredEvent.getParkingLotNumber()));
 
         boolean processed = false;
         ParkingLot parkingLot = parkingMeter
@@ -66,6 +72,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Step One: Check if it is a parking lot number
         if (parkingLot != null) {
+            transactionLog.write("Recognized as valid parking lot number.");
             processed = true;
             slotMachine.startTransaction();
             view.displayParkingLotNumberAndParkingTime(parkingLot.getNumber(),
@@ -78,6 +85,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             SecretActionEnum actionEnum = parkingMeter
                     .getSecretAction(parkingLotEnteredEvent
                             .getParkingLotNumber());
+
+            transactionLog.write(String.format("Recognized secret code %s", actionEnum));
 
             switch (actionEnum) {
             case VIEW_ALL_PARKING_CHARGE:
@@ -131,6 +140,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Step Three: Print error if nothing matched
         if (!processed) {
+            transactionLog.write("Invalid parking lot number.");
             view.displayErrorParkingLotNumberInvalid();
             view.promptForParkingLotNumber();
         }
@@ -138,6 +148,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
     @Override
     public void actionAborted(final ActionAbortedEvent actionAbortedEvent) {
+        transactionLog.write("Action aborted.");
         slotMachine.finishTransaction(BigDecimal.ZERO);
         view.promptForParkingLotNumber();
     }
@@ -146,53 +157,79 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     public void moneyInserted(MoneyInsertedEvent moneyInsertedEvent) {
         BigDecimal insertedMoney = slotMachine
                 .getAmountOfCurrentlyInsertedMoney();
-        LOG.info("Received: MoneyInsertedEvent, InsertedMoney: "
-                + insertedMoney);
+        int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
+
+        transactionLog.write(String.format("Money %s inserted for parking lot %s",
+                insertedMoney, parkingLotNumber));
 
         ParkingLotBooking booking = parkingMeter.calculateBookingForParkingLot(
-                moneyInsertedEvent.getParkingLotNumber(), insertedMoney);
+                parkingLotNumber, insertedMoney);
 
         if (booking.isNotEnoughMoney()) {
+            transactionLog.write("Amount is invalid. Not enough money.");
             view.displayNotEnoughMoneyError();
-            view.promptForMoney(moneyInsertedEvent.getParkingLotNumber());
+            view.promptForMoney(parkingLotNumber);
         } else {
+            Date paidTill = booking.getPaidTill();
+
+            transactionLog.write(String.format(
+                    "Amount is valid. Saving new booking of parking lot %d till %s",
+                    parkingLotNumber, paidTill));
+
             parkingMeter.persistBooking(booking);
             view.displayParkingLotNumberAndParkingTime(
-                    moneyInsertedEvent.getParkingLotNumber(),
-                    booking.getPaidTill());
+                    parkingLotNumber,
+                    paidTill);
             slotMachine.finishTransaction(booking.getDrawbackMoney());
             view.displayMessageForDrawback();
+
             view.promptForParkingLotNumber();
         }
     }
 
     @Override
     public void shutdownRequested(final ShutdownEvent shutdownEvent) {
-        LOG.info("Received request for shutdown...");
+        transactionLog.write("Shutting app down.");
 
-        LOG.info("Proceeding with shutdown...");
         view.displayShutdownMessage();
         view.shutdown();
-        LOG.info("Shutdown complete...exit");
+
+        transactionLog.write("Shutdown complete. Exit app now.");
+
         appContext.close();
     }
     
     @Override
     public void coinBoxLevelEntered(
             final CoinBoxLevelEnteredEvent coinBoxLevelEnteredEvent) {
-        LOG.info("Coin box level entered...");
+
+        transactionLog.write("New coin box level entered.");
+
         try {
             slotMachine.updateCoinLevelInCoinBoxes(coinBoxLevelEnteredEvent
                     .getCoinBoxLevels());
             view.displayContentOfCoinBoxes(slotMachine.getCurrentCoinBoxLevel());
+
+            for (CoinBoxLevel coinBoxLevel : coinBoxLevelEnteredEvent.getCoinBoxLevels()) {
+                transactionLog.write(String.format("Level is valid. Coin box for %s updated to %d",
+                        coinBoxLevel.getCoinValue(), coinBoxLevel.getCurrentCoinCount()));
+            }
+
             view.promptForParkingLotNumber();
         } catch (CoinBoxFullException e) {
-            view.displayCoinCountTooHigh(e.getCoinValue());
+            BigDecimal coinValue = e.getCoinValue();
+
+            transactionLog.write(String.format("Level is invalid. Amount of coin box %s is to high.",
+                    coinValue));
+
+            view.displayCoinCountTooHigh(coinValue);
         }
     }
 
     @Override
     public void numberOfTransactionLogEntriesToShowEntered(NumberOfTransactionLogEntriesToShowEvent event) {
+        transactionLog.write(String.format("Showing %d of transaction log entries.", event.getNumber()));
+
         view.displayNTransactionLogEntries(event.getNumber());
         view.promptForParkingLotNumber();
     }

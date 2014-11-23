@@ -2,6 +2,7 @@ package ch.zhaw.swengineering.controller;
 
 import ch.zhaw.swengineering.business.ParkingMeterImpl;
 import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
@@ -54,6 +55,9 @@ public class ViewControllerImplTest {
 
     @Mock
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
+
+    @Mock
+    private TransactionLogHandler transactionLog;
 
     /**
      * Set up a test case.

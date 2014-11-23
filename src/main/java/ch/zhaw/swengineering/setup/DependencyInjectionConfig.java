@@ -16,6 +16,8 @@ import ch.zhaw.swengineering.view.SimulationView;
 import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
 import ch.zhaw.swengineering.view.gui.GuiSimulationView;
 
+import javax.xml.bind.JAXBException;
+
 @Configuration
 public class DependencyInjectionConfig {
 
@@ -58,7 +60,7 @@ public class DependencyInjectionConfig {
 
     @Bean
     @Qualifier("coinBoxes")
-    public ConfigurationWriter coinBoxesConfigurationWriter() {
+    public ConfigurationWriter coinBoxesConfigurationWriter() throws JAXBException {
         return new ConfigurationWriter("./src/main/resources/coinBoxes.xml",
                 "ch.zhaw.swengineering.model.persistence.CoinBoxes");
     }
@@ -89,7 +91,7 @@ public class DependencyInjectionConfig {
 
     @Bean
     @Qualifier("parkingMeter")
-    public ConfigurationWriter parkingMeterConfigurationWriter() {
+    public ConfigurationWriter parkingMeterConfigurationWriter() throws JAXBException {
         return new ConfigurationWriter("./src/main/resources/parkingMeter.xml",
                 "ch.zhaw.swengineering.model.persistence.ParkingMeter");
     }
@@ -104,7 +106,7 @@ public class DependencyInjectionConfig {
 
     @Bean
     @Qualifier("transactionLog")
-    public ConfigurationWriter transactionLogConfigurationWriter() {
+    public ConfigurationWriter transactionLogConfigurationWriter() throws JAXBException {
         return new ConfigurationWriter(
                 "./src/main/resources/transactionLog.xml",
                 "ch.zhaw.swengineering.model.persistence.TransactionLog");
