@@ -1,7 +1,24 @@
 package ch.zhaw.swengineering.controller;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Map;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.stereotype.Component;
+
 import ch.zhaw.swengineering.business.ParkingMeter;
-import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.business.ParkingMeterImpl;
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
@@ -10,19 +27,18 @@ import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.SimulationViewInterface;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.Map;
 
 /**
  * @author Daniel Brun Controller for the view.
  */
 @Component
 public class ViewControllerImpl implements ViewController, ViewEventListener {
+
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(ParkingMeterImpl.class);
 
     @Autowired
     private SimulationViewInterface view;
@@ -79,7 +95,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                     .getSecretAction(parkingLotEnteredEvent
                             .getParkingLotNumber());
 
-            transactionLog.write(String.format("Recognized secret code %s", actionEnum));
+            transactionLog.write(String.format("Recognized secret code %s",
+                    actionEnum));
 
             switch (actionEnum) {
             case VIEW_ALL_PARKING_CHARGE:
@@ -92,8 +109,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
                 view.displayAllInformation(
                         slotMachine.getCurrentCoinBoxLevel(),
-                        parkingMeter.getParkingTimeDefinitions(),
-                        new Date(),
+                        parkingMeter.getParkingTimeDefinitions(), new Date(),
                         parkingMeter.getParkingLots(),
                         parkingMeter.getParkingTimeTable());
 
@@ -126,7 +142,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                 break;
             }
         } catch (Exception e) {
-            // Nothing to do here..
+            LOG.warn("An error occurred during detection of secret code!", e);
         }
 
         // Step Three: Print error if nothing matched
@@ -155,8 +171,9 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         int parkingLotNumber = moneyInsertedEvent.getParkingLotNumber();
         Map<BigDecimal, Integer> insertedCoins = slotMachine.getInsertedCoins();
 
-        transactionLog.write(String.format("Money %s inserted for parking lot %s",
-                insertedMoney, parkingLotNumber));
+        transactionLog.write(String.format(
+                "Money %s inserted for parking lot %s", insertedMoney,
+                parkingLotNumber));
 
         ParkingLotBooking booking = parkingMeter.calculateBookingForParkingLot(
                 parkingLotNumber, insertedMoney);
@@ -168,13 +185,14 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
         } else {
             Date paidTill = booking.getPaidTill();
 
-            transactionLog.write(String.format(
-                    "Amount is valid. Saving new booking of parking lot %d till %s",
-                    parkingLotNumber, paidTill));
-            
+            transactionLog
+                    .write(String
+                            .format("Amount is valid. Saving new booking of parking lot %d till %s",
+                                    parkingLotNumber, paidTill));
+
             parkingMeter.persistBooking(booking);
             slotMachine.finishTransaction(booking.getDrawbackMoney());
-            
+
             int bufferSize = 2;
 
             if (slotMachine.hasDrawback()) {
@@ -221,16 +239,20 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                     .getCoinBoxLevels());
             view.displayContentOfCoinBoxes(slotMachine.getCurrentCoinBoxLevel());
 
-            for (CoinBoxLevel coinBoxLevel : coinBoxLevelEnteredEvent.getCoinBoxLevels()) {
-                transactionLog.write(String.format("Level is valid. Coin box for %s updated to %d",
-                        coinBoxLevel.getCoinValue(), coinBoxLevel.getCurrentCoinCount()));
+            for (CoinBoxLevel coinBoxLevel : coinBoxLevelEnteredEvent
+                    .getCoinBoxLevels()) {
+                transactionLog.write(String.format(
+                        "Level is valid. Coin box for %s updated to %d",
+                        coinBoxLevel.getCoinValue(),
+                        coinBoxLevel.getCurrentCoinCount()));
             }
 
             view.promptForParkingLotNumber();
         } catch (CoinBoxFullException e) {
             BigDecimal coinValue = e.getCoinValue();
 
-            transactionLog.write(String.format("Level is invalid. Amount of coin box %s is to high.",
+            transactionLog.write(String.format(
+                    "Level is invalid. Amount of coin box %s is to high.",
                     coinValue));
 
             view.displayCoinCountTooHigh(coinValue);
@@ -240,7 +262,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
     @Override
     public void numberOfTransactionLogEntriesToShowEntered(
             NumberOfTransactionLogEntriesToShowEvent event) {
-        transactionLog.write(String.format("Showing %d of transaction log entries.", event.getNumber()));
+        transactionLog.write(String.format(
+                "Showing %d of transaction log entries.", event.getNumber()));
 
         view.displayNTransactionLogEntries(event.getNumber());
         view.promptForParkingLotNumber();

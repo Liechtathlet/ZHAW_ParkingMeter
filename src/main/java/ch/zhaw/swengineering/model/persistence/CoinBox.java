@@ -81,12 +81,4 @@ public class CoinBox {
         this.currentCoinCount = currentCoinCount;
     }
 
-    /**
-     * @param maxCoinCount
-     *            the maxCoinCount to set
-     */
-    public void setMaxCoinCount(int maxCoinCount) {
-        this.maxCoinCount = maxCoinCount;
-    }
-
 }

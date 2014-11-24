@@ -1,6 +1,28 @@
 package ch.zhaw.swengineering.view;
 
-import ch.zhaw.swengineering.event.*;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.MoneyInsertedEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
@@ -16,21 +38,6 @@ import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.data.ViewDataStore;
 import ch.zhaw.swengineering.view.helper.ViewOutputMode;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -49,7 +56,8 @@ public abstract class SimulationView implements Runnable,
      * Date-Format.
      */
     private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
-    protected static final DateFormatter dateFormatter = new DateFormatter(DATE_FORMAT);
+    protected static final DateFormatter dateFormatter = new DateFormatter(
+            DATE_FORMAT);
 
     private Thread thread;
 
@@ -71,7 +79,6 @@ public abstract class SimulationView implements Runnable,
 
     @Autowired
     protected TransactionLogHandler transactionLogHandler;
-
 
     /**
      * Creates a new instance of this class.
@@ -101,7 +108,7 @@ public abstract class SimulationView implements Runnable,
             while (run) {
                 try {
                     runLock.lock();
-                    switch (viewState) {
+                    switch (getViewState()) {
                     case ENTERING_PARKING_LOT:
                         executeActionsForStateEnteringParkingLotNumber();
                         break;
@@ -273,7 +280,8 @@ public abstract class SimulationView implements Runnable,
 
     }
 
-    private void displayBookedParkingLotsCore(List<ParkingLot> parkingLots, Date currentDate) {
+    private void displayBookedParkingLotsCore(List<ParkingLot> parkingLots,
+            Date currentDate) {
         for (ParkingLot parkingLot : parkingLots) {
             String paidUntilString = "--";
             String timeDifferenceString = "--";
@@ -306,7 +314,8 @@ public abstract class SimulationView implements Runnable,
     public void displayParkingMeterInfo(Date currentDate) {
         print("view.parking.time.info",
                 ViewOutputMode.LARGE_INFO,
-                dateFormatter.print(currentDate, LocaleContextHolder.getLocale()));
+                dateFormatter.print(currentDate,
+                        LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -320,7 +329,7 @@ public abstract class SimulationView implements Runnable,
             List<ParkingTimeDefinition> someParkingTimeDefinitions) {
         int i = 1;
         int lastMinuteCount = 0;
-        BigDecimal lastPrice = new BigDecimal(0);
+        BigDecimal lastPrice = BigDecimal.ZERO;
         for (ParkingTimeDefinition parkingTimeDef : someParkingTimeDefinitions) {
             for (int j = 0; j < parkingTimeDef.getCountOfSuccessivePeriods(); j++) {
                 BigDecimal newPrice = lastPrice.add(parkingTimeDef
@@ -344,7 +353,7 @@ public abstract class SimulationView implements Runnable,
     @Override
     public void displayContentOfCoinBoxes(
             final List<CoinBoxLevel> someCoinBoxLevels) {
-        BigDecimal totalCoinBoxes = new BigDecimal(0);
+        BigDecimal totalCoinBoxes = BigDecimal.ZERO;
         totalCoinBoxes = totalCoinBoxes.setScale(2);
 
         for (CoinBoxLevel level : someCoinBoxLevels) {
@@ -358,7 +367,8 @@ public abstract class SimulationView implements Runnable,
         displayContentOfCoinBoxesCore(someCoinBoxLevels);
     }
 
-    private void displayContentOfCoinBoxesCore(List<CoinBoxLevel> someCoinBoxLevels) {
+    private void displayContentOfCoinBoxesCore(
+            List<CoinBoxLevel> someCoinBoxLevels) {
         for (CoinBoxLevel level : someCoinBoxLevels) {
             print("view.info.coin.box.content",
                     ViewOutputMode.LARGE_INFO,
@@ -398,11 +408,9 @@ public abstract class SimulationView implements Runnable,
     }
 
     @Override
-    public void displayAllInformation(
-            List<CoinBoxLevel> coinBoxLevels,
+    public void displayAllInformation(List<CoinBoxLevel> coinBoxLevels,
             List<ParkingTimeDefinition> parkingTimeDefinitions,
-            Date currentDate,
-            List<ParkingLot> parkingLots,
+            Date currentDate, List<ParkingLot> parkingLots,
             ParkingTimeTable parkingTimeTable) {
         String formattedDate = dateFormatter.print(currentDate,
                 LocaleContextHolder.getLocale());
@@ -411,16 +419,17 @@ public abstract class SimulationView implements Runnable,
         displayParkingMeterInfo(currentDate);
 
         // Coin boxes
-        BigDecimal totalCoinBoxes = new BigDecimal(0);
+        BigDecimal totalCoinBoxes = BigDecimal.ZERO;
         totalCoinBoxes = totalCoinBoxes.setScale(2);
         for (CoinBoxLevel level : coinBoxLevels) {
-            BigDecimal currentCoinCount = new BigDecimal(level.getCurrentCoinCount());
-            BigDecimal coinBoxAmount = level.getCoinValue().multiply(currentCoinCount);
+            BigDecimal currentCoinCount = new BigDecimal(
+                    level.getCurrentCoinCount());
+            BigDecimal coinBoxAmount = level.getCoinValue().multiply(
+                    currentCoinCount);
             totalCoinBoxes = totalCoinBoxes.add(coinBoxAmount);
         }
         print("view.all.information.coin.box.content.total",
-                ViewOutputMode.LARGE_INFO,
-                totalCoinBoxes);
+                ViewOutputMode.LARGE_INFO, totalCoinBoxes);
         displayContentOfCoinBoxesCore(coinBoxLevels);
 
         // Parking time definitions
@@ -429,8 +438,8 @@ public abstract class SimulationView implements Runnable,
         displayParkingTimeDefinitions(parkingTimeDefinitions);
 
         // Parking lots
-        print("view.all.information.parking.lots",
-                ViewOutputMode.LARGE_INFO, formattedDate);
+        print("view.all.information.parking.lots", ViewOutputMode.LARGE_INFO,
+                formattedDate);
         displayBookedParkingLotsCore(parkingLots, currentDate);
 
         // Parking time calculation
@@ -444,27 +453,21 @@ public abstract class SimulationView implements Runnable,
         displayLast24HoursOfTransactionLog();
     }
 
-    private void displayParkingTimeCalculationTable(
-            ParkingTimeTable table) {
+    private void displayParkingTimeCalculationTable(ParkingTimeTable table) {
 
         int maxMinuteLength = Long.toString(
-                table.getItems().get(table.getItems().size()-1)
-                        .getMinutes()).length();
-        for (ParkingTimeTableItem item
-                : table.getItems()) {
-            print("view.parking.time.table",
-                    ViewOutputMode.LARGE_INFO,
+                table.getItems().get(table.getItems().size() - 1).getMinutes())
+                .length();
+        for (ParkingTimeTableItem item : table.getItems()) {
+            print("view.parking.time.table", ViewOutputMode.LARGE_INFO,
                     formatPrice(item.getAmount()),
-                    formatMinutes(item.getMinutes(),
-                            maxMinuteLength));
+                    formatMinutes(item.getMinutes(), maxMinuteLength));
         }
 
-        print("view.parking.maximal.time",
-                ViewOutputMode.LARGE_INFO,
+        print("view.parking.maximal.time", ViewOutputMode.LARGE_INFO,
                 table.getMaxBookingTime());
 
-        print("view.parking.maximal.amount",
-                ViewOutputMode.LARGE_INFO,
+        print("view.parking.maximal.amount", ViewOutputMode.LARGE_INFO,
                 formatPrice(table.getMaxPrice()));
     }
 
@@ -697,29 +700,31 @@ public abstract class SimulationView implements Runnable,
             boolean isWithTotal) {
         StringBuilder sb = new StringBuilder();
 
-        BigDecimal total = new BigDecimal(0);
+        BigDecimal total = BigDecimal.ZERO;
 
-        List<BigDecimal> keyList = new ArrayList<>(someCoins.keySet());
-        for (int i = 0; i < keyList.size(); i++) {
-            BigDecimal key = keyList.get(i);
+        if (someCoins != null) {
+            List<BigDecimal> keyList = new ArrayList<>(someCoins.keySet());
+            for (int i = 0; i < keyList.size(); i++) {
+                BigDecimal key = keyList.get(i);
 
-            Integer count = someCoins.get(key);
+                Integer count = someCoins.get(key);
 
-            sb.append(count);
-            sb.append(" x ");
-            sb.append(key);
+                sb.append(count);
+                sb.append(" x ");
+                sb.append(key);
 
-            if (i < (keyList.size() - 1)) {
-                sb.append(", ");
+                if (i < (keyList.size() - 1)) {
+                    sb.append(", ");
+                }
+
+                total = total
+                        .add(key.multiply(new BigDecimal(count.intValue())));
             }
 
-            total = total.add((key.multiply(new BigDecimal(count.intValue()))));
+            if (isWithTotal) {
+                sb.insert(0, total + " = ");
+            }
         }
-
-        if (isWithTotal) {
-            sb.insert(0, total + " = ");
-        }
-
         return sb.toString();
     }
 
@@ -742,7 +747,7 @@ public abstract class SimulationView implements Runnable,
         try {
             waitCondition.signal();
         } catch (Exception e) {
-            // Nothing to do here...
+            LOG.warn("Synchronized signal for wait failed...", e);
         }
     }
 
@@ -790,7 +795,8 @@ public abstract class SimulationView implements Runnable,
             print("view.slot.machine.coin.box.full", ViewOutputMode.ERROR,
                     anException.getCoinValue());
 
-            rolebackTransaction();
+            print("view.slot.machine.drawback", ViewOutputMode.INFO, "1 x "
+                    + anException.getCoinValue());
         } else {
             print("view.slot.machine.coin.box.single.full",
                     ViewOutputMode.ERROR, anException.getCoinValue());

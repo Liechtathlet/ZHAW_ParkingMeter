@@ -825,12 +825,10 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testValidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow() throws IOException {
-        String numberOfTransactionLogEntriesToShow = "2";
-        int numberOfTransactionLogEntriesToShowInteger =
-                Integer.valueOf(numberOfTransactionLogEntriesToShow);
+        int numberOfTransactionLogEntriesToShowInteger =2;
 
         // Mock
-        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShow);
+        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShowInteger + "");
 
         // Run
         view.executeActionsForStateEnteringTransactionLogEntriesToShow();

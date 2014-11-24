@@ -41,19 +41,17 @@ public class NumberInputActionListener implements ActionListener {
      */
     @Override
     public void actionPerformed(ActionEvent anEvent) {
-        if (!suspendEvent) {
-            if (anEvent.getSource() instanceof JButton) {
-                JButton button = (JButton) anEvent.getSource();
-                BigInteger enteredInt = new BigInteger(button.getText());
+        if (!suspendEvent && anEvent.getSource() instanceof JButton) {
+            JButton button = (JButton) anEvent.getSource();
+            BigInteger enteredInt = new BigInteger(button.getText());
 
-                if (integerInput == null) {
-                    integerInput = enteredInt;
-                } else {
-                    integerInput = integerInput.multiply(BigInteger.TEN);
-                    integerInput = integerInput.add(enteredInt);
-                }
-                displayer.appendTextToPromptDisplay(integerInput.toString());
+            if (integerInput == null) {
+                integerInput = enteredInt;
+            } else {
+                integerInput = integerInput.multiply(BigInteger.TEN);
+                integerInput = integerInput.add(enteredInt);
             }
+            displayer.appendTextToPromptDisplay(integerInput.toString());
         }
     }
 

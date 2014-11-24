@@ -1,5 +1,13 @@
 package ch.zhaw.swengineering.controller;
 
+import java.util.List;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import ch.zhaw.swengineering.business.ParkingMeter;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
@@ -7,17 +15,18 @@ import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
-import java.util.List;
 
 /**
  * Created by slang on 23.11.14.
  */
 @org.springframework.web.bind.annotation.RestController
 public class RestController {
+
+    /**
+     * The Logger.
+     */
+    private static final Logger LOG = LogManager
+            .getLogger(RestController.class);
 
     @Autowired
     private TransactionLogHandler transactionLog;
@@ -29,29 +38,30 @@ public class RestController {
     private IntelligentSlotMachineBackendInteractionInterface slotMachine;
 
     /**
-     * Displays transaction logs.
-     * If count is a valid integer greater than 0, it returns the appropriate.
-     * If count is not valid integer or lower than 1, it returns all transaction logs.
-     *
-     * @param countString Number of transaction logs to display.
+     * Displays transaction logs. If count is a valid integer greater than 0, it
+     * returns the appropriate. If count is not valid integer or lower than 1,
+     * it returns all transaction logs.
+     * 
+     * @param countString
+     *            Number of transaction logs to display.
      * @return Transaction log entries.
      */
     @RequestMapping("/transactionLog")
     public List<TransactionLogEntry> transactionLogNEntries(
-            @RequestParam(value="count", defaultValue = "") String countString) {
+            @RequestParam(value = "count", defaultValue = "") String countString) {
         int count = 0;
         try {
             count = Integer.parseInt(countString);
             return transactionLog.get(count);
         } catch (Exception e) {
-            // Do nothing here.
+            LOG.warn("Could not parse requested entry count!", e);
         }
         return transactionLog.getAll();
     }
 
     /**
      * Returns the transaction logs of the last 24 hours.
-     *
+     * 
      * @return Transaction log entries.
      */
     @RequestMapping("/transactionLog/24Hours")
@@ -60,8 +70,9 @@ public class RestController {
     }
 
     /**
-     * Displays all parking lots, till when they are paid and their remaining time.
-     *
+     * Displays all parking lots, till when they are paid and their remaining
+     * time.
+     * 
      * @return Parking lot data.
      */
     @RequestMapping("/parkingLots")
@@ -71,7 +82,7 @@ public class RestController {
 
     /**
      * Displays all coin boxes with their current and maximum coin counts.
-     *
+     * 
      * @return Coin boxes data.
      */
     @RequestMapping("/coinBoxes")
@@ -81,7 +92,7 @@ public class RestController {
 
     /**
      * Displays the parking time definitions.
-     *
+     * 
      * @return Parking time definitions.
      */
     @RequestMapping("/parkingTimeDefinitions")

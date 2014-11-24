@@ -5,10 +5,6 @@
 		<name>ParkingMeter</name>
 		<href>http://dublin.zhaw.ch/~brundan1/Module/Software-Engineering/ParkingMeter/</href>
 	</bannerLeft>
-	<!--<bannerRight>
-		<name>Name</name>
-		<src>./logo.png</src>
-	</bannerRight>-->
 	<publishDate format="dd MMM yyyy" />
 	<version position="right" />
 
@@ -27,17 +23,17 @@
 		<links>
 			<item name="Apache" href="http://www.apache.org/" />
 			<item name="Maven" href="http://maven.apache.org/" />
-			<item name="Continuum" href="http://maven.apache.org/continuum" />
+			<item name="Droine.io" href="https://drone.io/" />
+			<item name="Github" href="https://www.github.com/" />
 		</links>
 		<head>
 			<meta name="faq" content="ZHAW-ParkingMeter" />
 		</head>
-		<menu name="ParkingMeter">
+		<!--<menu name="ParkingMeter">
 			<item name="Github" href="https://github.com/Liechtathlet/ZHAW_ParkingMeter" />
 			<item name="CI" href="https://drone.io/github.com/Liechtathlet/ZHAW_ParkingMeter" />
-			<item name="Projekt-Wiki" href="https://github.com/Liechtathlet/ZHAW_ParkingMeter/wiki" />
 			<item name="Projekt-Management" href="https://www.pivotaltracker.com/s/projects/1165250" />
-		</menu>
+			</menu>-->
 		<menu ref="reports"/>
 		<footer/>
 	</body>

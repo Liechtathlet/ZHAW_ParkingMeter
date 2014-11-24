@@ -138,6 +138,8 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
      * Resets the coin input.
      */
     public void resetCoinInput() {
+        LOG.info("Reset coin input");
+
         totalCoinInput = null;
         displayer.appendTextToPromptDisplay("");
     }
@@ -155,6 +157,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
             JButton button = (JButton) anEvent.getSource();
 
             try {
+                LOG.info("Inserted coin: " + button.getText());
                 BigDecimal enteredCoin = new BigDecimal(button.getText());
                 enteredCoin = enteredCoin.setScale(2);
 
@@ -164,6 +167,7 @@ public class SlotMachinePanel extends JPanel implements ActionListener {
                 } else {
                     totalCoinInput = totalCoinInput.add(enteredCoin);
                 }
+                LOG.info("New total: " + totalCoinInput);
                 displayer.appendTextToPromptDisplay(totalCoinInput.toString());
             } catch (CoinBoxFullException e) {
                 slotMachineView.handleCoinBoxFullException(e);

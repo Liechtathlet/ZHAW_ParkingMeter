@@ -30,7 +30,7 @@ public final class DateHelper {
             final Date date2) {
         AssertHelper.isNotNull(date1, "date1");
         AssertHelper.isNotNull(date2, "date2");
-        
+
         String result = null;
         boolean negative = false;
         long diff = 0;
@@ -48,9 +48,9 @@ public final class DateHelper {
         }
 
         long days = (int) (diff / 1000 / 60 / 60 / 24);
-        long hours = (int) ((diff / 1000 / 60 / 60) - (days * 24));
-        long minutes = (int) ((diff / 1000 / 60) 
-                - (days * 24 * 60) - (hours * 60));
+        long hours = (int) (diff / 1000 / 60 / 60) - (days * 24);
+        long minutes = (int) (diff / 1000 / 60) - (days * 24 * 60)
+                - (hours * 60);
 
         if (days > 0) {
             result += String.format("%02d:%02d:%02d", days, hours, minutes);

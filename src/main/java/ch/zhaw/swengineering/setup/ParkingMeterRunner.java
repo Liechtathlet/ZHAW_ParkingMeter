@@ -2,14 +2,17 @@ package ch.zhaw.swengineering.setup;
 
 import java.util.Arrays;
 
-//import ch.zhaw.swengineering.setup.ParkingMeterBeanProcessor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.core.env.CommandLinePropertySource;
+import org.springframework.core.env.PropertySource;
+import org.springframework.core.env.SimpleCommandLinePropertySource;
 
 import ch.zhaw.swengineering.controller.ViewController;
 
@@ -24,16 +27,8 @@ import ch.zhaw.swengineering.controller.ViewController;
 @ImportResource("classpath:beans.xml")
 public class ParkingMeterRunner {
 
-    /**
-     * The Logger.
-     */
     private static final Logger LOG = LogManager
             .getLogger(ParkingMeterRunner.class);
-
-    /**
-     * The arguments.
-     */
-    private static String[] arguments;
 
     /**
      * Entry-Method for the Java-Application.
@@ -44,8 +39,6 @@ public class ParkingMeterRunner {
     public static void main(final String[] args) {
         System.setProperty("java.awt.headless", "false");
 
-        ParkingMeterRunner.arguments = args;
-
         LOG.info("Init application startup. Arguments: "
                 + Arrays.toString(args));
 
@@ -55,16 +48,10 @@ public class ParkingMeterRunner {
         // Start Spring
         app = new SpringApplication(ParkingMeterRunner.class);
 
+        PropertySource<?> clps = new SimpleCommandLinePropertySource(args);
+        
         context = app.run(args);
+        context.getEnvironment().getPropertySources().addFirst(clps);
         context.getBean(ViewController.class).start();
-    }
-
-    /**
-     * Gets the arguments which were set during application startup.
-     * 
-     * @return the arguments.
-     */
-    public static String[] getArguments() {
-        return arguments;
     }
 }

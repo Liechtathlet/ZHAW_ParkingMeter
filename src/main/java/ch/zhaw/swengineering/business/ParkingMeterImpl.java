@@ -268,7 +268,7 @@ public class ParkingMeterImpl implements ParkingMeter {
     @Override
     public ParkingTimeTable getParkingTimeTable() {
         int number = getParkingLots().get(0).getNumber();
-        BigDecimal lastAmount = new BigDecimal(0);
+        BigDecimal lastAmount = BigDecimal.ZERO;
 
         List<ParkingTimeTableItem> items = new ArrayList<>();
 
@@ -292,7 +292,7 @@ public class ParkingMeterImpl implements ParkingMeter {
     }
 
     private BigDecimal getMaxPrice() {
-        BigDecimal maxPrice = new BigDecimal(0);
+        BigDecimal maxPrice = BigDecimal.ZERO;
         for (ParkingTimeDefinition def : definitions
                 .getParkingTimeDefinitions()) {
             BigDecimal periodCount =
