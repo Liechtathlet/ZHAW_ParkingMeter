@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
@@ -69,4 +70,11 @@ public interface ParkingMeter {
 	 * @return the list of parking time definitions.
 	 */
 	List<ParkingTimeDefinition> getParkingTimeDefinitions();
+
+    /**
+     * Gets a list of parking time calculation examples
+     *
+     * @return Parking time table data.
+     */
+    ParkingTimeTable getParkingTimeTable();
 }

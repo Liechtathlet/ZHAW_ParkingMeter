@@ -10,6 +10,7 @@ import java.util.Map;
 
 import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 
@@ -167,15 +168,16 @@ public interface SimulationViewInterface {
 
     /**
      * Displays all information of the parking meter.
-     *
-     * @param coinBoxLevels Coin box values.
+     *  @param coinBoxLevels Coin box values.
      * @param parkingTimeDefinitions Parking time defintions.
      * @param currentDate Current date.
      * @param parkingLots Parking lots.
+     * @param parkingTimeTable Parking time table data.
      */
     void displayAllInformation(
             List<CoinBoxLevel> coinBoxLevels,
             List<ParkingTimeDefinition> parkingTimeDefinitions,
             Date currentDate,
-            List<ParkingLot> parkingLots);
+            List<ParkingLot> parkingLots,
+            ParkingTimeTable parkingTimeTable);
 }

@@ -11,6 +11,8 @@ import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -203,6 +205,7 @@ public class ParkingMeterImpl implements ParkingMeter {
         if (minimumBooking) {
             booking.setDrawbackMoney(leftoverMoney);
             booking.setChargedMoney(someInsertedMoney.subtract(leftoverMoney));
+            booking.setBookingInMinutes(bookingInMinutes);
 
             Calendar cal = Calendar.getInstance();
             booking.setPaidFrom(cal.getTime());
@@ -259,7 +262,56 @@ public class ParkingMeterImpl implements ParkingMeter {
 
     @Override
     public List<ParkingTimeDefinition> getParkingTimeDefinitions() {
-        return new ArrayList<ParkingTimeDefinition>(
-                definitions.getParkingTimeDefinitions());
+        return definitions.getParkingTimeDefinitions();
+    }
+
+    @Override
+    public ParkingTimeTable getParkingTimeTable() {
+        List<BigDecimal> values = new ArrayList<BigDecimal>() {{
+            add(new BigDecimal(0));
+            add(new BigDecimal(0.5));
+            add(new BigDecimal(1));
+            add(new BigDecimal(1.5));
+            add(new BigDecimal(2));
+        }};
+
+        int number = getParkingLots().get(0).getNumber();
+
+        List<ParkingTimeTableItem> items = new ArrayList<>();
+        for (BigDecimal amount : values) {
+            ParkingLotBooking booking =
+                    calculateBookingForParkingLot(number, amount);
+            items.add(new ParkingTimeTableItem(
+                    amount, booking.getBookingInMinutes()));
+        }
+
+        return new ParkingTimeTable(items, getMaxBookingTime(),
+                getMaxPrice());
+    }
+
+    private BigDecimal getMaxPrice() {
+        BigDecimal maxPrice = new BigDecimal(0);
+        for (ParkingTimeDefinition def : definitions
+                .getParkingTimeDefinitions()) {
+            BigDecimal periodCount =
+                    BigDecimal.valueOf(def.getCountOfSuccessivePeriods());
+            BigDecimal priceForPeriods = def.getPricePerPeriod().multiply(
+                    periodCount);
+            maxPrice = maxPrice.add(priceForPeriods);
+        }
+
+        return maxPrice;
+    }
+
+    private int getMaxBookingTime() {
+        int maxTime = 0;
+        for (ParkingTimeDefinition def : definitions
+                .getParkingTimeDefinitions()) {
+            maxTime = maxTime +
+                    def.getDurationOfPeriodInMinutes()
+                    * def.getCountOfSuccessivePeriods();
+        }
+
+        return maxTime;
     }
 }

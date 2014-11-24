@@ -94,7 +94,8 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
                         slotMachine.getCurrentCoinBoxLevel(),
                         parkingMeter.getParkingTimeDefinitions(),
                         new Date(),
-                        parkingMeter.getParkingLots());
+                        parkingMeter.getParkingLots(),
+                        parkingMeter.getParkingTimeTable());
 
                 view.promptForParkingLotNumber();
                 break;

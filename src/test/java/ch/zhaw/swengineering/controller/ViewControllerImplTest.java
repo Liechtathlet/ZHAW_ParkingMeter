@@ -5,6 +5,7 @@ import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
@@ -176,7 +177,8 @@ public class ViewControllerImplTest {
                 any(ArrayList.class),
                 any(ArrayList.class),
                 any(Date.class),
-                any(ArrayList.class));
+                any(ArrayList.class),
+                any(ParkingTimeTable.class));
     }
 
     /**

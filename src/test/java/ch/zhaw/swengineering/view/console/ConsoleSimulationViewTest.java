@@ -5,6 +5,8 @@ import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
@@ -90,6 +92,9 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_ALL_INFORMATION_PARKING_LOTS = "view.all.information.parking.lots";
     private static final String MSG_VAL_ALL_INFORMATION_PARKING_LOTS = "parking lots of {0}";
 
+    private static final String MSG_KEY_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME = "view.all.information.compute.parking.time";
+    private static final String MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME = "test of parking time calculation";
+
     private static final String MSG_KEY_ALL_INFORMATION_TRANSACTION_LOG = "view.all.information.transaction.log";
     private static final String MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG = "transaction log of {0}";
 
@@ -125,6 +130,15 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_BOOKED_PARKINGLOT = "view.booked.parkinglot";
     private static final String MSG_VAL_BOOKED_PARKINGLOT = "parkingmeter {0}  | paid till {1}  | deviation {2}  | {3}";
+
+    private static final String MSG_KEY_PARKING_TIME_TABLE = "view.parking.time.table";
+    private static final String MSG_VAL_PARKING_TIME_TABLE = "{0} € -> {1} min";
+
+    private static final String MSG_KEY_PARKING_MAX_TIME = "view.parking.maximal.time";
+    private static final String MSG_VAL_PARKING_MAX_TIME = "max {0} min";
+
+    private static final String MSG_KEY_PARKING_MAX_AMOUNT = "view.parking.maximal.amount";
+    private static final String MSG_VAL_PARKING_MAX_AMOUNT = "max {0} €";
 
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -221,6 +235,9 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_LOTS))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_LOTS);
 
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME);
+
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TRANSACTION_LOG))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG);
 
@@ -256,6 +273,15 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_BOOKED_PARKINGLOT)).thenReturn(
                 MSG_VAL_BOOKED_PARKINGLOT);
+
+        when(messageProvider.get(MSG_KEY_PARKING_TIME_TABLE)).thenReturn(
+                MSG_VAL_PARKING_TIME_TABLE);
+
+        when(messageProvider.get(MSG_KEY_PARKING_MAX_TIME)).thenReturn(
+                MSG_VAL_PARKING_MAX_TIME);
+
+        when(messageProvider.get(MSG_KEY_PARKING_MAX_AMOUNT)).thenReturn(
+                MSG_VAL_PARKING_MAX_AMOUNT);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -622,20 +648,40 @@ public class ConsoleSimulationViewTest {
         // Mock parking lots
         List<ParkingLot> parkingLots = new ArrayList<>();
 
+        // Mock parking time calculation table
+        int maxBookingTime = 300;
+        BigDecimal maxPrice = new BigDecimal(500);
+        Integer itemMinutes1 = 5;
+        BigDecimal itemAmount1 = new BigDecimal(1.5);
+        Integer itemMinutes2 = 100;
+        BigDecimal itemAmount2 = new BigDecimal(10);
+        final ParkingTimeTableItem item1 =
+                new ParkingTimeTableItem(itemAmount1, itemMinutes1);
+        final ParkingTimeTableItem item2 =
+                new ParkingTimeTableItem(itemAmount2, itemMinutes2);
+        List<ParkingTimeTableItem> items = new ArrayList<>();
+        items.add(item1);
+        items.add(item2);
+        ParkingTimeTable table =
+                new ParkingTimeTable(items, maxBookingTime, maxPrice);
+
         // Run
         view.displayAllInformation(
                 cbLevels,
                 parkingTimeDefinitions,
                 transactionLogDate,
-                parkingLots);
+                parkingLots,
+                table);
 
         // Assert
         assertEquals(
                 MSG_VAL_PARKING_TIME_INFO
                         + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT, coinBoxTotal)
+                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT,
+                            coinBoxTotal)
                         + System.lineSeparator()
-                        + MessageFormat.format(MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, coinCount, coinBoxTotal)
+                        + MessageFormat.format(MSG_VAL_ALL_VIEW_CBL_CONTENT,
+                            coin, coinCount, coinBoxTotal)
                         + System.lineSeparator()
                 + MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE
                         + System.lineSeparator()
@@ -653,6 +699,22 @@ public class ConsoleSimulationViewTest {
                         + System.lineSeparator()
                 + MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_LOTS,
                         formattedDate)
+                        + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME,
+                        formattedDate)
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_PARKING_TIME_TABLE,
+                            itemAmount1.toString() + "0",
+                            "00" + itemMinutes1.toString())
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_PARKING_TIME_TABLE,
+                            itemAmount2.toString() + ".00",
+                            itemMinutes2.toString())
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_PARKING_MAX_TIME, maxBookingTime)
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_PARKING_MAX_AMOUNT,
+                            maxPrice.toString() + ".00")
                         + System.lineSeparator()
                 + MessageFormat.format(MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG,
                         formattedDate)

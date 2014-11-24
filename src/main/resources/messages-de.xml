@@ -32,5 +32,9 @@
     <message key="view.all.information.coin.box.content.total">1) Inhalt der Münzeinheiten TOTAL:  {0} €</message>
     <message key="view.all.information.parking.time.def">2) Parkzeit Definition</message>
     <message key="view.all.information.parking.lots">3) ParkingMeter Info vom: {0}</message>
+    <message key="view.all.information.compute.parking.time">4) Test von computeTimeInMinutes()</message>
     <message key="view.all.information.transaction.log">5) Transaction Log vom {0}</message>
+    <message key="view.parking.time.table">{0} € -> {1} min</message>
+    <message key="view.parking.maximal.time">Max Park Time: {0} min</message>
+    <message key="view.parking.maximal.amount">Max Park Value: {0} €</message>
 </messages>

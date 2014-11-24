@@ -14,12 +14,14 @@ public class ParkingLotBooking {
     private boolean notEnoughMoney;
 
     private int parkingLotNumber;
+    private int bookingInMinutes;
 
     private Date paidFrom;
-    private Date paidTill;
 
+    private Date paidTill;
     private BigDecimal insertedMoney;
     private BigDecimal chargedMoney;
+
     private BigDecimal drawbackMoney;
 
     /**
@@ -154,5 +156,23 @@ public class ParkingLotBooking {
      */
     public void setNotEnoughMoney(boolean notEnoughMoney) {
         this.notEnoughMoney = notEnoughMoney;
+    }
+
+    /**
+     * Stores the length of the booking in minutes.
+     *
+     * @param bookingInMinutes Minutes count the user has paid for.
+     */
+    public void setBookingInMinutes(int bookingInMinutes) {
+        this.bookingInMinutes = bookingInMinutes;
+    }
+
+    /**
+     * Gets the length of the booking in minutes.
+     *
+     * @return Minutes count the user has paid for.
+     */
+    public int getBookingInMinutes() {
+        return bookingInMinutes;
     }
 }

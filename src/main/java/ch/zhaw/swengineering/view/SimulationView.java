@@ -5,6 +5,8 @@ import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
 import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
 import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
@@ -400,7 +402,8 @@ public abstract class SimulationView implements Runnable,
             List<CoinBoxLevel> coinBoxLevels,
             List<ParkingTimeDefinition> parkingTimeDefinitions,
             Date currentDate,
-            List<ParkingLot> parkingLots) {
+            List<ParkingLot> parkingLots,
+            ParkingTimeTable parkingTimeTable) {
         String formattedDate = dateFormatter.print(currentDate,
                 LocaleContextHolder.getLocale());
 
@@ -411,15 +414,18 @@ public abstract class SimulationView implements Runnable,
         BigDecimal totalCoinBoxes = new BigDecimal(0);
         totalCoinBoxes = totalCoinBoxes.setScale(2);
         for (CoinBoxLevel level : coinBoxLevels) {
-            totalCoinBoxes = totalCoinBoxes.add(level.getCoinValue().multiply(
-                    new BigDecimal(level.getCurrentCoinCount())));
+            BigDecimal currentCoinCount = new BigDecimal(level.getCurrentCoinCount());
+            BigDecimal coinBoxAmount = level.getCoinValue().multiply(currentCoinCount);
+            totalCoinBoxes = totalCoinBoxes.add(coinBoxAmount);
         }
-        print("view.all.information.coin.box.content.total", ViewOutputMode.LARGE_INFO,
+        print("view.all.information.coin.box.content.total",
+                ViewOutputMode.LARGE_INFO,
                 totalCoinBoxes);
         displayContentOfCoinBoxesCore(coinBoxLevels);
 
         // Parking time definitions
-        print("view.all.information.parking.time.def", ViewOutputMode.LARGE_INFO);
+        print("view.all.information.parking.time.def",
+                ViewOutputMode.LARGE_INFO);
         displayParkingTimeDefinitions(parkingTimeDefinitions);
 
         // Parking lots
@@ -427,12 +433,39 @@ public abstract class SimulationView implements Runnable,
                 ViewOutputMode.LARGE_INFO, formattedDate);
         displayBookedParkingLotsCore(parkingLots, currentDate);
 
-        // Output: test für Zeitberechnung
+        // Parking time calculation
+        print("view.all.information.compute.parking.time",
+                ViewOutputMode.LARGE_INFO);
+        displayParkingTimeCalculationTable(parkingTimeTable);
 
         // Transaction log
         print("view.all.information.transaction.log",
                 ViewOutputMode.LARGE_INFO, formattedDate);
         displayLast24HoursOfTransactionLog();
+    }
+
+    private void displayParkingTimeCalculationTable(
+            ParkingTimeTable table) {
+
+        int maxMinuteLength = Long.toString(
+                table.getItems().get(table.getItems().size()-1)
+                        .getMinutes()).length();
+        for (ParkingTimeTableItem item
+                : table.getItems()) {
+            print("view.parking.time.table",
+                    ViewOutputMode.LARGE_INFO,
+                    formatPrice(item.getAmount()),
+                    formatMinutes(item.getMinutes(),
+                            maxMinuteLength));
+        }
+
+        print("view.parking.maximal.time",
+                ViewOutputMode.LARGE_INFO,
+                table.getMaxBookingTime());
+
+        print("view.parking.maximal.amount",
+                ViewOutputMode.LARGE_INFO,
+                formatPrice(table.getMaxPrice()));
     }
 
     /* ********** Methods for prompt, executions and notification ********** */
@@ -640,6 +673,15 @@ public abstract class SimulationView implements Runnable,
         df.setMinimumFractionDigits(2);
         df.setGroupingUsed(false);
         return df.format(price);
+    }
+
+    private String formatMinutes(long minutes, int maxMinuteLength) {
+
+        String minutesString = Long.toString(minutes);
+        for (int i = minutesString.length(); i < maxMinuteLength; i++) {
+            minutesString = "0" + minutesString;
+        }
+        return minutesString;
     }
 
     /**
