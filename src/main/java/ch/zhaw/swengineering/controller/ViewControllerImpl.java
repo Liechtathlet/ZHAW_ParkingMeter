@@ -10,8 +10,6 @@ import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.SimulationViewInterface;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
@@ -25,12 +23,6 @@ import java.util.Map;
  */
 @Component
 public class ViewControllerImpl implements ViewController, ViewEventListener {
-
-    /**
-     * The Logger.
-     */
-    private static final Logger LOG = LogManager
-            .getLogger(ViewControllerImpl.class);
 
     @Autowired
     private SimulationViewInterface view;
@@ -98,14 +90,11 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             case VIEW_ALL_INFORMATION:
                 processed = true;
 
-                view.displayParkingMeterInfo();
-                view.displayContentOfCoinBoxes(slotMachine
-                        .getCurrentCoinBoxLevel());
-                view.displayParkingTimeDefinitions(parkingMeter
-                        .getParkingTimeDefinitions());
-
-                // Output: test für Zeitberechnung
-                // Output: Display Transaction log
+                view.displayAllInformation(
+                        slotMachine.getCurrentCoinBoxLevel(),
+                        parkingMeter.getParkingTimeDefinitions(),
+                        new Date(),
+                        parkingMeter.getParkingLots());
 
                 view.promptForParkingLotNumber();
                 break;

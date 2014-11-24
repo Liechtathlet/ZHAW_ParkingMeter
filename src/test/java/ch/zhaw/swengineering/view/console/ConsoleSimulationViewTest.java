@@ -1,13 +1,28 @@
 package ch.zhaw.swengineering.view.console;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import ch.zhaw.swengineering.event.*;
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.MessageProvider;
+import ch.zhaw.swengineering.helper.TransactionLogHandler;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.ParkingLot;
+import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
+import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
+import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
+import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
+import ch.zhaw.swengineering.view.ViewStateEnum;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.*;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -15,44 +30,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
-import ch.zhaw.swengineering.event.*;
-import ch.zhaw.swengineering.helper.TransactionLogHandler;
-import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
-import org.springframework.format.datetime.DateFormatter;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.model.CoinBoxLevel;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachine;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import ch.zhaw.swengineering.view.ViewStateEnum;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -96,14 +78,20 @@ public class ConsoleSimulationViewTest {
     private static final String MSG_KEY_PROMPT_SEPARATOR = "view.prompt.separator";
     private static final String MSG_VAL_PROMPT_SEPARATOR = ": ";
 
-    private static final String MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE = "view.all.information.title.template";
-    private static final String MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE = "{0}) {1}";
+    private static final String MSG_KEY_ALL_INFORMATION_COIN_BOX_CONTENT = "view.all.information.coin.box.content.total";
+    private static final String MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT = "coin box content. total {0} €";
 
-    private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE = "view.parking.time.def";
+    private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE = "view.all.information.parking.time.def";
     private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE = "parking time def";
 
     private static final String MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "view.all.information.parking.time";
     private static final String MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE = "timerange [{0}] | from {1} € | to {2} € | time: {3} min |";
+
+    private static final String MSG_KEY_ALL_INFORMATION_PARKING_LOTS = "view.all.information.parking.lots";
+    private static final String MSG_VAL_ALL_INFORMATION_PARKING_LOTS = "parking lots of {0}";
+
+    private static final String MSG_KEY_ALL_INFORMATION_TRANSACTION_LOG = "view.all.information.transaction.log";
+    private static final String MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG = "transaction log of {0}";
 
     private static final String MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY = "view.transaction.log.entry";
     private static final String MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY = "[{0}] {1}";
@@ -131,6 +119,12 @@ public class ConsoleSimulationViewTest {
 
     private static final String MSG_KEY_PARKING_TIME_INFO = "view.parking.time.info";
     private static final String MSG_VAL_PARKING_TIME_INFO = "info";
+
+    private static final String MSG_KEY_PARKING_TIME_EXCEEDED = "parking.time.exceeded";
+    private static final String MSG_VAL_PARKING_TIME_EXCEEDED = "exceeded";
+
+    private static final String MSG_KEY_BOOKED_PARKINGLOT = "view.booked.parkinglot";
+    private static final String MSG_VAL_BOOKED_PARKINGLOT = "parkingmeter {0}  | paid till {1}  | deviation {2}  | {3}";
 
     // Replacement for the command line
     private final ByteArrayOutputStream outContent = new ByteArrayOutputStream();
@@ -214,14 +208,21 @@ public class ConsoleSimulationViewTest {
                 MSG_VAL_PROMPT_SEPARATOR);
 
         when(messageProvider
+                .get(MSG_KEY_ALL_INFORMATION_COIN_BOX_CONTENT))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT);
+
+        when(messageProvider
                 .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
 
-        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TITLE_TEMPLATE))
-                .thenReturn(MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE);
-
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE);
+
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_LOTS))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_LOTS);
+
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TRANSACTION_LOG))
+                .thenReturn(MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG);
 
         when(messageProvider.get(MSG_KEY_ALL_COIN_LEVEL_TOO_HIGH)).thenReturn(
                 MSG_VAL_ALL_COIN_LEVEL_TOO_HIGH);
@@ -249,6 +250,12 @@ public class ConsoleSimulationViewTest {
 
         when(messageProvider.get(MSG_KEY_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW)).thenReturn(
                 MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW);
+
+        when(messageProvider.get(MSG_KEY_PARKING_TIME_EXCEEDED)).thenReturn(
+                MSG_VAL_PARKING_TIME_EXCEEDED);
+
+        when(messageProvider.get(MSG_KEY_BOOKED_PARKINGLOT)).thenReturn(
+                MSG_VAL_BOOKED_PARKINGLOT);
 
         // Initialize view
         view.addViewEventListener(listener);
@@ -283,8 +290,10 @@ public class ConsoleSimulationViewTest {
     @Test
     public final void whenEnteredAStringItShouldNotGenerateAnEvent()
             throws IOException {
-        String expectedSequence = MSG_VAL_ENTER_PARKING_LOT + ": "
-                + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+        String expectedSequence = MSG_VAL_ENTER_PARKING_LOT
+                + MSG_VAL_PROMPT_SEPARATOR
+                + MSG_VAL_INVALID_FORMAT
+                + System.lineSeparator();
 
         String invalidParkingLotNumber = "invalid parkinglot number";
 
@@ -325,7 +334,8 @@ public class ConsoleSimulationViewTest {
         view.executeActionsForStateEnteringParkingLotNumber();
 
         // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT + ": ", outContent.toString());
+        assertEquals(MSG_VAL_ENTER_PARKING_LOT
+                + MSG_VAL_PROMPT_SEPARATOR, outContent.toString());
     }
 
     @Test
@@ -394,7 +404,7 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecuteWithValidCoins()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
+                + MSG_VAL_PROMPT_SEPARATOR, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("0.5 1.0");
@@ -419,7 +429,7 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinString()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
+                + MSG_VAL_PROMPT_SEPARATOR, 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         // Mock
@@ -446,7 +456,7 @@ public class ConsoleSimulationViewTest {
             throws IOException, CoinBoxFullException, NoTransactionException,
             InvalidCoinException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
+                + MSG_VAL_PROMPT_SEPARATOR, 5)
                 + MSG_VAL_COIN_INVALID + System.lineSeparator();
 
         List<BigDecimal> validCoins = new ArrayList<>();
@@ -472,7 +482,7 @@ public class ConsoleSimulationViewTest {
     public void testStateForDroppingInMoneyExecuteWithInvalidCoinDelimiter()
             throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
+                + MSG_VAL_PROMPT_SEPARATOR, 5)
                 + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         // Mock
@@ -491,7 +501,7 @@ public class ConsoleSimulationViewTest {
             throws IOException, CoinBoxFullException, NoTransactionException,
             InvalidCoinException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
+                + MSG_VAL_PROMPT_SEPARATOR, 5)
                 + MSG_VAL_CB_FULL
                 + System.lineSeparator()
                 + MSG_VAL_DRAWBACK
@@ -526,7 +536,7 @@ public class ConsoleSimulationViewTest {
         Map<BigDecimal, Integer> drawbackMap = new Hashtable<>();
 
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
+                + MSG_VAL_PROMPT_SEPARATOR, 5);
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
@@ -552,7 +562,7 @@ public class ConsoleSimulationViewTest {
             throws IOException, CoinBoxFullException, NoTransactionException,
             InvalidCoinException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5)
+                + MSG_VAL_PROMPT_SEPARATOR, 5)
                 + MSG_VAL_ONE_CB_FULL
                 + System.lineSeparator()
                 + MSG_VAL_DRAWBACK + System.lineSeparator();
@@ -581,7 +591,14 @@ public class ConsoleSimulationViewTest {
 
     @Test
     public void testWhenDisplayAllInformationIsCalledItShouldOutputsText() {
-        // Mock
+
+        // Mock coin box level
+        BigDecimal coin = new BigDecimal(5);
+        int coinCount = 4;
+        int coinBoxTotal = coin.intValue() * coinCount;
+        List<CoinBoxLevel> cbLevels = getCoinBoxLevelsMock(coin, coinCount);
+
+        // Mock parking time definitions
         ParkingTimeDefinition definition1 = new ParkingTimeDefinition();
         definition1.setPricePerPeriod(new BigDecimal(0.5));
         definition1.setDurationOfPeriodInMinutes(30);
@@ -594,48 +611,66 @@ public class ConsoleSimulationViewTest {
         definition2.setCountOfSuccessivePeriods(1);
         definition2.setOrderId(2);
 
-        List<ParkingTimeDefinition> parkingTimeDefinition = new ArrayList<>();
-        parkingTimeDefinition.add(definition1);
-        parkingTimeDefinition.add(definition2);
+        List<ParkingTimeDefinition> parkingTimeDefinitions = new ArrayList<>();
+        parkingTimeDefinitions.add(definition1);
+        parkingTimeDefinitions.add(definition2);
 
-        ParkingTimeDefinitions definitions = new ParkingTimeDefinitions();
-        definitions.setParkingTimeDefinitions(parkingTimeDefinition);
+        Date transactionLogDate = new Date();
+        String formattedDate = dateFormatter.print(
+                transactionLogDate, Locale.getDefault());
 
-        when(parkingTimeConfigurationProvider.get()).thenReturn(definitions);
+        // Mock parking lots
+        List<ParkingLot> parkingLots = new ArrayList<>();
 
         // Run
-        view.displayParkingTimeDefinitions(definitions
-                .getParkingTimeDefinitions());
+        view.displayAllInformation(
+                cbLevels,
+                parkingTimeDefinitions,
+                transactionLogDate,
+                parkingLots);
 
         // Assert
         assertEquals(
-                MessageFormat.format(MessageFormat.format(
-                        MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE, "2",
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE),
-                        outContent.toString() + System.lineSeparator()
-                                + MSG_VAL_ALL_INFORMATION_TITLE_TEMPLATE, "2",
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE)
+                MSG_VAL_PARKING_TIME_INFO
+                        + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT, coinBoxTotal)
+                        + System.lineSeparator()
+                        + MessageFormat.format(MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, coinCount, coinBoxTotal)
+                        + System.lineSeparator()
+                + MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE
                         + System.lineSeparator()
                         + MessageFormat.format(
-                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                                "1", "0.00", "0.50", "30")
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "1", "0.00", "0.50", "30")
                         + System.lineSeparator()
                         + MessageFormat.format(
-                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                                "2", "0.50", "1.00", "60")
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "2", "0.50", "1.00", "60")
                         + System.lineSeparator()
                         + MessageFormat.format(
-                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                                "3", "1.00", "2.00", "70")
+                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                        "3", "1.00", "2.00", "70")
+                        + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_LOTS,
+                        formattedDate)
+                        + System.lineSeparator()
+                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG,
+                        formattedDate)
                         + System.lineSeparator(),
                 outContent.toString());
+    }
+
+    private List<CoinBoxLevel> getCoinBoxLevelsMock(BigDecimal coin, int coinCount) {
+        List<CoinBoxLevel> cbLevels = new ArrayList<>();
+        cbLevels.add(new CoinBoxLevel(coin, coinCount, 10));
+        return cbLevels;
     }
 
     @Test
     public void testWhenDisplayP() {
 
         // Run
-        view.displayParkingMeterInfo();
+        view.displayParkingMeterInfo(new Date());
 
         // Assert
         assertEquals(MSG_VAL_PARKING_TIME_INFO + System.lineSeparator(),
@@ -887,7 +922,7 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testReadFromConsole() throws IOException {
         String exptectedMessage = MessageFormat.format(MSG_VAL_ENTER_COINS
-                + ": ", 5);
+                + MSG_VAL_PROMPT_SEPARATOR, 5);
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("x");
@@ -919,17 +954,17 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testStateForEnteringCoinBoxLevelWidthInvalidNumber()
             throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<>();
 
         BigDecimal coin = new BigDecimal(5);
-        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+        int coinCount = 4;
+        List<CoinBoxLevel> cbLevels = getCoinBoxLevelsMock(coin, coinCount);
 
-        String exptectedMessage = MessageFormat.format(
-                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
-                coin.multiply(new BigDecimal(4)))
+        String expectedMessage = MessageFormat.format(
+                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, coinCount,
+                coin.multiply(new BigDecimal(coinCount)))
                 + System.lineSeparator()
                 + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
-                + ": " + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+                + MSG_VAL_PROMPT_SEPARATOR + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("abc");
@@ -939,7 +974,7 @@ public class ConsoleSimulationViewTest {
         view.executeActionsForStateEnteringCoinBoxLevels();
 
         // Assert
-        assertEquals(exptectedMessage, outContent.toString());
+        assertEquals(expectedMessage, outContent.toString());
 
         verify(listener, Mockito.times(0)).coinBoxLevelEntered(
                 any(CoinBoxLevelEnteredEvent.class));
@@ -948,17 +983,17 @@ public class ConsoleSimulationViewTest {
     @Test
     public void testStateForEnteringCoinBoxLevelWidthToHighNumber()
             throws IOException {
-        List<CoinBoxLevel> cbLevels = new ArrayList<>();
-
         BigDecimal coin = new BigDecimal(5);
-        cbLevels.add(new CoinBoxLevel(coin, 4, 10));
+        int coinCount = 4;
+
+        List<CoinBoxLevel> cbLevels = getCoinBoxLevelsMock(coin, coinCount);
 
         String exptectedMessage = MessageFormat.format(
-                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, 4,
-                coin.multiply(new BigDecimal(4)))
+                MSG_VAL_ALL_VIEW_CBL_CONTENT, coin, coinCount,
+                coin.multiply(new BigDecimal(coinCount)))
                 + System.lineSeparator()
                 + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
-                + ": " + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
+                + MSG_VAL_PROMPT_SEPARATOR + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("200");
@@ -986,7 +1021,7 @@ public class ConsoleSimulationViewTest {
                 coin.multiply(new BigDecimal(4)))
                 + System.lineSeparator()
                 + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
-                + ": ";
+                + MSG_VAL_PROMPT_SEPARATOR;
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("5");

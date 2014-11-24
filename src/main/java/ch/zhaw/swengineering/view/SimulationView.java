@@ -1,28 +1,6 @@
 package ch.zhaw.swengineering.view;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.locks.Condition;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.format.datetime.DateFormatter;
-
-import ch.zhaw.swengineering.event.ActionAbortedEvent;
-import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
-import ch.zhaw.swengineering.event.MoneyInsertedEvent;
-import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
-import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
-import ch.zhaw.swengineering.event.ShutdownEvent;
-import ch.zhaw.swengineering.event.ViewEventListener;
+import ch.zhaw.swengineering.event.*;
 import ch.zhaw.swengineering.helper.DateHelper;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
@@ -36,6 +14,21 @@ import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.data.ViewDataStore;
 import ch.zhaw.swengineering.view.helper.ViewOutputMode;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.format.datetime.DateFormatter;
+
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author Daniel Brun Interface which defines the actions which the controller
@@ -54,6 +47,7 @@ public abstract class SimulationView implements Runnable,
      * Date-Format.
      */
     private static final String DATE_FORMAT = "dd.MM.YYYY HH:mm";
+    protected static final DateFormatter dateFormatter = new DateFormatter(DATE_FORMAT);
 
     private Thread thread;
 
@@ -62,12 +56,10 @@ public abstract class SimulationView implements Runnable,
     private ViewStateEnum viewState;
 
     private boolean run;
-
     private final Lock runLock;
-    private final Condition waitCondition;
 
+    private final Condition waitCondition;
     protected ViewDataStore dataStore;
-    protected DateFormatter dateFormatter;
 
     @Autowired
     protected IntelligentSlotMachineUserInteractionInterface slotMachine;
@@ -78,6 +70,7 @@ public abstract class SimulationView implements Runnable,
     @Autowired
     protected TransactionLogHandler transactionLogHandler;
 
+
     /**
      * Creates a new instance of this class.
      */
@@ -85,7 +78,6 @@ public abstract class SimulationView implements Runnable,
         eventListeners = new ArrayList<>();
         runLock = new ReentrantLock();
         dataStore = new ViewDataStore();
-        dateFormatter = new DateFormatter(DATE_FORMAT);
 
         waitCondition = runLock.newCondition();
 
@@ -275,6 +267,11 @@ public abstract class SimulationView implements Runnable,
                 dateFormatter.print(currentDate,
                         LocaleContextHolder.getLocale()));
 
+        displayBookedParkingLotsCore(parkingLots, currentDate);
+
+    }
+
+    private void displayBookedParkingLotsCore(List<ParkingLot> parkingLots, Date currentDate) {
         for (ParkingLot parkingLot : parkingLots) {
             String paidUntilString = "--";
             String timeDifferenceString = "--";
@@ -302,14 +299,12 @@ public abstract class SimulationView implements Runnable,
                     parkingLot.getNumber(), paidUntilString,
                     timeDifferenceString, parkingTimeExceededString);
         }
-
     }
 
-    @Override
-    public void displayParkingMeterInfo() {
+    public void displayParkingMeterInfo(Date currentDate) {
         print("view.parking.time.info",
                 ViewOutputMode.LARGE_INFO,
-                dateFormatter.print(new Date(), LocaleContextHolder.getLocale()));
+                dateFormatter.print(currentDate, LocaleContextHolder.getLocale()));
     }
 
     @Override
@@ -319,11 +314,8 @@ public abstract class SimulationView implements Runnable,
                 formatCoinMaptoString(somePaymentMap, true));
     }
 
-    @Override
     public void displayParkingTimeDefinitions(
             List<ParkingTimeDefinition> someParkingTimeDefinitions) {
-        print("view.all.information.title.template", ViewOutputMode.LARGE_INFO,
-                2, messageProvider.get("view.parking.time.def").trim());
         int i = 1;
         int lastMinuteCount = 0;
         BigDecimal lastPrice = new BigDecimal(0);
@@ -361,6 +353,10 @@ public abstract class SimulationView implements Runnable,
         print("view.info.coin.box.content.total", ViewOutputMode.LARGE_INFO,
                 totalCoinBoxes);
 
+        displayContentOfCoinBoxesCore(someCoinBoxLevels);
+    }
+
+    private void displayContentOfCoinBoxesCore(List<CoinBoxLevel> someCoinBoxLevels) {
         for (CoinBoxLevel level : someCoinBoxLevels) {
             print("view.info.coin.box.content",
                     ViewOutputMode.LARGE_INFO,
@@ -397,6 +393,46 @@ public abstract class SimulationView implements Runnable,
             print("view.transaction.log.entry", ViewOutputMode.LARGE_INFO,
                     entry.creationTime, entry.text);
         }
+    }
+
+    @Override
+    public void displayAllInformation(
+            List<CoinBoxLevel> coinBoxLevels,
+            List<ParkingTimeDefinition> parkingTimeDefinitions,
+            Date currentDate,
+            List<ParkingLot> parkingLots) {
+        String formattedDate = dateFormatter.print(currentDate,
+                LocaleContextHolder.getLocale());
+
+        // Title
+        displayParkingMeterInfo(currentDate);
+
+        // Coin boxes
+        BigDecimal totalCoinBoxes = new BigDecimal(0);
+        totalCoinBoxes = totalCoinBoxes.setScale(2);
+        for (CoinBoxLevel level : coinBoxLevels) {
+            totalCoinBoxes = totalCoinBoxes.add(level.getCoinValue().multiply(
+                    new BigDecimal(level.getCurrentCoinCount())));
+        }
+        print("view.all.information.coin.box.content.total", ViewOutputMode.LARGE_INFO,
+                totalCoinBoxes);
+        displayContentOfCoinBoxesCore(coinBoxLevels);
+
+        // Parking time definitions
+        print("view.all.information.parking.time.def", ViewOutputMode.LARGE_INFO);
+        displayParkingTimeDefinitions(parkingTimeDefinitions);
+
+        // Parking lots
+        print("view.all.information.parking.lots",
+                ViewOutputMode.LARGE_INFO, formattedDate);
+        displayBookedParkingLotsCore(parkingLots, currentDate);
+
+        // Output: test für Zeitberechnung
+
+        // Transaction log
+        print("view.all.information.transaction.log",
+                ViewOutputMode.LARGE_INFO, formattedDate);
+        displayLast24HoursOfTransactionLog();
     }
 
     /* ********** Methods for prompt, executions and notification ********** */
@@ -757,9 +793,7 @@ public abstract class SimulationView implements Runnable,
 
     @Override
     public final void rolebackTransaction() {
-        Map<BigDecimal, Integer> drawbackMap = slotMachine
-                .rolebackTransaction();
-
+        slotMachine.rolebackTransaction();
         displayMessageForDrawback();
     }
 }

@@ -112,15 +112,6 @@ public interface SimulationViewInterface {
     void displayBookedParkingLots(List<ParkingLot> parkingLots);
 
     /**
-     * Displays all available information.
-     * 
-     * @param someParkingTimeDefinitions
-     *            The parking time definitions.
-     */
-    void displayParkingTimeDefinitions(
-            List<ParkingTimeDefinition> someParkingTimeDefinitions);
-
-    /**
      * Displays a message with the drawback.
      */
     void displayMessageForDrawback();
@@ -132,11 +123,6 @@ public interface SimulationViewInterface {
      *            the coin box levels to display.
      */
     void displayContentOfCoinBoxes(List<CoinBoxLevel> someCoinBoxLevels);
-
-    /**
-     * Displays a parking meter info text.
-     */
-    void displayParkingMeterInfo();
 
     /**
      * Displays a message with the inserted coin couns and the total.
@@ -178,4 +164,18 @@ public interface SimulationViewInterface {
      *            Number of transaction log entries to show.
      */
     void displayNTransactionLogEntries(int n);
+
+    /**
+     * Displays all information of the parking meter.
+     *
+     * @param coinBoxLevels Coin box values.
+     * @param parkingTimeDefinitions Parking time defintions.
+     * @param currentDate Current date.
+     * @param parkingLots Parking lots.
+     */
+    void displayAllInformation(
+            List<CoinBoxLevel> coinBoxLevels,
+            List<ParkingTimeDefinition> parkingTimeDefinitions,
+            Date currentDate,
+            List<ParkingLot> parkingLots);
 }

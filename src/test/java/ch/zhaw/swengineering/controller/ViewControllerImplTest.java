@@ -172,12 +172,11 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
-        verify(view).displayParkingMeterInfo();
-        verify(view).displayContentOfCoinBoxes(
-                slotMachine.getCurrentCoinBoxLevel());
-        verify(view).displayParkingTimeDefinitions(
-                parkingMeter.getParkingTimeDefinitions());
-        verify(view).promptForParkingLotNumber();
+        verify(view).displayAllInformation(
+                any(ArrayList.class),
+                any(ArrayList.class),
+                any(Date.class),
+                any(ArrayList.class));
     }
 
     /**
