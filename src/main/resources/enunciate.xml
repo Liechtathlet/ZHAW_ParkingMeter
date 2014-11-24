@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<enunciate label="service/myservice" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:noNamespaceSchemaLocation="http://enunciate.codehaus.org/schemas/enunciate-1.25.xsd">
+	<modules>
+		<!--<basic-app disabled="false" />
+		<java-client disabled="true" />
+		<xml disabled="false" />
+		<jaxws-client disabled="true" />
+		<jboss disabled="true" />
+		<jaxws-ri disabled="false" />
+		<jaxws-support disabled="false" />-->
+		<csharp disabled="true" />
+		<jersey disabled="true" />
+		<c disabled="true" />
+		<obj-c disabled="true" />
+		<!--<spring-app disabled="false"/>-->
+	</modules>
+	<services>
+		<rest defaultRestSubcontext="/" />
+	</services>
+</enunciate>

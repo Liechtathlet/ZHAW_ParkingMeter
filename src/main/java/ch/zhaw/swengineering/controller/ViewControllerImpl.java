@@ -61,7 +61,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Register event listener.
         view.addViewEventListener(this);
-
+        
         // Start simulation view.
         view.startSimulationView();
 

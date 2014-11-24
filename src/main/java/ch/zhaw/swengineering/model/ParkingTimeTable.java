@@ -4,17 +4,22 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public class ParkingTimeTable {
-    private final List<ParkingTimeTableItem> items;
-    private final int maxBookingTime;
-    private final BigDecimal maxPrice;
+    private List<ParkingTimeTableItem> items;
+    private int maxBookingTime;
+    private BigDecimal maxPrice;
 
-    public ParkingTimeTable(
-            List<ParkingTimeTableItem> items,
-            int maxBookingTime,
-            BigDecimal maxPrice) {
+    public ParkingTimeTable(List<ParkingTimeTableItem> items,
+            int maxBookingTime, BigDecimal maxPrice) {
         this.items = items;
         this.maxBookingTime = maxBookingTime;
         this.maxPrice = maxPrice;
+    }
+
+    /**
+     * Empty constructor for serialization.
+     */
+    public ParkingTimeTable() {
+        super();
     }
 
     public BigDecimal getMaxPrice() {

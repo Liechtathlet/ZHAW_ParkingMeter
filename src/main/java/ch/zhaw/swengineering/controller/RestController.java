@@ -2,6 +2,9 @@ package ch.zhaw.swengineering.controller;
 
 import java.util.List;
 
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +22,7 @@ import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBacken
 /**
  * Created by slang on 23.11.14.
  */
+@Path("/")
 @org.springframework.web.bind.annotation.RestController
 public class RestController {
 
@@ -46,6 +50,8 @@ public class RestController {
      *            Number of transaction logs to display.
      * @return Transaction log entries.
      */
+    @GET
+    @Path("/transactionLog")
     @RequestMapping("/transactionLog")
     public List<TransactionLogEntry> transactionLogNEntries(
             @RequestParam(value = "count", defaultValue = "") String countString) {
@@ -64,6 +70,8 @@ public class RestController {
      * 
      * @return Transaction log entries.
      */
+    @GET
+    @Path("/transactionLog/24Hours")
     @RequestMapping("/transactionLog/24Hours")
     public List<TransactionLogEntry> transactionLog24Hours() {
         return transactionLog.getLast24Hours();
@@ -75,6 +83,8 @@ public class RestController {
      * 
      * @return Parking lot data.
      */
+    @GET
+    @Path("/parkingLots")
     @RequestMapping("/parkingLots")
     public List<ParkingLot> parkingLots() {
         return parkingMeter.getParkingLots();
@@ -85,6 +95,8 @@ public class RestController {
      * 
      * @return Coin boxes data.
      */
+    @GET
+    @Path("/coinBoxes")
     @RequestMapping("/coinBoxes")
     public List<CoinBoxLevel> coinBoxes() {
         return slotMachine.getCurrentCoinBoxLevel();
@@ -95,6 +107,8 @@ public class RestController {
      * 
      * @return Parking time definitions.
      */
+    @GET
+    @Path("/parkingTimeDefinitions")
     @RequestMapping("/parkingTimeDefinitions")
     public List<ParkingTimeDefinition> parkingTimeDefinitions() {
         return parkingMeter.getParkingTimeDefinitions();

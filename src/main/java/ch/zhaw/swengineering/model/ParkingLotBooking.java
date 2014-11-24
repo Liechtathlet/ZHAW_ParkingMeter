@@ -57,16 +57,24 @@ public class ParkingLotBooking {
      *            The drawback.
      */
     public ParkingLotBooking(boolean notEnoughMoney, int parkingLotNumber,
-            final Date paidFrom, final Date paidTill, final BigDecimal insertedMoney,
-            final BigDecimal chargedMoney, final BigDecimal drawbackMoney) {
+            final Date paidFrom, final Date paidTill,
+            final BigDecimal insertedMoney, final BigDecimal chargedMoney,
+            final BigDecimal drawbackMoney) {
         super();
         this.notEnoughMoney = notEnoughMoney;
         this.parkingLotNumber = parkingLotNumber;
         this.paidFrom = (Date) paidFrom.clone();
-        this.paidTill = (Date)  paidTill.clone();
+        this.paidTill = (Date) paidTill.clone();
         this.insertedMoney = insertedMoney;
         this.chargedMoney = chargedMoney;
         this.drawbackMoney = drawbackMoney;
+    }
+
+    /**
+     * Empty constructor for Serialization.
+     */
+    public ParkingLotBooking() {
+        super();
     }
 
     /**
