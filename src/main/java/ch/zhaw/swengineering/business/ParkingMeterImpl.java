@@ -267,26 +267,28 @@ public class ParkingMeterImpl implements ParkingMeter {
 
     @Override
     public ParkingTimeTable getParkingTimeTable() {
-        List<BigDecimal> values = new ArrayList<BigDecimal>() {{
-            add(new BigDecimal(0));
-            add(new BigDecimal(0.5));
-            add(new BigDecimal(1));
-            add(new BigDecimal(1.5));
-            add(new BigDecimal(2));
-        }};
-
         int number = getParkingLots().get(0).getNumber();
+        BigDecimal lastAmount = new BigDecimal(0);
 
         List<ParkingTimeTableItem> items = new ArrayList<>();
-        for (BigDecimal amount : values) {
-            ParkingLotBooking booking =
-                    calculateBookingForParkingLot(number, amount);
-            items.add(new ParkingTimeTableItem(
-                    amount, booking.getBookingInMinutes()));
+
+        for (ParkingTimeDefinition def : definitions
+                .getParkingTimeDefinitions()) {
+            for (int i = 0; i < def.getCountOfSuccessivePeriods(); i ++) {
+                ParkingLotBooking booking =
+                        calculateBookingForParkingLot(number, lastAmount);
+                items.add(new ParkingTimeTableItem(
+                        lastAmount, booking.getBookingInMinutes()));
+                lastAmount = lastAmount.add(def.getPricePerPeriod());
+            }
         }
 
-        return new ParkingTimeTable(items, getMaxBookingTime(),
-                getMaxPrice());
+        int maxBookingTime = getMaxBookingTime();
+        BigDecimal maxPrice = getMaxPrice();
+        items.add(new ParkingTimeTableItem(maxPrice, maxBookingTime));
+
+        return new ParkingTimeTable(items, maxBookingTime,
+                maxPrice);
     }
 
     private BigDecimal getMaxPrice() {

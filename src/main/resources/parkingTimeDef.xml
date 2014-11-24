@@ -11,4 +11,10 @@
         <countOfSuccessivePeriods>4</countOfSuccessivePeriods>
         <orderId>1</orderId>
     </parkingTimeDefinition>
+    <parkingTimeDefinition>
+        <pricePerPeriod>5</pricePerPeriod>
+        <durationOfPeriodInMinutes>5</durationOfPeriodInMinutes>
+        <countOfSuccessivePeriods>2</countOfSuccessivePeriods>
+        <orderId>3</orderId>
+    </parkingTimeDefinition>
 </parkingTimeDefinitions>
