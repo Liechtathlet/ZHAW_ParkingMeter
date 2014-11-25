@@ -3,11 +3,13 @@
  */
 package ch.zhaw.swengineering.view.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import ch.zhaw.swengineering.view.gui.listeners.ActionAbortListener;
+import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.math.BigInteger;
@@ -15,16 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
-
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JTextArea;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-
-import ch.zhaw.swengineering.view.gui.listeners.ActionAbortListener;
-import ch.zhaw.swengineering.view.gui.listeners.NumberInputActionListener;
 
 /**
  * @author Roland Hofer
@@ -88,10 +80,10 @@ public class ParkingMeterPanel extends JPanel implements
     private boolean cancelPressed;
 
     private String promptText;
-    private String lastErrorText;
+    String lastErrorText;
 
-    private int currentInfoBufferElements;
-    private int infoMsgBufferSize;
+    int currentInfoBufferElements;
+    int infoMsgBufferSize;
 
     private ActionAbortListener actionAbortListener;
 
@@ -122,7 +114,7 @@ public class ParkingMeterPanel extends JPanel implements
         setPreferredSize(new Dimension((int) (initialWidth * factor),
                 (int) (initialHeight * factor)));
 
-        numberBlockList = new ArrayList<JButton>();
+        numberBlockList = new ArrayList<>();
 
         numberInputListener = new NumberInputActionListener(this);
 
@@ -275,9 +267,7 @@ public class ParkingMeterPanel extends JPanel implements
                 actionExecuted = true;
                 try {
                     barrier.await();
-                } catch (InterruptedException e) {
-                    LOG.warn("Barrier failed...", e);
-                } catch (BrokenBarrierException e) {
+                } catch (Exception e) {
                     LOG.warn("Barrier failed...", e);
                 }
             }
@@ -287,9 +277,7 @@ public class ParkingMeterPanel extends JPanel implements
                 actionExecuted = true;
                 try {
                     barrier.await();
-                } catch (InterruptedException e) {
-                    LOG.warn("Barrier failed...", e);
-                } catch (BrokenBarrierException e) {
+                } catch (Exception e) {
                     LOG.warn("Barrier failed...", e);
                 }
                 resetErrorDisplay();
@@ -305,9 +293,7 @@ public class ParkingMeterPanel extends JPanel implements
         actionExecuted = true;
         try {
             barrier.await();
-        } catch (InterruptedException e) {
-            LOG.warn("Barrier failed...", e);
-        } catch (BrokenBarrierException e) {
+        } catch (Exception e) {
             LOG.warn("Barrier failed...", e);
         }
     }
@@ -351,7 +337,7 @@ public class ParkingMeterPanel extends JPanel implements
         BigInteger returnInt = numberInputListener.getIntegerInput();
 
         if (returnInt != null) {
-            return Integer.valueOf(returnInt.intValue());
+            return returnInt.intValue();
         } else {
             return null;
         }
@@ -415,7 +401,7 @@ public class ParkingMeterPanel extends JPanel implements
     /**
      * Resets the error display.
      */
-    private void resetErrorDisplay() {
+    void resetErrorDisplay() {
         errorDisplay.setText("");
         lastErrorText = null;
     }
@@ -432,7 +418,7 @@ public class ParkingMeterPanel extends JPanel implements
     /**
      * Resets the prompt display.
      */
-    private void resetPromptDisplay() {
+    public void resetPromptDisplay() {
         display.setText("");
     }
 
