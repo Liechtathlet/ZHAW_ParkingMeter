@@ -2,7 +2,6 @@ package ch.zhaw.swengineering.helper;
 
 import ch.zhaw.swengineering.model.persistence.*;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,9 +10,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
-import java.util.Date;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes=ParkingMeterRunner.class, loader=AnnotationConfigContextLoader.class)

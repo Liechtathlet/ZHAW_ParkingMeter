@@ -1,42 +1,30 @@
 package ch.zhaw.swengineering.slotmachine.controller;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
+import ch.zhaw.swengineering.model.CoinBoxLevel;
+import ch.zhaw.swengineering.model.persistence.CoinBox;
+import ch.zhaw.swengineering.model.persistence.CoinBoxes;
+import ch.zhaw.swengineering.slotmachine.exception.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.ConfigurationWriter;
-import ch.zhaw.swengineering.model.CoinBoxLevel;
-import ch.zhaw.swengineering.model.persistence.CoinBox;
-import ch.zhaw.swengineering.model.persistence.CoinBoxes;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
-import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
-import ch.zhaw.swengineering.slotmachine.exception.SlotMachineException;
-import ch.zhaw.swengineering.slotmachine.exception.TransactionAlreadyStartedException;
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class IntelligentSlotMachineImplTest {
 
     @InjectMocks
@@ -223,7 +211,7 @@ public class IntelligentSlotMachineImplTest {
     public final void testFinishTransactionWithDrawback()
             throws NoTransactionException, InvalidCoinException,
             CoinBoxFullException {
-        Map<BigDecimal, Integer> drawbackMap = new HashMap<BigDecimal, Integer>();
+        Map<BigDecimal, Integer> drawbackMap = new HashMap<>();
 
         BigDecimal insertedCoin = new BigDecimal(0.5);
         BigDecimal drawBack = new BigDecimal(2.0);
@@ -231,9 +219,9 @@ public class IntelligentSlotMachineImplTest {
         insertedCoin = insertedCoin.setScale(2);
         drawBack = drawBack.setScale(2);
 
-        drawbackMap.put(insertedCoin, Integer.valueOf(0));
-        drawbackMap.put(new BigDecimal(1.0).setScale(2), Integer.valueOf(0));
-        drawbackMap.put(drawBack, Integer.valueOf(1));
+        drawbackMap.put(insertedCoin, 0);
+        drawbackMap.put(new BigDecimal(1.0).setScale(2), 0);
+        drawbackMap.put(drawBack, 1);
 
         slotMachine.startTransaction();
 

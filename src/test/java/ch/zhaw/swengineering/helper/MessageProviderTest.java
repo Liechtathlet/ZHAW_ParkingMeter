@@ -2,24 +2,19 @@ package ch.zhaw.swengineering.helper;
 
 import ch.zhaw.swengineering.model.persistence.Message;
 import ch.zhaw.swengineering.model.persistence.Messages;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes=ParkingMeterRunner.class, loader=AnnotationConfigContextLoader.class)
+@RunWith(MockitoJUnitRunner.class)
 public class MessageProviderTest {
 
 	@InjectMocks
@@ -57,7 +52,7 @@ public class MessageProviderTest {
 	public void gettingDefaultMessageWhenKeyIsNotPresent() throws Exception {
 		String key = "Bumblebee";
 		Messages messages = new Messages();
-		messages.messages = new ArrayList<Message>();
+		messages.messages = new ArrayList<>();
 
 		MockitoAnnotations.initMocks(this);
 		when(configurationProvider.get()).thenReturn(messages);

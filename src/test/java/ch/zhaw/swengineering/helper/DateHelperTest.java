@@ -6,12 +6,15 @@ import java.util.Calendar;
 import java.util.Date;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 /**
  * @author Daniel Brun
  * 
  *         Tests the class 'DateHelper'
  */
+@RunWith(MockitoJUnitRunner.class)
 public class DateHelperTest {
 
     /**
@@ -55,8 +58,8 @@ public class DateHelperTest {
         calTwo.set(Calendar.MILLISECOND, 0);
 
         // Test hour and minute.
-        calOne.set(2014, 10, 2, 12, 30, 0);
-        calTwo.set(2014, 10, 2, 10, 15, 0);
+        calOne.set(2014, Calendar.OCTOBER, 2, 12, 30, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 2, 10, 15, 0);
 
         String result = DateHelper.calculateFormattedTimeDifference(
                 calOne.getTime(), calTwo.getTime());
@@ -64,8 +67,8 @@ public class DateHelperTest {
         assertEquals("+02:15", result);
 
         // Test minute
-        calOne.set(2014, 10, 2, 12, 30, 0);
-        calTwo.set(2014, 10, 2, 12, 15, 0);
+        calOne.set(2014, Calendar.OCTOBER, 2, 12, 30, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 2, 12, 15, 0);
 
         result = DateHelper.calculateFormattedTimeDifference(calOne.getTime(),
                 calTwo.getTime());
@@ -73,8 +76,8 @@ public class DateHelperTest {
         assertEquals("+00:15", result);
 
         // Test day, hour and minute
-        calOne.set(2014, 10, 3, 12, 30, 0);
-        calTwo.set(2014, 10, 2, 11, 15, 0);
+        calOne.set(2014, Calendar.OCTOBER, 3, 12, 30, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 2, 11, 15, 0);
 
         result = DateHelper.calculateFormattedTimeDifference(calOne.getTime(),
                 calTwo.getTime());
@@ -101,8 +104,8 @@ public class DateHelperTest {
         calTwo.set(Calendar.MILLISECOND, 0);
         
         // Test hour and minute
-        calOne.set(2014, 10, 2, 10, 15, 0);
-        calTwo.set(2014, 10, 2, 12, 30, 0);
+        calOne.set(2014, Calendar.OCTOBER, 2, 10, 15, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 2, 12, 30, 0);
 
         String result = DateHelper.calculateFormattedTimeDifference(
                 calOne.getTime(), calTwo.getTime());
@@ -110,8 +113,8 @@ public class DateHelperTest {
         assertEquals("-02:15", result);
 
         // Test minute
-        calOne.set(2014, 10, 2, 12, 15, 0);
-        calTwo.set(2014, 10, 2, 12, 30, 0);
+        calOne.set(2014, Calendar.OCTOBER, 2, 12, 15, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 2, 12, 30, 0);
 
         result = DateHelper.calculateFormattedTimeDifference(calOne.getTime(),
                 calTwo.getTime());
@@ -119,8 +122,8 @@ public class DateHelperTest {
         assertEquals("-00:15", result);
 
         // Test day, hour and minute
-        calOne.set(2014, 10, 2, 11, 15, 0);
-        calTwo.set(2014, 10, 3, 12, 30, 0);
+        calOne.set(2014, Calendar.OCTOBER, 2, 11, 15, 0);
+        calTwo.set(2014, Calendar.OCTOBER, 3, 12, 30, 0);
 
         result = DateHelper.calculateFormattedTimeDifference(calOne.getTime(),
                 calTwo.getTime());

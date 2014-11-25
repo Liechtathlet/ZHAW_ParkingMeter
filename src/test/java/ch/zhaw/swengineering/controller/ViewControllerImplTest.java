@@ -8,7 +8,6 @@ import ch.zhaw.swengineering.model.ParkingLotBooking;
 import ch.zhaw.swengineering.model.ParkingTimeTable;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.view.SimulationView;
@@ -18,10 +17,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,8 +35,7 @@ import static org.mockito.Mockito.*;
  * 
  *         Tests the Class: 'ViewControllerImpl'.
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
+@RunWith(MockitoJUnitRunner.class)
 public class ViewControllerImplTest {
 
     @Mock

@@ -1,17 +1,12 @@
 package ch.zhaw.swengineering.business;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Hashtable;
-import java.util.List;
-
+import ch.zhaw.swengineering.helper.ConfigurationProvider;
+import ch.zhaw.swengineering.helper.ConfigurationWriter;
+import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
+import ch.zhaw.swengineering.model.persistence.*;
+import ch.zhaw.swengineering.model.persistence.ParkingMeter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,25 +14,17 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
-import ch.zhaw.swengineering.helper.ConfigurationWriter;
-import ch.zhaw.swengineering.model.ParkingLotBooking;
-import ch.zhaw.swengineering.model.ParkingTimeTable;
-import ch.zhaw.swengineering.model.ParkingTimeTableItem;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
-import ch.zhaw.swengineering.model.persistence.ParkingMeter;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
-import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinitions;
-import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
-import ch.zhaw.swengineering.model.persistence.SecretCodes;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
+import java.math.BigDecimal;
+import java.util.*;
 
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+@RunWith(MockitoJUnitRunner.class)
 public class ParkingMeterImplTest {
 
     @Mock(name = "parkingMeterProvider")

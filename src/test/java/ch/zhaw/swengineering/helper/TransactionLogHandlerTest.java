@@ -1,9 +1,16 @@
 package ch.zhaw.swengineering.helper;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.when;
+import ch.zhaw.swengineering.model.persistence.TransactionLog;
+import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -12,24 +19,12 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.when;
 
-import ch.zhaw.swengineering.model.persistence.TransactionLog;
-import ch.zhaw.swengineering.model.persistence.TransactionLogEntry;
-import ch.zhaw.swengineering.setup.ParkingMeterRunner;
-
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
+@RunWith(MockitoJUnitRunner.class)
 public class TransactionLogHandlerTest {
 
     @InjectMocks

@@ -2,9 +2,11 @@ package ch.zhaw.swengineering.setup;
 
 import ch.zhaw.swengineering.controller.ViewController;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
@@ -12,6 +14,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ParkingMeterRunnerTest {
 
     @Mock

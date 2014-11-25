@@ -1,11 +1,18 @@
 package ch.zhaw.swengineering.model.persistence;
 
-import junit.framework.TestCase;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ParkingTimeDefinitionsTest extends TestCase {
+import static org.junit.Assert.assertEquals;
+
+@RunWith(MockitoJUnitRunner.class)
+public class ParkingTimeDefinitionsTest {
+
+    @Test
     public void testParkingTimeDefinitionsAreOrdered() throws Exception {
         ParkingTimeDefinition definition1 = new ParkingTimeDefinition();
         definition1.setOrderId(3);
