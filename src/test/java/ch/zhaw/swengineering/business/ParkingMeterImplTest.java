@@ -95,7 +95,7 @@ public class ParkingMeterImplTest {
         when(configProviderParkingMeter.get()).thenReturn(parkingMeter);
         when(configProviderTimeDef.get()).thenReturn(definitions);
 
-        controller.init();
+        parkingMeterImpl.init();
     }
 
     /**
