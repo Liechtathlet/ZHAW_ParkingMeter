@@ -157,7 +157,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                 CoinBox cb = coinBoxes.getCoinBox(entry.getKey());
                 cb.setCurrentCoinCount(cb.getCurrentCoinCount()
                         - entry.getValue().intValue());
-                transactionCoinCache.put(entry.getKey(), new Integer(0));
+                transactionCoinCache.put(entry.getKey(), Integer.valueOf(0));
             }
         }
 
@@ -224,11 +224,10 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
                 allCoinBoxesFull = false;
             }
 
-            if (cb.getCoinValue().equals(aCoinValue)) {
-                if (cb.getCurrentCoinCount() < cb.getMaxCoinCount()) {
-                    cb.setCurrentCoinCount(cb.getCurrentCoinCount() + 1);
-                    coinBoxFull = false;
-                }
+            if (cb.getCoinValue().equals(aCoinValue)
+                    && cb.getCurrentCoinCount() < cb.getMaxCoinCount()) {
+                cb.setCurrentCoinCount(cb.getCurrentCoinCount() + 1);
+                coinBoxFull = false;
             }
         }
 
@@ -330,6 +329,6 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
     @Override
     public Map<BigDecimal, Integer> getInsertedCoins() {
-       return new HashMap<BigDecimal, Integer>(transactionCoinCache);
+        return new HashMap<BigDecimal, Integer>(transactionCoinCache);
     }
 }

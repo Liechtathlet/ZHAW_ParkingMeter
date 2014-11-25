@@ -72,13 +72,6 @@ public class ParkingTimeDefinition implements Comparable<ParkingTimeDefinition> 
     }
 
     /**
-     * @return the orderId
-     */
-    public int getOrderId() {
-        return orderId;
-    }
-
-    /**
      * @param pricePerPeriod
      *            the pricePerPeriod to set
      */
@@ -105,7 +98,7 @@ public class ParkingTimeDefinition implements Comparable<ParkingTimeDefinition> 
     /**
      * @param orderId
      *            the orderId to set
-     */
+     */ 
     public void setOrderId(int orderId) {
         this.orderId = orderId;
     }

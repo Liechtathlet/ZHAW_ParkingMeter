@@ -57,46 +57,54 @@ public class ParkingLotBooking {
      *            The drawback.
      */
     public ParkingLotBooking(boolean notEnoughMoney, int parkingLotNumber,
-            Date paidFrom, Date paidTill, BigDecimal insertedMoney,
-            BigDecimal chargedMoney, BigDecimal drawbackMoney) {
+            final Date paidFrom, final Date paidTill,
+            final BigDecimal insertedMoney, final BigDecimal chargedMoney,
+            final BigDecimal drawbackMoney) {
         super();
         this.notEnoughMoney = notEnoughMoney;
         this.parkingLotNumber = parkingLotNumber;
-        this.paidFrom = paidFrom;
-        this.paidTill = paidTill;
+        this.paidFrom = (Date) paidFrom.clone();
+        this.paidTill = (Date) paidTill.clone();
         this.insertedMoney = insertedMoney;
         this.chargedMoney = chargedMoney;
         this.drawbackMoney = drawbackMoney;
     }
 
     /**
+     * Empty constructor for Serialization.
+     */
+    public ParkingLotBooking() {
+        super();
+    }
+
+    /**
      * @return the paidFrom
      */
     public Date getPaidFrom() {
-        return paidFrom;
+        return (Date) paidFrom.clone();
     }
 
     /**
      * @param paidFrom
      *            the paidFrom to set
      */
-    public void setPaidFrom(Date paidFrom) {
-        this.paidFrom = paidFrom;
+    public void setPaidFrom(final Date paidFrom) {
+        this.paidFrom = (Date) paidFrom.clone();
     }
 
     /**
      * @return the paidTill
      */
     public Date getPaidTill() {
-        return paidTill;
+        return (Date) paidTill.clone();
     }
 
     /**
      * @param paidTill
      *            the paidTill to set
      */
-    public void setPaidTill(Date paidTill) {
-        this.paidTill = paidTill;
+    public void setPaidTill(final Date paidTill) {
+        this.paidTill = (Date) paidTill.clone();
     }
 
     /**
@@ -160,8 +168,9 @@ public class ParkingLotBooking {
 
     /**
      * Stores the length of the booking in minutes.
-     *
-     * @param bookingInMinutes Minutes count the user has paid for.
+     * 
+     * @param bookingInMinutes
+     *            Minutes count the user has paid for.
      */
     public void setBookingInMinutes(int bookingInMinutes) {
         this.bookingInMinutes = bookingInMinutes;
@@ -169,7 +178,7 @@ public class ParkingLotBooking {
 
     /**
      * Gets the length of the booking in minutes.
-     *
+     * 
      * @return Minutes count the user has paid for.
      */
     public int getBookingInMinutes() {

@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  * 
  */
 public class CoinBoxLevel {
-    private final BigDecimal coinValue;
+    private BigDecimal coinValue;
     private int currentCoinCount;
     private int maxCoinCount;
 
@@ -31,6 +31,15 @@ public class CoinBoxLevel {
         this.currentCoinCount = aCurrentCoinCount;
         this.maxCoinCount = aMaxCoinCount;
     }
+
+    
+    /**
+     * Empty constructor for Serialization.
+     */
+    public CoinBoxLevel() {
+        super();
+    }
+
 
     /**
      * @return the coinValue

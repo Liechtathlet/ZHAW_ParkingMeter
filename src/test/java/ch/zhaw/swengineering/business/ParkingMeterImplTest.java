@@ -81,6 +81,24 @@ public class ParkingMeterImplTest {
     }
 
     /**
+     * Tests the validation of the parking time definition.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public final void testParkingTimeDefinitionValidation() {
+        parkingMeter = getParkingMeterMock();
+
+        ParkingTimeDefinitions definitions = new ParkingTimeDefinitions();
+
+        definitions
+                .setParkingTimeDefinitions(new ArrayList<ParkingTimeDefinition>());
+
+        when(configProviderParkingMeter.get()).thenReturn(parkingMeter);
+        when(configProviderTimeDef.get()).thenReturn(definitions);
+
+        controller.init();
+    }
+
+    /**
      * Argument: Invalid parking lot number.
      * 
      * Method: 'getParkingLot'

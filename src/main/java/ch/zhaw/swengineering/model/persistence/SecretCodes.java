@@ -26,11 +26,12 @@ public class SecretCodes {
     public SecretCodes() {
         codeMapping = new Hashtable<Integer, SecretActionEnum>();
     }
-    
+
     /**
      * Creates a new instance of this class.
      * 
-     * @param aCodeMapping the code mapping.
+     * @param aCodeMapping
+     *            the code mapping.
      */
     public SecretCodes(final Map<Integer, SecretActionEnum> aCodeMapping) {
         super();
@@ -43,5 +44,5 @@ public class SecretCodes {
     public final Map<Integer, SecretActionEnum> getCodeMapping() {
         return new Hashtable<Integer, SecretActionEnum>(codeMapping);
     }
- 
+
 }

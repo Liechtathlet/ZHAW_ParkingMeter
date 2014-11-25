@@ -5,17 +5,12 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.text.MessageFormat;
-import java.util.Date;
-import java.util.List;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
-import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
-import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
@@ -39,11 +34,6 @@ public class ConsoleSimulationView extends SimulationView {
      */
     private static final String EXIT_COMMAND = "exit";
 
-    /**
-     * Thread-Sleep-Time.
-     */
-    private static final int SLEEP_TIME = 100;
-
     private static final String COIN_SPLITTER = " ";
 
     /**
@@ -59,15 +49,7 @@ public class ConsoleSimulationView extends SimulationView {
     private BufferedReader reader;
 
     @Autowired
-    @Qualifier("parkingTimeDef")
-    private ConfigurationProvider parkingTimeConfigurationProvider;
-
-    private List<ParkingLot> parkingLots;
-
-    @Autowired
     private PrintStream writer;
-
-    private Date now = new Date();
 
     /*
      * (non-Javadoc)
@@ -136,7 +118,7 @@ public class ConsoleSimulationView extends SimulationView {
 
         if (input != null) {
             try {
-                enteredInteger = new Integer(input);
+                enteredInteger = Integer.valueOf(input);
             } catch (NumberFormatException e) {
                 print("view.slot.machine.format.invalid", ViewOutputMode.ERROR);
             }
@@ -178,6 +160,6 @@ public class ConsoleSimulationView extends SimulationView {
 
     @Override
     public void increaseInfoBufferSizeTemporarily(int aCount) {
-        //Nothing to do here...
+        // Nothing to do here...
     }
 }
