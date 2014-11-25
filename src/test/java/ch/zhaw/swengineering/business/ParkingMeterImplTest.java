@@ -12,8 +12,6 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
-import ch.zhaw.swengineering.model.ParkingTimeTable;
-import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +26,8 @@ import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.ConfigurationWriter;
 import ch.zhaw.swengineering.model.ParkingLotBooking;
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import ch.zhaw.swengineering.model.persistence.ParkingLot;
 import ch.zhaw.swengineering.model.persistence.ParkingMeter;
 import ch.zhaw.swengineering.model.persistence.ParkingTimeDefinition;
@@ -95,7 +95,7 @@ public class ParkingMeterImplTest {
         when(configProviderParkingMeter.get()).thenReturn(parkingMeter);
         when(configProviderTimeDef.get()).thenReturn(definitions);
 
-        controller.init();
+        parkingMeterImpl.init();
     }
 
     /**
@@ -131,7 +131,8 @@ public class ParkingMeterImplTest {
 
         // Assert
         for (ParkingLot pl : parkingMeter.parkingLots) {
-            ParkingLot reqParkingLot = parkingMeterImpl.getParkingLot(pl.getNumber());
+            ParkingLot reqParkingLot = parkingMeterImpl.getParkingLot(pl
+                    .getNumber());
 
             Assert.assertNotNull(reqParkingLot);
             assertEquals(pl.getNumber(), reqParkingLot.getNumber());
@@ -150,7 +151,8 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        assertEquals(parkingMeter.parkingLots, parkingMeterImpl.getParkingLots());
+        assertEquals(parkingMeter.parkingLots,
+                parkingMeterImpl.getParkingLots());
     }
 
     // ************** Tests secret code validation ***************
@@ -243,8 +245,8 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        ParkingLotBooking booking = parkingMeterImpl.calculateBookingForParkingLot(5,
-                new BigDecimal(5.0));
+        ParkingLotBooking booking = parkingMeterImpl
+                .calculateBookingForParkingLot(5, new BigDecimal(5.0));
 
         // 5.0 ->
         Assert.assertNotNull(booking);
@@ -273,8 +275,8 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        ParkingLotBooking booking = parkingMeterImpl.calculateBookingForParkingLot(5,
-                new BigDecimal(0.5));
+        ParkingLotBooking booking = parkingMeterImpl
+                .calculateBookingForParkingLot(5, new BigDecimal(0.5));
 
         // 5.0 ->
         Assert.assertNotNull(booking);
@@ -335,9 +337,9 @@ public class ParkingMeterImplTest {
 
     /**
      * Tests the result of the parking time table.
-     *
+     * 
      * Method: 'getParkingTimeTable'
-     *
+     * 
      * Expected: All results are correct
      */
     @Test
@@ -347,7 +349,8 @@ public class ParkingMeterImplTest {
         initStandard();
 
         // Run
-        ParkingTimeTable parkingTimeTable = parkingMeterImpl.getParkingTimeTable();
+        ParkingTimeTable parkingTimeTable = parkingMeterImpl
+                .getParkingTimeTable();
 
         // Assert
         List<ParkingTimeTableItem> items = parkingTimeTable.getItems();
