@@ -63,11 +63,17 @@ public class ParkingLotBooking {
         super();
         this.notEnoughMoney = notEnoughMoney;
         this.parkingLotNumber = parkingLotNumber;
-        this.paidFrom = (Date) paidFrom.clone();
-        this.paidTill = (Date) paidTill.clone();
         this.insertedMoney = insertedMoney;
         this.chargedMoney = chargedMoney;
         this.drawbackMoney = drawbackMoney;
+
+        if (paidFrom != null) {
+            this.paidFrom = (Date) paidFrom.clone();
+        }
+
+        if (paidTill != null) {
+            this.paidTill = (Date) paidTill.clone();
+        }
     }
 
     /**
@@ -81,7 +87,11 @@ public class ParkingLotBooking {
      * @return the paidFrom
      */
     public Date getPaidFrom() {
-        return (Date) paidFrom.clone();
+        if (paidFrom != null) {
+            return (Date) paidFrom.clone();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -89,14 +99,20 @@ public class ParkingLotBooking {
      *            the paidFrom to set
      */
     public void setPaidFrom(final Date paidFrom) {
-        this.paidFrom = (Date) paidFrom.clone();
+        if (paidFrom != null) {
+            this.paidFrom = (Date) paidFrom.clone();
+        }
     }
 
     /**
      * @return the paidTill
      */
     public Date getPaidTill() {
-        return (Date) paidTill.clone();
+        if (paidTill != null) {
+            return (Date) paidTill.clone();
+        } else {
+            return null;
+        }
     }
 
     /**

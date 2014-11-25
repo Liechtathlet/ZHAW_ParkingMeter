@@ -32,7 +32,9 @@ public class ParkingLot {
      */
     public ParkingLot(int number, final Date paidUntil) {
         this.number = number;
-        this.paidUntil = (Date) paidUntil.clone();
+        if (paidUntil != null) {
+            this.paidUntil = (Date) paidUntil.clone();
+        }
     }
 
     /**
@@ -46,7 +48,11 @@ public class ParkingLot {
      * @return the paidUntil
      */
     public Date getPaidUntil() {
-        return (Date) paidUntil.clone();
+        if (paidUntil != null) {
+            return (Date) paidUntil.clone();
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -54,6 +60,8 @@ public class ParkingLot {
      *            the paidUntil to set
      */
     public void setPaidUntil(final Date paidUntil) {
-        this.paidUntil = (Date) paidUntil.clone();
+        if(paidUntil != null){
+            this.paidUntil = (Date) paidUntil.clone();
+        }
     }
 }
