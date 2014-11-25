@@ -12,6 +12,8 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 
+import ch.zhaw.swengineering.model.ParkingTimeTable;
+import ch.zhaw.swengineering.model.ParkingTimeTableItem;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -51,7 +53,7 @@ public class ParkingMeterImplTest {
     private ConfigurationWriter configWriterParkingMeter;
 
     @InjectMocks
-    private ParkingMeterImpl controller;
+    private ParkingMeterImpl parkingMeterImpl;
 
     private ParkingMeter parkingMeter;
 
@@ -75,7 +77,7 @@ public class ParkingMeterImplTest {
         when(configProviderParkingMeter.get()).thenReturn(parkingMeter);
         when(configProviderTimeDef.get()).thenReturn(parkingTimeDefinitions);
 
-        controller.init();
+        parkingMeterImpl.init();
     }
 
     /**
@@ -91,10 +93,10 @@ public class ParkingMeterImplTest {
         initStandard();
 
         // Assert
-        Assert.assertNull(controller.getParkingLot(100));
-        Assert.assertNull(controller.getParkingLot(0));
-        Assert.assertNull(controller.getParkingLot(150));
-        Assert.assertNull(controller.getParkingLot(20));
+        Assert.assertNull(parkingMeterImpl.getParkingLot(100));
+        Assert.assertNull(parkingMeterImpl.getParkingLot(0));
+        Assert.assertNull(parkingMeterImpl.getParkingLot(150));
+        Assert.assertNull(parkingMeterImpl.getParkingLot(20));
     }
 
     /**
@@ -111,7 +113,7 @@ public class ParkingMeterImplTest {
 
         // Assert
         for (ParkingLot pl : parkingMeter.parkingLots) {
-            ParkingLot reqParkingLot = controller.getParkingLot(pl.getNumber());
+            ParkingLot reqParkingLot = parkingMeterImpl.getParkingLot(pl.getNumber());
 
             Assert.assertNotNull(reqParkingLot);
             assertEquals(pl.getNumber(), reqParkingLot.getNumber());
@@ -130,7 +132,7 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        assertEquals(parkingMeter.parkingLots, controller.getParkingLots());
+        assertEquals(parkingMeter.parkingLots, parkingMeterImpl.getParkingLots());
     }
 
     // ************** Tests secret code validation ***************
@@ -157,10 +159,10 @@ public class ParkingMeterImplTest {
 
         when(configProviderSecretCode.get()).thenReturn(secretCodes);
 
-        controller.init();
+        parkingMeterImpl.init();
 
         // Assert
-        assertEquals(secretAction, controller.getSecretAction(secretKey));
+        assertEquals(secretAction, parkingMeterImpl.getSecretAction(secretKey));
     }
 
     /**
@@ -177,7 +179,7 @@ public class ParkingMeterImplTest {
         int secretKey = 999;
 
         // Assert
-        controller.getSecretAction(secretKey);
+        parkingMeterImpl.getSecretAction(secretKey);
     }
 
     /**
@@ -203,10 +205,10 @@ public class ParkingMeterImplTest {
 
         when(configProviderSecretCode.get()).thenReturn(secretCodes);
 
-        controller.init();
+        parkingMeterImpl.init();
 
         // Assert
-        controller.getSecretAction(secretKey);
+        parkingMeterImpl.getSecretAction(secretKey);
     }
 
     // ************** Tests booking calculation ***************
@@ -223,7 +225,7 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        ParkingLotBooking booking = controller.calculateBookingForParkingLot(5,
+        ParkingLotBooking booking = parkingMeterImpl.calculateBookingForParkingLot(5,
                 new BigDecimal(5.0));
 
         // 5.0 ->
@@ -253,7 +255,7 @@ public class ParkingMeterImplTest {
         // Setup
         initStandard();
 
-        ParkingLotBooking booking = controller.calculateBookingForParkingLot(5,
+        ParkingLotBooking booking = parkingMeterImpl.calculateBookingForParkingLot(5,
                 new BigDecimal(0.5));
 
         // 5.0 ->
@@ -281,8 +283,8 @@ public class ParkingMeterImplTest {
                 new BigDecimal(5.0));
         booking.setPaidTill(paidUntil);
 
-        controller.persistBooking(booking);
-        ParkingLot lot = controller.getParkingLot(5);
+        parkingMeterImpl.persistBooking(booking);
+        ParkingLot lot = parkingMeterImpl.getParkingLot(5);
 
         assertEquals(paidUntil, lot.getPaidUntil());
         verify(configWriterParkingMeter).write(any(ParkingMeter.class));
@@ -306,11 +308,45 @@ public class ParkingMeterImplTest {
                 new BigDecimal(5.0));
         booking.setPaidTill(paidUntil);
 
-        List<ParkingTimeDefinition> defList = controller
+        List<ParkingTimeDefinition> defList = parkingMeterImpl
                 .getParkingTimeDefinitions();
 
         assertEquals(defList,
                 parkingTimeDefinitions.getParkingTimeDefinitions());
+    }
+
+    /**
+     * Tests the result of the parking time table.
+     *
+     * Method: 'getParkingTimeTable'
+     *
+     * Expected: All results are correct
+     */
+    @Test
+    public final void testGetParkingTimeTable() {
+
+        // Mock
+        initStandard();
+
+        // Run
+        ParkingTimeTable parkingTimeTable = parkingMeterImpl.getParkingTimeTable();
+
+        // Assert
+        List<ParkingTimeTableItem> items = parkingTimeTable.getItems();
+        assertEquals(5, items.size());
+        assertEquals(new BigDecimal(0), items.get(0).getAmount());
+        assertEquals(0, items.get(0).getMinutes());
+        assertEquals(new BigDecimal(1), items.get(1).getAmount());
+        assertEquals(30, items.get(1).getMinutes());
+        assertEquals(new BigDecimal(2), items.get(2).getAmount());
+        assertEquals(60, items.get(2).getMinutes());
+        assertEquals(new BigDecimal(4), items.get(3).getAmount());
+        assertEquals(90, items.get(3).getMinutes());
+        assertEquals(new BigDecimal(6), items.get(4).getAmount());
+        assertEquals(120, items.get(4).getMinutes());
+
+        assertEquals(new BigDecimal(6), parkingTimeTable.getMaxPrice());
+        assertEquals(120, parkingTimeTable.getMaxBookingTime());
     }
 
     /**

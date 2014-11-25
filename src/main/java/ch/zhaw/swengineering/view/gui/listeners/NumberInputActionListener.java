@@ -19,7 +19,7 @@ public class NumberInputActionListener implements ActionListener {
 
     private DisplayTextAppenderInterface displayer;
 
-    private boolean suspendEvent;
+    boolean suspendEvent;
 
     /**
      * Creates a new instance of this class.

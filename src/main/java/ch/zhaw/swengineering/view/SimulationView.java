@@ -188,24 +188,6 @@ public abstract class SimulationView implements Runnable,
         }
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see ch.zhaw.swengineering.view.SimulationViewInterface#
-     * removeViewEventListener(ch.zhaw.swengineering.event.ViewEventListener)
-     */
-    @Override
-    public void removeViewEventListener(final ViewEventListener aListener) {
-        if (aListener == null) {
-            throw new IllegalArgumentException(
-                    "The parameter 'aListener' must not be null!");
-        }
-
-        if (eventListeners.contains(aListener)) {
-            eventListeners.remove(aListener);
-        }
-    }
-
     @Override
     public void displayParkingLotNumberAndParkingTime(
             final int aParkingLotNumber, final Date aPaidParkingTime) {

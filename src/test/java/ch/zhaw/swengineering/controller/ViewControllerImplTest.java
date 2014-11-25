@@ -11,7 +11,7 @@ import ch.zhaw.swengineering.model.persistence.SecretActionEnum;
 import ch.zhaw.swengineering.setup.ParkingMeterRunner;
 import ch.zhaw.swengineering.slotmachine.controller.IntelligentSlotMachineBackendInteractionInterface;
 import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
-import ch.zhaw.swengineering.view.console.ConsoleSimulationView;
+import ch.zhaw.swengineering.view.SimulationView;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.*;
 public class ViewControllerImplTest {
 
     @Mock
-    private ConsoleSimulationView view;
+    private SimulationView view;
 
     @Mock
     private ConfigurableApplicationContext appContext;
@@ -309,6 +309,58 @@ public class ViewControllerImplTest {
     }
 
     /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: User entered secret code for viewing all parking charges.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewAllParkingChargeSecretCode()
+            throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_ALL_PARKING_CHARGE);
+
+        // Run
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(view).displayBookedParkingLots(any(ArrayList.class));
+        verify(view).promptForParkingLotNumber();
+    }
+
+    /**
+     * Method-Under-Test: parkingLotEntered(...).
+     *
+     * Scenario: User entered secret code for viewing content of coin boxes.
+     *
+     * Expectation: All methods are invoked correctly.
+     */
+    @Test
+    public final void testParkingLotEnteredEventWithValidViewContentOfCoinBoxesSecretCode()
+            throws Exception {
+        int parkingLotNumber = 123456;
+
+        // Mock
+        ParkingLotEnteredEvent plEnteredEvent = new ParkingLotEnteredEvent(
+                view, parkingLotNumber);
+        when(parkingMeter.getSecretAction(parkingLotNumber)).thenReturn(
+                SecretActionEnum.VIEW_CONTENT_OF_COIN_BOXES);
+
+        // Run
+        controller.parkingLotEntered(plEnteredEvent);
+
+        // Assert positive
+        verify(view).displayContentOfCoinBoxes(any(ArrayList.class));
+        verify(view).promptForParkingLotNumber();
+    }
+
+    /**
      * Method-Under-Test: moneyInserted(...).
      * 
      * Scenario: All data is valid and enough money was inserted.
@@ -340,6 +392,7 @@ public class ViewControllerImplTest {
         when(parkingMeter.getParkingLot(parkingLotNumber)).thenReturn(null);
         when(parkingMeter.calculateBookingForParkingLot(5, insertedMoney))
                 .thenReturn(booking);
+        when(slotMachine.hasDrawback()).thenReturn(true);
 
         // Run
         controller.moneyInserted(mInsertedEvent);
@@ -472,12 +525,31 @@ public class ViewControllerImplTest {
         // Setup
         controller.start();
 
-        // Execute Test
+        // Run
         controller.shutdownRequested(shutdownEvent);
 
         // Assert positive
         verify(view).displayShutdownMessage();
         verify(view).shutdown();
         verify(appContext).close();
+    }
+
+    /**
+     * Method-Under-Test: actionAborted(...).
+     *
+     * Scenario: User aborted the the current action.
+     *
+     * Expectation: All methods are invoked correctly
+     */
+    @Test
+    public final void testActionAbortedCallsCorrectMethods() {
+
+        // Run
+        controller.actionAborted(new ActionAbortedEvent(this));
+
+        // Assert
+        verify(slotMachine, times(2)).finishTransaction(any(BigDecimal.class));
+        verify(view).displayMessageForDrawback();
+        verify(view).promptForParkingLotNumber();
     }
 }

@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-/**
- * Created by slang on 23.11.14.
- */
 @org.springframework.web.bind.annotation.RestController
 public class RestController {
 
@@ -39,7 +36,7 @@ public class RestController {
     @RequestMapping("/transactionLog")
     public List<TransactionLogEntry> transactionLogNEntries(
             @RequestParam(value="count", defaultValue = "") String countString) {
-        int count = 0;
+        int count;
         try {
             count = Integer.parseInt(countString);
             return transactionLog.get(count);

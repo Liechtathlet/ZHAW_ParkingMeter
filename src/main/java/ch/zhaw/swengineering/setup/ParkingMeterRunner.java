@@ -33,7 +33,7 @@ public class ParkingMeterRunner {
     /**
      * The arguments.
      */
-    private static String[] arguments;
+    static String[] arguments;
 
     /**
      * Entry-Method for the Java-Application.
@@ -42,6 +42,10 @@ public class ParkingMeterRunner {
      *            The arguments.
      */
     public static void main(final String[] args) {
+        new ParkingMeterRunner().start(args);
+    }
+
+    void start(String[] args) {
         System.setProperty("java.awt.headless", "false");
 
         ParkingMeterRunner.arguments = args;
@@ -49,14 +53,18 @@ public class ParkingMeterRunner {
         LOG.info("Init application startup. Arguments: "
                 + Arrays.toString(args));
 
-        SpringApplication app = null;
-        ConfigurableApplicationContext context = null;
+        SpringApplication app;
+        ConfigurableApplicationContext context;
 
         // Start Spring
-        app = new SpringApplication(ParkingMeterRunner.class);
+        app = getSpringApplication();
 
         context = app.run(args);
         context.getBean(ViewController.class).start();
+    }
+
+    SpringApplication getSpringApplication() {
+        return new SpringApplication(ParkingMeterRunner.class);
     }
 
     /**
