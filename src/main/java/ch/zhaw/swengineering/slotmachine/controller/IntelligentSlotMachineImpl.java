@@ -264,14 +264,10 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
     @Override
     public Map<BigDecimal, Integer> getDrawback() {
-        if (!transactionStarted) {
-            Map<BigDecimal, Integer> returnCoinache = new HashMap<BigDecimal, Integer>(
-                    drawBackCoinCache);
-            drawBackCoinCache.clear();
-            return returnCoinache;
-        } else {
-            return null;
-        }
+        Map<BigDecimal, Integer> returnCoinache = new HashMap<BigDecimal, Integer>(
+                drawBackCoinCache);
+        drawBackCoinCache.clear();
+        return returnCoinache;
     }
 
     @Override

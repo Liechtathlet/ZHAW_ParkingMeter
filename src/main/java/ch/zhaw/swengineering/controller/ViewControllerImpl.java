@@ -61,7 +61,7 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
 
         // Register event listener.
         view.addViewEventListener(this);
-        
+
         // Start simulation view.
         view.startSimulationView();
 
@@ -87,62 +87,64 @@ public class ViewControllerImpl implements ViewController, ViewEventListener {
             view.displayParkingLotNumberAndParkingTime(parkingLot.getNumber(),
                     parkingLot.getPaidUntil());
             view.promptForMoney(parkingLot.getNumber());
-        }
+        } else {
 
-        // Step Two: Check if it is a secret number
-        try {
-            SecretActionEnum actionEnum = parkingMeter
-                    .getSecretAction(parkingLotEnteredEvent
-                            .getParkingLotNumber());
+            // Step Two: Check if it is a secret number
+            try {
+                SecretActionEnum actionEnum = parkingMeter
+                        .getSecretAction(parkingLotEnteredEvent
+                                .getParkingLotNumber());
 
-            transactionLog.write(String.format("Recognized secret code %s",
-                    actionEnum));
+                transactionLog.write(String.format("Recognized secret code %s",
+                        actionEnum));
 
-            switch (actionEnum) {
-            case VIEW_ALL_PARKING_CHARGE:
-                processed = true;
-                view.displayBookedParkingLots(parkingMeter.getParkingLots());
-                view.promptForParkingLotNumber();
-                break;
-            case VIEW_ALL_INFORMATION:
-                processed = true;
+                switch (actionEnum) {
+                case VIEW_ALL_PARKING_CHARGE:
+                    processed = true;
+                    view.displayBookedParkingLots(parkingMeter.getParkingLots());
+                    view.promptForParkingLotNumber();
+                    break;
+                case VIEW_ALL_INFORMATION:
+                    processed = true;
 
-                view.displayAllInformation(
-                        slotMachine.getCurrentCoinBoxLevel(),
-                        parkingMeter.getParkingTimeDefinitions(), new Date(),
-                        parkingMeter.getParkingLots(),
-                        parkingMeter.getParkingTimeTable());
+                    view.displayAllInformation(
+                            slotMachine.getCurrentCoinBoxLevel(),
+                            parkingMeter.getParkingTimeDefinitions(),
+                            new Date(), parkingMeter.getParkingLots(),
+                            parkingMeter.getParkingTimeTable());
 
-                view.promptForParkingLotNumber();
-                break;
-            case VIEW_CONTENT_OF_COIN_BOXES:
-                processed = true;
-                view.displayContentOfCoinBoxes(slotMachine
-                        .getCurrentCoinBoxLevel());
-                view.promptForParkingLotNumber();
-                break;
-            case VIEW_ALL_TRANSACTION_LOGS:
-                processed = true;
-                view.displayAllTransactionLogs();
-                view.promptForParkingLotNumber();
-                break;
-            case VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG:
-                processed = true;
-                view.displayLast24HoursOfTransactionLog();
-                view.promptForParkingLotNumber();
-                break;
-            case VIEW_N_TRANSACTION_LOG_ENTRIES:
-                processed = true;
-                view.promptForNumberOfTransactionLogEntriesToShow();
-                break;
-            case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
-                processed = true;
-                view.promptForNewCoinBoxLevels(slotMachine
-                        .getCurrentCoinBoxLevel());
-                break;
+                    view.promptForParkingLotNumber();
+                    break;
+                case VIEW_CONTENT_OF_COIN_BOXES:
+                    processed = true;
+                    view.displayContentOfCoinBoxes(slotMachine
+                            .getCurrentCoinBoxLevel());
+                    view.promptForParkingLotNumber();
+                    break;
+                case VIEW_ALL_TRANSACTION_LOGS:
+                    processed = true;
+                    view.displayAllTransactionLogs();
+                    view.promptForParkingLotNumber();
+                    break;
+                case VIEW_LAST_24_HOURS_OF_TRANSACTION_LOG:
+                    processed = true;
+                    view.displayLast24HoursOfTransactionLog();
+                    view.promptForParkingLotNumber();
+                    break;
+                case VIEW_N_TRANSACTION_LOG_ENTRIES:
+                    processed = true;
+                    view.promptForNumberOfTransactionLogEntriesToShow();
+                    break;
+                case ENTER_NEW_LEVEL_FOR_COIN_BOXES:
+                    processed = true;
+                    view.promptForNewCoinBoxLevels(slotMachine
+                            .getCurrentCoinBoxLevel());
+                    break;
+                }
+            } catch (Exception e) {
+                LOG.warn("An error occurred during detection of secret code!",
+                        e);
             }
-        } catch (Exception e) {
-            LOG.warn("An error occurred during detection of secret code!", e);
         }
 
         // Step Three: Print error if nothing matched

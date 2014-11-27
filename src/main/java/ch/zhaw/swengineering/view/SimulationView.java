@@ -792,10 +792,15 @@ public abstract class SimulationView implements Runnable,
     public final void handleInvalidCoinException(
             final InvalidCoinException anException) {
         StringBuilder coinString = new StringBuilder();
+        int i = 1;
 
         for (BigDecimal validCoin : anException.getValidCoins()) {
             coinString.append(validCoin);
-            coinString.append(", ");
+
+            if (i < anException.getValidCoins().size()) {
+                coinString.append(", ");
+            }
+            i++;
         }
 
         LOG.error("Received exception " + "from slot machine: invalid coin!",
