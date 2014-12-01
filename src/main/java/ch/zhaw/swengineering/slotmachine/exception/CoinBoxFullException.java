@@ -19,30 +19,20 @@ public class CoinBoxFullException extends RuntimeException {
 
     /**
      * Creates a new instance of this class. If this constructor is used, it is
-     * assumed, that all coin boxes are full.
-     * 
-     * @param aMessage
-     *            the message.
-     */
-    public CoinBoxFullException(String aMessage) {
-        super(aMessage);
-        allCoinBoxesFull = true;
-    }
-
-    /**
-     * Creates a new instance of this class. If this constructor is used, it is
      * assumed, that one specific coin box is full.
      * 
      * @param aMessage
      *            the message.
      * @param aCoinValue
      *            The type of coins of the coin box.
+     * @param allCoinBoxesFull
+     *            True if all coinboxes are full.
      */
-    public CoinBoxFullException(String aMessage, 
-            BigDecimal aCoinValue) {
+    public CoinBoxFullException(String aMessage, BigDecimal aCoinValue,
+            boolean allCoinBoxesFull) {
         super(aMessage);
-        allCoinBoxesFull = false;
-        coinValue = aCoinValue;
+        this.allCoinBoxesFull = allCoinBoxesFull;
+        this.coinValue = aCoinValue;
     }
 
     /**

@@ -1,1 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?><parkingMeter><parkingLot number="35" paidUntil="2014-11-24T13:35:42.889+01:00"/><parkingLot number="77" paidUntil="2014-11-27T21:52:43.776+01:00"/></parkingMeter>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<parkingMeter>
+	<parkingLot number="35"/>
+	<parkingLot number="77" paidUntil="2014-11-27T21:52:43.776+01:00"/>
+</parkingMeter>

@@ -1,6 +1,49 @@
 package ch.zhaw.swengineering.view.console;
 
-import ch.zhaw.swengineering.event.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.math.BigDecimal;
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.format.datetime.DateFormatter;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.support.AnnotationConfigContextLoader;
+
+import ch.zhaw.swengineering.event.ActionAbortedEvent;
+import ch.zhaw.swengineering.event.CoinBoxLevelEnteredEvent;
+import ch.zhaw.swengineering.event.NumberOfTransactionLogEntriesToShowEvent;
+import ch.zhaw.swengineering.event.ParkingLotEnteredEvent;
+import ch.zhaw.swengineering.event.ShutdownEvent;
+import ch.zhaw.swengineering.event.ViewEventListener;
 import ch.zhaw.swengineering.helper.ConfigurationProvider;
 import ch.zhaw.swengineering.helper.MessageProvider;
 import ch.zhaw.swengineering.helper.TransactionLogHandler;
@@ -16,27 +59,6 @@ import ch.zhaw.swengineering.slotmachine.exception.CoinBoxFullException;
 import ch.zhaw.swengineering.slotmachine.exception.InvalidCoinException;
 import ch.zhaw.swengineering.slotmachine.exception.NoTransactionException;
 import ch.zhaw.swengineering.view.ViewStateEnum;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.*;
-import org.springframework.format.datetime.DateFormatter;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.AnnotationConfigContextLoader;
-
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.math.BigDecimal;
-import java.text.MessageFormat;
-import java.util.*;
-
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(classes = ParkingMeterRunner.class, loader = AnnotationConfigContextLoader.class)
@@ -221,12 +243,12 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_PROMPT_SEPARATOR)).thenReturn(
                 MSG_VAL_PROMPT_SEPARATOR);
 
-        when(messageProvider
-                .get(MSG_KEY_ALL_INFORMATION_COIN_BOX_CONTENT))
+        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_COIN_BOX_CONTENT))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT);
 
-        when(messageProvider
-                .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
+        when(
+                messageProvider
+                        .get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_DEF_TITLE))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE);
 
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_TIME_TEMPLATE))
@@ -235,7 +257,9 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_PARKING_LOTS))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_PARKING_LOTS);
 
-        when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME))
+        when(
+                messageProvider
+                        .get(MSG_KEY_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME))
                 .thenReturn(MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME);
 
         when(messageProvider.get(MSG_KEY_ALL_INFORMATION_TRANSACTION_LOG))
@@ -259,14 +283,17 @@ public class ConsoleSimulationViewTest {
         when(messageProvider.get(MSG_KEY_PARKING_TIME_INFO)).thenReturn(
                 MSG_VAL_PARKING_TIME_INFO);
 
-        when(messageProvider.get(MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY)).thenReturn(
-                MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY);
+        when(messageProvider.get(MSG_KEY_VIEW_TRANSACTION_LOG_ENTRY))
+                .thenReturn(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY);
 
-        when(messageProvider.get(MSG_KEY_VIEW_N_TRANSACTION_LOG_ENTRIES)).thenReturn(
-                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES);
+        when(messageProvider.get(MSG_KEY_VIEW_N_TRANSACTION_LOG_ENTRIES))
+                .thenReturn(MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES);
 
-        when(messageProvider.get(MSG_KEY_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW)).thenReturn(
-                MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW);
+        when(
+                messageProvider
+                        .get(MSG_KEY_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW))
+                .thenReturn(
+                        MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW);
 
         when(messageProvider.get(MSG_KEY_PARKING_TIME_EXCEEDED)).thenReturn(
                 MSG_VAL_PARKING_TIME_EXCEEDED);
@@ -317,8 +344,7 @@ public class ConsoleSimulationViewTest {
     public final void whenEnteredAStringItShouldNotGenerateAnEvent()
             throws IOException {
         String expectedSequence = MSG_VAL_ENTER_PARKING_LOT
-                + MSG_VAL_PROMPT_SEPARATOR
-                + MSG_VAL_INVALID_FORMAT
+                + MSG_VAL_PROMPT_SEPARATOR + MSG_VAL_INVALID_FORMAT
                 + System.lineSeparator();
 
         String invalidParkingLotNumber = "invalid parkinglot number";
@@ -360,8 +386,8 @@ public class ConsoleSimulationViewTest {
         view.executeActionsForStateEnteringParkingLotNumber();
 
         // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT
-                + MSG_VAL_PROMPT_SEPARATOR, outContent.toString());
+        assertEquals(MSG_VAL_ENTER_PARKING_LOT + MSG_VAL_PROMPT_SEPARATOR,
+                outContent.toString());
     }
 
     @Test
@@ -376,7 +402,8 @@ public class ConsoleSimulationViewTest {
         view.executeActionsForStateEnteringParkingLotNumber();
 
         // Assert
-        assertEquals(MSG_VAL_ENTER_PARKING_LOT + MSG_VAL_PROMPT_SEPARATOR, outContent.toString());
+        assertEquals(MSG_VAL_ENTER_PARKING_LOT + MSG_VAL_PROMPT_SEPARATOR,
+                outContent.toString());
     }
 
     @Test
@@ -541,8 +568,8 @@ public class ConsoleSimulationViewTest {
         drawbackMap.put(coin, 1);
 
         // Mock
-        doThrow(new CoinBoxFullException("coinboxfull")).when(slotMachine)
-                .insertCoin(coin);
+        doThrow(new CoinBoxFullException("coinboxfull", coin, true)).when(
+                slotMachine).insertCoin(coin);
         when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
         when(slotMachine.getDrawback()).thenReturn(drawbackMap);
         when(slotMachine.hasDrawback()).thenReturn(true);
@@ -601,8 +628,8 @@ public class ConsoleSimulationViewTest {
         drawbackMap.put(coin, 2);
 
         // Mock
-        doThrow(new CoinBoxFullException("coinboxfull", coin))
-                .when(slotMachine).insertCoin(coin);
+        doThrow(new CoinBoxFullException("coinboxfull", coin, false)).when(
+                slotMachine).insertCoin(coin);
         when(slotMachine.rolebackTransaction()).thenReturn(drawbackMap);
         when(bufferedReader.readLine()).thenReturn(
                 coin.toPlainString() + " " + coin.toPlainString());
@@ -642,8 +669,8 @@ public class ConsoleSimulationViewTest {
         parkingTimeDefinitions.add(definition2);
 
         Date transactionLogDate = new Date();
-        String formattedDate = dateFormatter.print(
-                transactionLogDate, Locale.getDefault());
+        String formattedDate = dateFormatter.print(transactionLogDate,
+                Locale.getDefault());
 
         // Mock parking lots
         List<ParkingLot> parkingLots = new ArrayList<>();
@@ -655,74 +682,75 @@ public class ConsoleSimulationViewTest {
         BigDecimal itemAmount1 = new BigDecimal(1.5);
         Integer itemMinutes2 = 100;
         BigDecimal itemAmount2 = new BigDecimal(10);
-        final ParkingTimeTableItem item1 =
-                new ParkingTimeTableItem(itemAmount1, itemMinutes1);
-        final ParkingTimeTableItem item2 =
-                new ParkingTimeTableItem(itemAmount2, itemMinutes2);
+        final ParkingTimeTableItem item1 = new ParkingTimeTableItem(
+                itemAmount1, itemMinutes1);
+        final ParkingTimeTableItem item2 = new ParkingTimeTableItem(
+                itemAmount2, itemMinutes2);
         List<ParkingTimeTableItem> items = new ArrayList<>();
         items.add(item1);
         items.add(item2);
-        ParkingTimeTable table =
-                new ParkingTimeTable(items, maxBookingTime, maxPrice);
+        ParkingTimeTable table = new ParkingTimeTable(items, maxBookingTime,
+                maxPrice);
 
         // Run
-        view.displayAllInformation(
-                cbLevels,
-                parkingTimeDefinitions,
-                transactionLogDate,
-                parkingLots,
-                table);
+        view.displayAllInformation(cbLevels, parkingTimeDefinitions,
+                transactionLogDate, parkingLots, table);
 
         // Assert
         assertEquals(
                 MSG_VAL_PARKING_TIME_INFO
                         + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT,
-                            coinBoxTotal)
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_COIN_BOX_CONTENT,
+                                coinBoxTotal)
                         + System.lineSeparator()
                         + MessageFormat.format(MSG_VAL_ALL_VIEW_CBL_CONTENT,
-                            coin, coinCount, coinBoxTotal)
+                                coin, coinCount, coinBoxTotal)
                         + System.lineSeparator()
-                + MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE
-                        + System.lineSeparator()
-                        + MessageFormat.format(
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "1", "0.00", "0.50", "30")
+                        + MSG_VAL_ALL_INFORMATION_PARKING_TIME_DEF_TITLE
                         + System.lineSeparator()
                         + MessageFormat.format(
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "2", "0.50", "1.00", "60")
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "1", "0.00", "0.50", "30")
                         + System.lineSeparator()
                         + MessageFormat.format(
-                        MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
-                        "3", "1.00", "2.00", "70")
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "2", "0.50", "1.00", "60")
                         + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_PARKING_LOTS,
-                        formattedDate)
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_PARKING_TIME_TEMPLATE,
+                                "3", "1.00", "2.00", "70")
                         + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME,
-                        formattedDate)
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_PARKING_LOTS,
+                                formattedDate)
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_TEST_COMPUTE_PARKING_TIME,
+                                formattedDate)
                         + System.lineSeparator()
                         + MessageFormat.format(MSG_VAL_PARKING_TIME_TABLE,
-                            itemAmount1.toString() + "0",
-                            "00" + itemMinutes1.toString())
+                                itemAmount1.toString() + "0", "00"
+                                        + itemMinutes1.toString())
                         + System.lineSeparator()
                         + MessageFormat.format(MSG_VAL_PARKING_TIME_TABLE,
-                            itemAmount2.toString() + ".00",
-                            itemMinutes2.toString())
+                                itemAmount2.toString() + ".00",
+                                itemMinutes2.toString())
                         + System.lineSeparator()
-                        + MessageFormat.format(MSG_VAL_PARKING_MAX_TIME, maxBookingTime)
+                        + MessageFormat.format(MSG_VAL_PARKING_MAX_TIME,
+                                maxBookingTime)
                         + System.lineSeparator()
                         + MessageFormat.format(MSG_VAL_PARKING_MAX_AMOUNT,
-                            maxPrice.toString() + ".00")
+                                maxPrice.toString() + ".00")
                         + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG,
-                        formattedDate)
-                        + System.lineSeparator(),
+                        + MessageFormat.format(
+                                MSG_VAL_ALL_INFORMATION_TRANSACTION_LOG,
+                                formattedDate) + System.lineSeparator(),
                 outContent.toString());
     }
 
-    private List<CoinBoxLevel> getCoinBoxLevelsMock(BigDecimal coin, int coinCount) {
+    private List<CoinBoxLevel> getCoinBoxLevelsMock(BigDecimal coin,
+            int coinCount) {
         List<CoinBoxLevel> cbLevels = new ArrayList<>();
         cbLevels.add(new CoinBoxLevel(coin, coinCount, 10));
         return cbLevels;
@@ -771,10 +799,12 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(
-                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
-                + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
-                + System.lineSeparator(),
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1,
+                        text1)
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2,
+                                text2) + System.lineSeparator(),
                 outContent.toString());
     }
 
@@ -782,7 +812,8 @@ public class ConsoleSimulationViewTest {
     public void testDisplayLast24HoursOfTransactionLogOutputsText() {
         // Mock
 
-        // Looks silly, because the two dates here are not within the last 24 hours.
+        // Looks silly, because the two dates here are not within the last 24
+        // hours.
         // But that is ok. Because they are mock data. The actual implementation
         // of the getLast24Hours method does indeed check for the date which is
         // covered by another unit test.
@@ -816,19 +847,23 @@ public class ConsoleSimulationViewTest {
 
         // Assert
         assertEquals(
-                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1,
+                        text1)
                         + System.lineSeparator()
-                        + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
-                        + System.lineSeparator(),
+                        + MessageFormat.format(
+                                MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2,
+                                text2) + System.lineSeparator(),
                 outContent.toString());
     }
 
     @Test
-    public void testValidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow() throws IOException {
-        int numberOfTransactionLogEntriesToShowInteger =2;
+    public void testValidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow()
+            throws IOException {
+        int numberOfTransactionLogEntriesToShowInteger = 2;
 
         // Mock
-        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShowInteger + "");
+        when(bufferedReader.readLine()).thenReturn(
+                numberOfTransactionLogEntriesToShowInteger + "");
 
         // Run
         view.executeActionsForStateEnteringTransactionLogEntriesToShow();
@@ -836,32 +871,32 @@ public class ConsoleSimulationViewTest {
         // Assert
         ArgumentCaptor<NumberOfTransactionLogEntriesToShowEvent> argument = ArgumentCaptor
                 .forClass(NumberOfTransactionLogEntriesToShowEvent.class);
-        verify(listener).numberOfTransactionLogEntriesToShowEntered(argument.capture());
-        assertEquals(numberOfTransactionLogEntriesToShowInteger, argument.getValue().getNumber());
+        verify(listener).numberOfTransactionLogEntriesToShowEntered(
+                argument.capture());
+        assertEquals(numberOfTransactionLogEntriesToShowInteger, argument
+                .getValue().getNumber());
 
-        assertEquals(
-                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES +
-                MSG_VAL_PROMPT_SEPARATOR,
-                outContent.toString());
+        assertEquals(MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES
+                + MSG_VAL_PROMPT_SEPARATOR, outContent.toString());
     }
 
     @Test
-    public void testInvalidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow() throws IOException {
+    public void testInvalidInputForExecuteActionsForStateEnteringTransactionLogEntriesToShow()
+            throws IOException {
         String numberOfTransactionLogEntriesToShow = "x";
 
         // Mock
-        when(bufferedReader.readLine()).thenReturn(numberOfTransactionLogEntriesToShow);
+        when(bufferedReader.readLine()).thenReturn(
+                numberOfTransactionLogEntriesToShow);
 
         // Run
         view.executeActionsForStateEnteringTransactionLogEntriesToShow();
 
         // Assert
-        assertEquals(
-                MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES
+        assertEquals(MSG_VAL_VIEW_N_TRANSACTION_LOG_ENTRIES
                 + MSG_VAL_PROMPT_SEPARATOR
                 + MSG_VAL_INVALID_NUMBER_OF_TRANSACTION_LOG_ENTRIES_TO_SHOW
-                + System.lineSeparator(),
-                outContent.toString());
+                + System.lineSeparator(), outContent.toString());
     }
 
     @Test
@@ -891,17 +926,20 @@ public class ConsoleSimulationViewTest {
         logEntries.add(transactionLogEntry1);
         logEntries.add(transactionLogEntry2);
 
-        when(transactionLogHandler.get(numberOfTransactionLogEntriesToShow)).thenReturn(logEntries);
+        when(transactionLogHandler.get(numberOfTransactionLogEntriesToShow))
+                .thenReturn(logEntries);
 
         // Run
         view.displayNTransactionLogEntries(numberOfTransactionLogEntriesToShow);
 
         // Assert
         assertEquals(
-                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1, text1)
-                + System.lineSeparator()
-                + MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2, text2)
-                + System.lineSeparator(),
+                MessageFormat.format(MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date1,
+                        text1)
+                        + System.lineSeparator()
+                        + MessageFormat.format(
+                                MSG_VAL_VIEW_TRANSACTION_LOG_ENTRY, date2,
+                                text2) + System.lineSeparator(),
                 outContent.toString());
     }
 
@@ -1024,7 +1062,9 @@ public class ConsoleSimulationViewTest {
                 coin.multiply(new BigDecimal(coinCount)))
                 + System.lineSeparator()
                 + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
-                + MSG_VAL_PROMPT_SEPARATOR + MSG_VAL_INVALID_FORMAT + System.lineSeparator();
+                + MSG_VAL_PROMPT_SEPARATOR
+                + MSG_VAL_INVALID_FORMAT
+                + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("abc");
@@ -1053,7 +1093,9 @@ public class ConsoleSimulationViewTest {
                 coin.multiply(new BigDecimal(coinCount)))
                 + System.lineSeparator()
                 + MSG_VAL_ALL_VIEW_CBL_CONTENT_NEW
-                + MSG_VAL_PROMPT_SEPARATOR + MSG_VAL_VIEW_CBL_COUNT_LIMIT + System.lineSeparator();
+                + MSG_VAL_PROMPT_SEPARATOR
+                + MSG_VAL_VIEW_CBL_COUNT_LIMIT
+                + System.lineSeparator();
 
         // Mock
         when(bufferedReader.readLine()).thenReturn("200");
@@ -1117,22 +1159,23 @@ public class ConsoleSimulationViewTest {
         // Assert
         assertEquals(exptectedMessage, outContent.toString());
     }
-    
+
     @Test
     public void testDisplayParkginLotPayment() throws IOException {
         Map<BigDecimal, Integer> coinMap = new Hashtable<>();
 
         BigDecimal coin = new BigDecimal(2.00);
         coin = coin.setScale(2);
-        
+
         coinMap.put(coin, 2);
-        
+
         String expectedOutput = "5:4.00 = 2 x 2.00" + System.lineSeparator();
 
-        when(messageProvider.get("view.info.inserted.coins")).thenReturn("{0}:{1}");
-        
+        when(messageProvider.get("view.info.inserted.coins")).thenReturn(
+                "{0}:{1}");
+
         // Run
-        view.displayParkingLotPayment(5,coinMap);
+        view.displayParkingLotPayment(5, coinMap);
 
         // Assert
         assertEquals(expectedOutput, outContent.toString());

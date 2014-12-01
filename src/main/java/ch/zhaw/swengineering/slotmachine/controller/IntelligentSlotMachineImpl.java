@@ -233,11 +233,13 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
 
         if (allCoinBoxesFull) {
             LOG.warn("All coin boxes are full!");
-            throw new CoinBoxFullException("All coin boxes are full!");
+            throw new CoinBoxFullException("All coin boxes are full!",
+                    aCoinValue, true);
         } else if (coinBoxFull) {
             LOG.warn("The coin boxe are full!");
             throw new CoinBoxFullException("The coin box for "
-                    + aCoinValue.toPlainString() + " is full!", aCoinValue);
+                    + aCoinValue.toPlainString() + " is full!", aCoinValue,
+                    false);
         }
     }
 
@@ -290,7 +292,7 @@ public class IntelligentSlotMachineImpl implements IntelligentSlotMachine {
             if (cbl.getCurrentCoinCount() > cb.getMaxCoinCount()) {
                 throw new CoinBoxFullException(
                         "view.slot.machine.coin.box.level.too.high",
-                        cbl.getCoinValue());
+                        cbl.getCoinValue(), false);
             } else {
                 // TODO: Write to transaction log.
                 cb.setCurrentCoinCount(cbl.getCurrentCoinCount());

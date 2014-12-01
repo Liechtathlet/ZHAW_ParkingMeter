@@ -169,19 +169,17 @@ public class ViewControllerImplTest {
 
         // Assert positive
         verify(parkingMeter).getSecretAction(parkingLotNumber);
-        verify(view).displayAllInformation(
-                any(ArrayList.class),
-                any(ArrayList.class),
-                any(Date.class),
-                any(ArrayList.class),
+        verify(view).displayAllInformation(any(ArrayList.class),
+                any(ArrayList.class), any(Date.class), any(ArrayList.class),
                 any(ParkingTimeTable.class));
     }
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
-     * Scenario: Valid secret code for viewing all transaction logs has been entered.
-     *
+     * 
+     * Scenario: Valid secret code for viewing all transaction logs has been
+     * entered.
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -206,9 +204,10 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
-     * Scenario: Valid secret code for viewing transaction logs of the last 24 hours has been entered.
-     *
+     * 
+     * Scenario: Valid secret code for viewing transaction logs of the last 24
+     * hours has been entered.
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -233,9 +232,10 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
-     * Scenario: Valid secret code for viewing n transaction logs entries has been entered.
-     *
+     * 
+     * Scenario: Valid secret code for viewing n transaction logs entries has
+     * been entered.
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -259,9 +259,10 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: numberOfTransactionLogEntriesToShowEntered(...).
-     *
-     * Scenario: Valid amount of transaction log entries to show has been entered..
-     *
+     * 
+     * Scenario: Valid amount of transaction log entries to show has been
+     * entered..
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -306,9 +307,9 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
+     * 
      * Scenario: User entered secret code for viewing all parking charges.
-     *
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -332,9 +333,9 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: parkingLotEntered(...).
-     *
+     * 
      * Scenario: User entered secret code for viewing content of coin boxes.
-     *
+     * 
      * Expectation: All methods are invoked correctly.
      */
     @Test
@@ -447,11 +448,9 @@ public class ViewControllerImplTest {
         verify(view).promptForMoney(5);
         verify(parkingMeter).calculateBookingForParkingLot(5, insertedMoney);
 
-
         // Assert negative
         verify(slotMachine, times(0)).finishTransaction(drawback);
-        verify(view, times(0)).displayParkingLotNumberAndParkingTime(5,
-                end);
+        verify(view, times(0)).displayParkingLotNumberAndParkingTime(5, end);
         verify(view, times(0)).promptForParkingLotNumber();
     }
 
@@ -495,8 +494,8 @@ public class ViewControllerImplTest {
         CoinBoxLevelEnteredEvent event = new CoinBoxLevelEnteredEvent(view,
                 cbLevels);
 
-        doThrow(new CoinBoxFullException("coinboxfull", coin))
-                .when(slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
+        doThrow(new CoinBoxFullException("coinboxfull", coin, false)).when(
+                slotMachine).updateCoinLevelInCoinBoxes(cbLevels);
 
         controller.coinBoxLevelEntered(event);
 
@@ -532,9 +531,9 @@ public class ViewControllerImplTest {
 
     /**
      * Method-Under-Test: actionAborted(...).
-     *
+     * 
      * Scenario: User aborted the the current action.
-     *
+     * 
      * Expectation: All methods are invoked correctly
      */
     @Test
